@@ -1,0 +1,2074 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Customise Your Own Earth</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#05080f; --panel:rgba(12,17,28,.82); --line:rgba(255,255,255,.09); --line2:rgba(255,255,255,.16);
+  --text:#eef2f8; --mute:#8d99ad; --acc:#5cc8ff; --ok:#4ade80; --warn:#fbbf24; --bad:#f87171;
+  --r:14px; --side:380px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--text);
+  font:13px/1.45 Inter,system-ui,-apple-system,"Segoe UI",sans-serif;user-select:none;-webkit-user-select:none}
+.hidden{display:none!important}
+#canvas-container{position:fixed;inset:0;cursor:grab}
+#canvas-container:active{cursor:grabbing}
+#critical-overlay{position:fixed;inset:0;z-index:10;pointer-events:none;animation:alert 1.3s infinite ease-in-out}
+@keyframes alert{0%,100%{box-shadow:inset 0 0 0 rgba(248,113,113,0)}50%{box-shadow:inset 0 0 90px rgba(248,113,113,.35)}}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);
+  -webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px)}
+button{font:inherit;color:var(--text);cursor:pointer}
+
+/* ---------- left HUD ---------- */
+.hud{position:fixed;z-index:20;left:20px;top:20px;width:272px;display:flex;flex-direction:column;gap:12px;pointer-events:none}
+.hud .card{pointer-events:auto;padding:16px}
+.label{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
+.score-row{display:flex;align-items:flex-end;justify-content:space-between}
+.score{font-size:46px;font-weight:700;line-height:1;letter-spacing:-.03em}
+.score small{font-size:13px;font-weight:500;color:var(--mute);margin-left:4px;letter-spacing:0}
+.badge{font-size:11px;font-weight:600;padding:3px 9px;border-radius:99px;border:1px solid currentColor;margin-bottom:5px}
+.status{display:flex;align-items:center;gap:8px;margin:10px 0 10px;font-weight:500}
+.dot{width:8px;height:8px;border-radius:50%;background:currentColor;flex:none}
+.dot.off{background:var(--mute);opacity:.6}
+.bar{height:6px;border-radius:9px;background:rgba(255,255,255,.08);overflow:hidden}
+.bar>div{height:100%;border-radius:9px;background:currentColor;transition:width .3s}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
+.stats span{display:block}
+.stats .k{font-size:11px;color:var(--mute)}
+.stats .v{font-weight:600;margin-top:1px}
+#biosphere-card .score,#biosphere-card .badge,#biosphere-card .status .dot,#biosphere-card .bar>div{color:var(--ok)}
+#biosphere-card[data-tone=warn] .score,#biosphere-card[data-tone=warn] .badge,#biosphere-card[data-tone=warn] .dot,#biosphere-card[data-tone=warn] .bar>div{color:var(--warn)}
+#biosphere-card[data-tone=bad] .score,#biosphere-card[data-tone=bad] .badge,#biosphere-card[data-tone=bad] .dot,#biosphere-card[data-tone=bad] .bar>div{color:var(--bad)}
+#biosphere-card .status .dot{animation:pulse 2s infinite}
+@keyframes pulse{50%{opacity:.35}}
+
+.pop-head{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:10px}
+#population-counter{font-size:20px;font-weight:700;letter-spacing:-.01em;display:block;margin-top:2px}
+#population-trend{font-size:12px;font-weight:600}
+[data-tone=ok]{color:var(--ok)} [data-tone=warn]{color:var(--warn)} [data-tone=bad]{color:var(--bad)} [data-tone=neutral]{color:var(--acc)}
+.chart{height:84px;border-radius:10px;background:rgba(0,0,0,.28);border:1px solid var(--line);overflow:hidden}
+.chart canvas{width:100%;height:100%;display:block}
+.legend{display:flex;gap:12px;margin-top:8px;font-size:11px;color:var(--mute)}
+.legend i{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px}
+
+/* ---------- right panel ---------- */
+.panel{position:fixed;z-index:30;right:20px;top:20px;bottom:20px;width:var(--side);display:flex;flex-direction:column;overflow:hidden}
+.panel header{padding:18px 18px 14px;border-bottom:1px solid var(--line)}
+.title-row{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+h1{margin:0;font-size:17px;font-weight:700;letter-spacing:-.01em}
+.sub{margin:3px 0 0;color:var(--mute);font-size:12px}
+.ghost{background:transparent;border:1px solid var(--line2);border-radius:9px;padding:5px 11px;font-size:12px;color:var(--mute);transition:.15s}
+.ghost:hover{color:var(--text);border-color:var(--acc)}
+.seg{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-top:14px;padding:3px;border-radius:11px;background:rgba(255,255,255,.05)}
+.preset-btn{border:0;background:transparent;border-radius:8px;padding:7px 2px;font-size:12px;color:var(--mute);transition:.15s}
+.preset-btn:hover{color:var(--text)}
+.preset-btn.active{background:rgba(92,200,255,.16);color:var(--acc);font-weight:600}
+#preset-overload.active{background:rgba(248,113,113,.16);color:var(--bad)}
+.tabs{display:flex;gap:18px;margin-top:12px;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.cat-tab{background:none;border:0;border-bottom:2px solid transparent;padding:4px 0 7px;font-size:12px;color:var(--mute);white-space:nowrap;transition:.15s}
+.cat-tab:hover{color:var(--text)}
+.cat-tab.active{color:var(--text);font-weight:600;border-color:var(--acc)}
+
+#sliders-list{flex:1;overflow-y:auto;padding:6px 18px 10px;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.18) transparent}
+.slider-row{padding:13px 0;border-bottom:1px solid var(--line)}
+.slider-row:last-child{border-bottom:0}
+.slider-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.slider-head label{font-weight:600;font-size:13px}
+.slider-val{font-weight:600;color:var(--acc);font-variant-numeric:tabular-nums;font-size:13px}
+.slider-row.danger .slider-val{color:var(--bad)}
+.slider-desc{margin:6px 0 0;font-size:11.5px;line-height:1.4;color:var(--mute)}
+input[type=range].planet-slider{-webkit-appearance:none;appearance:none;width:100%;height:4px;margin:11px 0 0;border-radius:9px;background:rgba(255,255,255,.12);outline:none;cursor:pointer}
+input[type=range].planet-slider::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:#fff;border:3px solid var(--acc);cursor:grab;transition:transform .12s}
+input[type=range].planet-slider::-moz-range-thumb{width:12px;height:12px;border-radius:50%;background:#fff;border:3px solid var(--acc);cursor:grab}
+input[type=range].planet-slider::-webkit-slider-thumb:active{transform:scale(1.2)}
+input[type=range].danger-slider::-webkit-slider-thumb{border-color:var(--bad)}
+input[type=range].danger-slider::-moz-range-thumb{border-color:var(--bad)}
+
+.panel footer{padding:14px 18px 16px;border-top:1px solid var(--line)}
+.foot-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+#footer-stress-val{font-weight:600}
+.stress-bar{height:6px;border-radius:9px;background:rgba(255,255,255,.08);overflow:hidden}
+#footer-stress-bar{height:100%;border-radius:9px;background:linear-gradient(90deg,var(--ok),var(--warn),var(--bad));transition:width .3s}
+.note{margin:8px 0 0;font-size:11px;color:var(--mute);line-height:1.4}
+
+/* ---------- bottom dock ---------- */
+.dock{position:fixed;z-index:25;left:calc((100vw - var(--side) - 20px)/2);bottom:22px;transform:translateX(-50%);
+  display:flex;align-items:center;gap:4px;padding:6px}
+.dock button{background:transparent;border:0;border-radius:10px;padding:9px 14px;font-size:12.5px;font-weight:500;color:var(--text);
+  display:flex;align-items:center;gap:7px;white-space:nowrap;transition:.15s}
+.dock button:hover{background:rgba(255,255,255,.08)}
+.dock .danger{color:var(--bad)}
+.dock .danger:hover{background:rgba(248,113,113,.14)}
+.dock .sep{width:1px;height:20px;background:var(--line2);margin:0 4px}
+.dock .state{color:var(--acc);font-weight:600}
+.dock .dot{width:7px;height:7px;color:var(--ok)}
+
+/* ---------- collapse banner ---------- */
+#disaster-banner{position:fixed;z-index:40;left:calc((100vw - var(--side) - 20px)/2);top:50%;transform:translate(-50%,-50%);
+  width:min(420px,calc(100vw - 32px));padding:28px;text-align:center;border-color:rgba(248,113,113,.5)}
+#disaster-banner h2{margin:0;font-size:20px;letter-spacing:-.01em}
+#disaster-banner .tag{color:var(--bad);margin-bottom:8px;display:block}
+#disaster-reason{margin:10px 0 18px;color:var(--mute);font-size:12.5px;line-height:1.5}
+.collapse-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:12px;border-radius:10px;background:rgba(248,113,113,.07);margin-bottom:18px}
+.collapse-stats .k{display:block;font-size:11px;color:var(--mute)}
+.collapse-stats .v{font-weight:600}
+.cta{width:100%;border:0;border-radius:11px;padding:12px;background:var(--acc);color:#04111c;font-weight:600;font-size:13px}
+.cta:hover{background:#8bd9ff}
+
+/* ---------- small screens ---------- */
+@media (max-width:900px){
+  :root{--side:100vw}
+  .panel{left:8px;right:8px;top:auto;bottom:8px;width:auto;height:46vh}
+  .hud{left:10px;top:10px;width:220px}
+  .hud .card{padding:12px}
+  .score{font-size:34px}
+  .stats,.hud .pop{display:none}
+  .dock{left:50%;bottom:calc(46vh + 16px);max-width:calc(100vw - 16px);overflow-x:auto}
+  .dock button{padding:8px 10px;font-size:12px}
+  .dock .sep{display:none}
+  #disaster-banner{left:50%;top:38%}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+
+/* ---------- 100-year outlook ---------- */
+.dock .primary{background:var(--acc);color:#04111c;font-weight:600}
+.dock .primary:hover{background:#8bd9ff}
+.dock .primary.on{background:rgba(92,200,255,.18);color:var(--acc)}
+.outlook{position:fixed;z-index:26;left:20px;right:calc(var(--side) + 40px);bottom:82px;padding:14px 16px 12px}
+body.outlook-on .hud .pop{display:none}
+.ol-top{display:flex;justify-content:space-between;align-items:flex-end;gap:12px}
+.ol-year{display:flex;align-items:baseline;gap:10px;margin-top:2px}
+.ol-year span{font-size:30px;font-weight:700;letter-spacing:-.02em;line-height:1}
+.ol-year small{font-size:12px;color:var(--mute)}
+.ol-ctl{display:flex;align-items:center;gap:8px}
+.ol-btn{background:var(--acc);color:#04111c;border:0;border-radius:9px;padding:6px 16px;font-size:12.5px;font-weight:600;min-width:74px}
+.ol-btn:hover{background:#8bd9ff}
+.ol-speed{display:flex;padding:2px;border-radius:9px;background:rgba(255,255,255,.06)}
+.ol-speed button{background:none;border:0;border-radius:7px;padding:4px 9px;font-size:12px;color:var(--mute)}
+.ol-speed button.active{background:rgba(92,200,255,.16);color:var(--acc);font-weight:600}
+.ol-chart{position:relative;height:clamp(92px,15vh,150px);margin-top:10px}
+.ol-chart canvas{width:100%;height:100%;display:block;cursor:col-resize;touch-action:none}
+.ol-legend{position:absolute;top:0;right:8px;display:flex;gap:12px;font-size:11px;color:var(--mute);pointer-events:none}
+.ol-legend i{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px}
+.ol-legend em{font-style:normal}
+.ol-range{margin:6px 0 0!important}
+.ol-stats{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-top:12px;padding-top:10px;border-top:1px solid var(--line)}
+.ol-stats span{display:block}
+.ol-stats .k{font-size:11px;color:var(--mute)}
+.ol-stats .v{font-weight:600;font-size:12.5px;margin-top:1px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.ol-events{display:flex;gap:6px;margin-top:10px;overflow-x:auto;padding-bottom:4px;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.18) transparent}
+.ol-ev{flex:none;background:rgba(255,255,255,.05);border:1px solid var(--line2);border-radius:99px;padding:5px 12px;font-size:12px;white-space:nowrap;transition:.2s}
+.ol-ev b{margin-right:7px;font-variant-numeric:tabular-nums}
+.ol-ev[data-tone=warn] b{color:var(--warn)} .ol-ev[data-tone=bad] b{color:var(--bad)} .ol-ev[data-tone=ok] b{color:var(--ok)} .ol-ev[data-tone=neutral] b{color:var(--acc)}
+.ol-ev:hover{border-color:var(--acc)}
+.ol-ev.future{opacity:.45}
+.outlook .note{margin-top:4px}
+@media (max-width:900px){
+  .outlook{left:8px;right:8px;bottom:70px;padding:12px}
+  body.outlook-on .panel{display:none}
+  body.outlook-on .dock{bottom:12px}
+  .ol-stats{grid-template-columns:repeat(3,1fr)}
+  .ol-year span{font-size:24px}
+  .outlook .note{display:none}
+}
+</style>
+</head>
+<body>
+<div id="canvas-container"></div>
+<div id="critical-overlay" class="hidden"></div>
+
+<!-- Left: status -->
+<div class="hud">
+  <section class="card" id="biosphere-card" data-tone="ok">
+    <div class="score-row">
+      <div class="score"><span id="biosphere-score">100</span><small>/ 100</small></div>
+      <span id="stress-badge" class="badge">Stress: 0%</span>
+    </div>
+    <div class="status"><span id="biosphere-dot" class="dot"></span><span id="biosphere-status">Thriving biosphere</span></div>
+    <div class="bar"><div id="biosphere-bar" style="width:100%"></div></div>
+    <div class="stats">
+      <div><span class="k">Temperature</span><span class="v" id="hud-temp">15 °C</span></div>
+      <div><span class="k">Water</span><span class="v" id="hud-water">71%</span></div>
+      <div><span class="k">Oxygen</span><span class="v" id="hud-o2">21.0% O₂</span></div>
+    </div>
+  </section>
+
+  <section class="card pop">
+    <div class="pop-head">
+      <div><span class="label">Population</span><span id="population-counter" data-tone="ok">8.12 Billion</span></div>
+      <span id="population-trend" data-tone="neutral">Equilibrium</span>
+    </div>
+    <div class="chart"><canvas id="telemetry-chart"></canvas></div>
+    <div class="legend">
+      <span><i style="background:#4ade80"></i>Population</span>
+      <span><i style="background:#5cc8ff"></i>Habitability</span>
+      <span><i style="background:#f87171"></i>Stress</span>
+    </div>
+  </section>
+</div>
+
+<!-- Collapse message -->
+<div id="disaster-banner" class="card hidden">
+  <span class="label tag">Planetary collapse</span>
+  <h2>The biosphere has collapsed</h2>
+  <p id="disaster-reason">Pollution, deforestation and extreme carbon emissions pushed Earth past its tipping point.</p>
+  <div class="collapse-stats">
+    <div><span class="k">Survivors</span><span class="v">0.00 B</span></div>
+    <div><span class="k">Surface</span><span class="v">Shattered</span></div>
+    <div><span class="k">Biosphere</span><span class="v">0 / 100</span></div>
+  </div>
+  <button class="cta" onclick="restoreEarth()">Restore Earth</button>
+</div>
+
+<!-- 100-year outlook -->
+<section id="outlook" class="outlook card hidden" aria-label="100-year outlook">
+  <div class="ol-top">
+    <div>
+      <span class="label">Next 100 years</span>
+      <div class="ol-year"><span id="ol-year">2026</span><small id="ol-delta">Today</small></div>
+    </div>
+    <div class="ol-ctl">
+      <button id="ol-play" class="ol-btn">Pause</button>
+      <div class="ol-speed" id="ol-speed"><button data-s="1" class="active">1×</button><button data-s="2">2×</button><button data-s="4">4×</button></div>
+      <button class="ghost" onclick="closeOutlook()">Close</button>
+    </div>
+  </div>
+  <div class="ol-chart">
+    <canvas id="ol-canvas"></canvas>
+    <div class="ol-legend"><span><i style="background:#5cc8ff"></i>Habitability</span><span><i style="background:#4ade80"></i><em id="ol-poplegend">Population</em></span><span><i style="background:#f87171"></i>Stress</span></div>
+  </div>
+  <input id="ol-range" class="planet-slider ol-range" type="range" min="0" max="100" step="0.1" value="0" aria-label="Year">
+  <div class="ol-stats">
+    <div><span class="k">Habitability</span><span class="v" id="ol-hab">-</span></div>
+    <div><span class="k">Population</span><span class="v" id="ol-pop">-</span></div>
+    <div><span class="k">Temperature</span><span class="v" id="ol-temp">-</span></div>
+    <div><span class="k">CO₂</span><span class="v" id="ol-co2">-</span></div>
+    <div><span class="k">Forest</span><span class="v" id="ol-forest">-</span></div>
+    <div><span class="k">Ice caps</span><span class="v" id="ol-ice">-</span></div>
+  </div>
+  <div id="ol-events" class="ol-events"></div>
+  <p class="note">A simplified teaching model. It starts from your sliders, so change them to see a different future.</p>
+</section>
+
+<!-- Bottom controls -->
+<nav class="dock card">
+  <button id="btn-outlook" class="primary" onclick="toggleOutlook()">100-year outlook</button>
+  <button id="btn-spin" onclick="toggleAutoRotate()">Auto-rotate <span id="spin-state-text" class="state">On</span></button>
+  <button onclick="resetCameraView()">Center</button>
+  <button id="btn-sound" onclick="toggleSound()"><span id="sound-icon" class="dot"></span><span id="sound-text">Sound on</span></button>
+  <span class="sep"></span>
+  <button id="btn-blast-earth" class="danger" onclick="triggerCatastrophicOverload()">Blast test</button>
+</nav>
+
+<!-- Right: settings -->
+<aside class="panel card">
+  <header>
+    <div class="title-row">
+      <div>
+        <h1>Customise your own Earth</h1>
+        <p class="sub">22 planetary settings. Drag to see how life responds.</p>
+      </div>
+      <button class="ghost" onclick="applyPreset('earth')">Reset</button>
+    </div>
+    <div class="seg">
+      <button id="preset-earth" class="preset-btn active" onclick="applyPreset('earth')">Earth</button>
+      <button id="preset-mars" class="preset-btn" onclick="applyPreset('mars')">Mars</button>
+      <button id="preset-venus" class="preset-btn" onclick="applyPreset('venus')">Venus</button>
+      <button id="preset-snowball" class="preset-btn" onclick="applyPreset('snowball')">Snowball</button>
+      <button id="preset-overload" class="preset-btn" onclick="applyPreset('overload')">Polluted</button>
+    </div>
+    <div class="tabs">
+      <button id="cat-all" class="cat-tab active" onclick="filterCategory('all')">All</button>
+      <button id="cat-atmo" class="cat-tab" onclick="filterCategory('atmo')">Atmosphere</button>
+      <button id="cat-land" class="cat-tab" onclick="filterCategory('land')">Land &amp; life</button>
+      <button id="cat-human" class="cat-tab" onclick="filterCategory('human')">Human impact</button>
+    </div>
+  </header>
+  <div id="sliders-list"></div>
+  <footer>
+    <div class="foot-row"><span class="label">Tipping-point stress</span><span id="footer-stress-val" data-tone="ok">0% (Stable)</span></div>
+    <div class="stress-bar"><div id="footer-stress-bar" style="width:0%"></div></div>
+    <p class="note">At 100% stress the planet's core destabilises and Earth breaks apart.</p>
+  </footer>
+</aside>
+
+<script>
+        /***********************************************************************
+         * 1. DEFINE ALL 22 CUSTOMIZABLE PLANETARY PARAMETERS
+         ***********************************************************************/
+        const PLANET_PARAMETERS = [
+            // --- ATMOSPHERE & ASTROPHYSICS ---
+            {
+                id: 'oxygen',
+                name: 'Oxygen Level',
+                unit: '%',
+                min: 0, max: 50, step: 0.5, defaultVal: 21.0,
+                category: 'atmo',
+                desc: 'Made by plants and algae. Too little and complex life suffocates; above 35% global wildfires ignite effortlessly.'
+            },
+            {
+                id: 'co2',
+                name: 'Carbon Dioxide (CO₂)',
+                unit: ' ppm',
+                min: 50, max: 5000, step: 10, defaultVal: 421,
+                category: 'atmo',
+                dangerHigh: true,
+                desc: 'A heat-trapping greenhouse gas. Plants need some, but excessive CO₂ cooks the biosphere and acidifies oceans.'
+            },
+            {
+                id: 'water',
+                name: 'Water Coverage (Sea Level)',
+                unit: '%',
+                min: 0, max: 100, step: 1, defaultVal: 71,
+                category: 'land',
+                desc: 'Oceans store solar heat and feed rain cycles. Raising water level floods coastal countries; lowering it exposes dry seabeds.'
+            },
+            {
+                id: 'landLevel',
+                name: 'Land Elevation & Relief',
+                unit: 'x',
+                min: 0.2, max: 2.5, step: 0.05, defaultVal: 1.0,
+                category: 'land',
+                desc: 'Controls continental uplift, mountain ranges, and terrain elevation above the ocean floor.'
+            },
+            {
+                id: 'forest',
+                name: 'Forest & Vegetation Cover',
+                unit: '%',
+                min: 0, max: 100, step: 1, defaultVal: 65,
+                category: 'land',
+                desc: 'Lush rainforests and boreal trees across continents. Absorbs CO₂, generates oxygen, and cools the land.'
+            },
+            {
+                id: 'deforestation',
+                name: 'Tree Cutting (Deforestation)',
+                unit: '%',
+                min: 0, max: 100, step: 1, defaultVal: 12,
+                category: 'human',
+                dangerHigh: true,
+                desc: 'Human logging and land clearing. Strips green continents into barren red-brown desert and releases massive CO₂.'
+            },
+            {
+                id: 'waterPollution',
+                name: 'Dirty Water & Ocean Toxicity',
+                unit: '%',
+                min: 0, max: 100, step: 1, defaultVal: 8,
+                category: 'human',
+                dangerHigh: true,
+                desc: 'Industrial runoff, plastic waste, and chemical sludge. Turns deep blue oceans into murky toxic green-brown water.'
+            },
+            {
+                id: 'airPollution',
+                name: 'Air Pollution & Toxic Smog',
+                unit: '%',
+                min: 0, max: 100, step: 1, defaultVal: 10,
+                category: 'human',
+                dangerHigh: true,
+                desc: 'Particulate soot and toxic aerosols. Shrouds the planet in a thick, choking brown-grey atmospheric haze.'
+            },
+            {
+                id: 'populationTarget',
+                name: 'Human Population Pressure',
+                unit: ' B',
+                min: 0, max: 25, step: 0.1, defaultVal: 8.1,
+                category: 'human',
+                desc: 'Target human population in billions. Expands glowing urban megacities on the night side and increases resource demand.'
+            },
+            {
+                id: 'sunDistance',
+                name: 'Distance from Sun',
+                unit: ' AU',
+                min: 0.4, max: 2.2, step: 0.02, defaultVal: 1.00,
+                category: 'atmo',
+                desc: '1.00 AU is Earth’s orbit. Closer scorches the surface into magma; farther freezes the oceans solid.'
+            },
+            {
+                id: 'airPressure',
+                name: 'Air Pressure',
+                unit: ' atm',
+                min: 0.0, max: 5.0, step: 0.1, defaultVal: 1.0,
+                category: 'atmo',
+                desc: 'Thin air cannot hold liquid water or breathable oxygen. Excessive atmospheric pressure crushes and superheats life.'
+            },
+            {
+                id: 'gravity',
+                name: 'Surface Gravity',
+                unit: ' g',
+                min: 0.2, max: 2.5, step: 0.05, defaultVal: 1.00,
+                category: 'atmo',
+                desc: 'Controls planetary compression and atmospheric retention. High gravity flattens mountains and crushes organisms.'
+            },
+            {
+                id: 'temperature',
+                name: 'Global Surface Temperature',
+                unit: ' °C',
+                min: -60, max: 120, step: 1, defaultVal: 15,
+                category: 'atmo',
+                dangerHigh: true,
+                desc: 'Earth averages 15°C. Below 0°C triggers global glaciation; above 55°C boils ecosystems and fractures the crust.'
+            },
+            {
+                id: 'iceCaps',
+                name: 'Polar Ice Cap Coverage',
+                unit: '%',
+                min: 0, max: 100, step: 1, defaultVal: 18,
+                category: 'land',
+                desc: 'Reflective white glaciers at the Arctic and Antarctic poles. Reflects sunlight (albedo) and locks up fresh water.'
+            },
+            {
+                id: 'clouds',
+                name: 'Cloud Coverage',
+                unit: '%',
+                min: 0, max: 100, step: 1, defaultVal: 55,
+                category: 'atmo',
+                desc: 'Swirling tropospheric water vapor clouds. Regulates planetary reflectivity and global rainfall.'
+            },
+            {
+                id: 'ozone',
+                name: 'Ozone Layer Thickness',
+                unit: ' DU',
+                min: 0, max: 500, step: 10, defaultVal: 300,
+                category: 'atmo',
+                desc: 'Stratospheric O₃ shield (Dobson Units) blocking lethal solar UV radiation from sterilizing continental life.'
+            },
+            {
+                id: 'industrialization',
+                name: 'Fossil Fuels & Heavy Industry',
+                unit: '%',
+                min: 0, max: 100, step: 1, defaultVal: 25,
+                category: 'human',
+                dangerHigh: true,
+                desc: 'Global factories, coal plants, and oil extraction. Illuminates night-side cities while accelerating planetary stress.'
+            },
+            {
+                id: 'volcanism',
+                name: 'Volcanic & Tectonic Activity',
+                unit: '%',
+                min: 0, max: 100, step: 1, defaultVal: 10,
+                category: 'land',
+                dangerHigh: true,
+                desc: 'Mantle plumes and fault eruptions. High levels open glowing magma fissures across continents and spew ash.'
+            },
+            {
+                id: 'magneticField',
+                name: 'Magnetic Field Strength',
+                unit: '%',
+                min: 0, max: 200, step: 5, defaultVal: 100,
+                category: 'atmo',
+                desc: 'Generated by Earth’s liquid Outer Core. Deflects cosmic rays and creates glowing polar auroras.'
+            },
+            {
+                id: 'oceanAcidity',
+                name: 'Ocean Acidity Index',
+                unit: '%',
+                min: 0, max: 100, step: 1, defaultVal: 10,
+                category: 'human',
+                dangerHigh: true,
+                desc: 'Driven by CO₂ absorption. Dissolves coral reefs, shellfish, and marine food webs.'
+            },
+            {
+                id: 'biodiversity',
+                name: 'Biodiversity & Wildlife Index',
+                unit: '%',
+                min: 0, max: 100, step: 1, defaultVal: 85,
+                category: 'land',
+                desc: 'Richness of terrestrial and marine species. Stabilizes food chains and planetary resilience.'
+            },
+            {
+                id: 'rotationSpeed',
+                name: 'Rotation Speed (Day Length)',
+                unit: 'x',
+                min: 0, max: 4.0, step: 0.1, defaultVal: 1.0,
+                category: 'atmo',
+                desc: '1.0x equals a 24-hour Earth day. Faster spin intensifies cyclonic wind bands; 0x tidally locks the planet.'
+            }
+        ];
+
+        // Current state store
+        const state = {};
+        PLANET_PARAMETERS.forEach(p => state[p.id] = p.defaultVal);        let autoRotate = true;
+        let isExploded = false;
+        let explosionTime = 0;
+        let biosphereScore = 100;
+        let planetaryStress = 0;
+        let simulatedPopulation = 8.12; // Billions
+        let soundEnabled = true;
+        let outlookActive = false;
+
+        /***********************************************************************
+         * 2. PROCEDURAL SOUND ENGINE (TONE.JS)
+         ***********************************************************************/
+        let audioInitialized = false;
+        let rumbleSynth = null;
+
+        async function initAudio() {
+            if (audioInitialized || typeof Tone === 'undefined') return;
+            try {
+                await Tone.start();
+                rumbleSynth = new Tone.NoiseSynth({
+                    noise: { type: 'brown' },
+                    envelope: { attack: 0.2, decay: 1.5, sustain: 0.4, release: 2.0 }
+                }).toDestination();
+                rumbleSynth.volume.value = -14;
+                audioInitialized = true;
+            } catch (e) {
+                // Ignore audio unlock issues
+            }
+        }
+
+        function playUISound(freq = 520, duration = 0.06) {
+            if (!soundEnabled || typeof Tone === 'undefined') return;
+            try {
+                initAudio();
+                const synth = new Tone.Synth({
+                    oscillator: { type: 'sine' },
+                    envelope: { attack: 0.005, decay: 0.08, sustain: 0, release: 0.05 }
+                }).toDestination();
+                synth.volume.value = -18;
+                synth.triggerAttackRelease(freq, duration);
+                setTimeout(() => synth.dispose(), 300);
+            } catch (e) {}
+        }
+
+        function playExplosionSound() {
+            if (!soundEnabled || typeof Tone === 'undefined') return;
+            try {
+                initAudio();
+                if (rumbleSynth) {
+                    rumbleSynth.volume.value = -4;
+                    rumbleSynth.triggerAttackRelease("2n");
+                }
+                const boom = new Tone.MembraneSynth({
+                    pitchDecay: 0.15,
+                    octaves: 6,
+                    oscillator: { type: 'sine' },
+                    envelope: { attack: 0.01, decay: 1.8, sustain: 0.1, release: 2.5 }
+                }).toDestination();
+                boom.volume.value = -2;
+                boom.triggerAttackRelease("C1", "1n");
+                setTimeout(() => boom.dispose(), 4000);
+            } catch (e) {}
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const icon = document.getElementById('sound-icon');
+            const text = document.getElementById('sound-text');
+            if (soundEnabled) {
+                icon.className = 'dot';
+                text.textContent = 'Sound on';
+                playUISound(660, 0.08);
+            } else {
+                icon.className = 'dot off';
+                text.textContent = 'Muted';
+            }
+        }
+
+        /***********************************************************************
+         * 3. BUILD SIDEBAR SLIDERS UI
+         ***********************************************************************/
+        function renderSliders(activeCategory = 'all') {
+            const container = document.getElementById('sliders-list');
+            container.innerHTML = '';
+
+            const filtered = activeCategory === 'all'
+                ? PLANET_PARAMETERS
+                : PLANET_PARAMETERS.filter(p => p.category === activeCategory);
+
+            filtered.forEach((param, idx) => {
+                const val = state[param.id];
+                const isDanger = param.dangerHigh && ((val - param.min) / (param.max - param.min) > 0.65);
+
+                const item = document.createElement('div');
+                item.className = 'slider-row' + (isDanger ? ' danger' : '');
+
+                item.innerHTML = `
+                    <div class="slider-head">
+                        <label for="slider-${param.id}">${param.name}</label>
+                        <span id="val-${param.id}" class="slider-val">${formatValue(param, val)}</span>
+                    </div>
+                    <input id="slider-${param.id}" type="range" min="${param.min}" max="${param.max}" step="${param.step}" value="${val}"
+                        class="planet-slider ${param.dangerHigh ? 'danger-slider' : ''}" oninput="onSliderInput('${param.id}', this.value)" />
+                    <p class="slider-desc">${param.desc}</p>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function formatValue(param, val) {
+            const num = Number(val);
+            if (param.step < 0.1) return num.toFixed(2) + param.unit;
+            if (param.step < 1) return num.toFixed(1) + param.unit;
+            return Math.round(num) + param.unit;
+        }
+
+        let currentCategory = 'all';
+        function filterCategory(cat) {
+            currentCategory = cat;
+            document.querySelectorAll('.cat-tab').forEach(btn => btn.classList.remove('active'));
+            const activeBtn = document.getElementById('cat-' + cat);
+            if (activeBtn) activeBtn.classList.add('active');
+            renderSliders(cat);
+            playUISound(580, 0.04);
+        }
+
+        function onSliderInput(id, rawVal) {
+            const param = PLANET_PARAMETERS.find(p => p.id === id);
+            if (!param) return;
+            state[id] = parseFloat(rawVal);
+
+            // Coupled realistic environmental feedback:
+            // Cutting trees reduces forest cover and boosts CO2 slightly
+            if (id === 'deforestation') {
+                state.forest = Math.max(0, Math.round(80 - state.deforestation * 0.78));
+                const forestSlider = document.getElementById('slider-forest');
+                const forestVal = document.getElementById('val-forest');
+                if (forestSlider) forestSlider.value = state.forest;
+                if (forestVal) forestVal.textContent = formatValue(PLANET_PARAMETERS.find(p => p.id === 'forest'), state.forest);
+            }
+            // Distance from sun influences surface temperature
+            if (id === 'sunDistance') {
+                const computedTemp = Math.round(15 + (1.0 - state.sunDistance) * 95);
+                state.temperature = Math.max(-60, Math.min(120, computedTemp));
+                const tempSlider = document.getElementById('slider-temperature');
+                const tempVal = document.getElementById('val-temperature');
+                if (tempSlider) tempSlider.value = state.temperature;
+                if (tempVal) tempVal.textContent = formatValue(PLANET_PARAMETERS.find(p => p.id === 'temperature'), state.temperature);
+            }
+
+            const valSpan = document.getElementById('val-' + id);
+            if (valSpan) {
+                valSpan.textContent = formatValue(param, state[id]);
+            }
+
+            // If Earth was exploded and user adjusts sliders, restore Earth automatically
+            if (isExploded) {
+                restoreEarth(false);
+            }
+
+            if (outlookActive) { refreshOutlook(); } else {
+                evaluatePlanetaryHealth();
+                updateShaderUniforms();
+            }
+        }
+
+        /***********************************************************************
+         * 4. PLANETARY PRESETS (Earth, Mars-like, Venus-like, Snowball, Overload)
+         ***********************************************************************/
+        function applyPreset(presetName) {
+            playUISound(620, 0.07);
+            if (isExploded) restoreEarth(false);
+
+            // Highlight active preset button
+            document.querySelectorAll('.preset-btn').forEach(btn => btn.classList.remove('active'));
+            const activeBtn = document.getElementById('preset-' + presetName);
+            if (activeBtn) activeBtn.classList.add('active');
+
+            // Reset to baseline first
+            PLANET_PARAMETERS.forEach(p => state[p.id] = p.defaultVal);
+
+            if (presetName === 'mars') {
+                state.oxygen = 0.2;
+                state.co2 = 2500;
+                state.water = 5;
+                state.landLevel = 1.6;
+                state.forest = 0;
+                state.deforestation = 100;
+                state.sunDistance = 1.52;
+                state.airPressure = 0.1;
+                state.gravity = 0.38;
+                state.temperature = -45;
+                state.iceCaps = 22;
+                state.clouds = 12;
+                state.magneticField = 5;
+                state.populationTarget = 0.1;
+                state.biodiversity = 0;
+            } else if (presetName === 'venus') {
+                state.oxygen = 0.0;
+                state.co2 = 5000;
+                state.water = 0;
+                state.forest = 0;
+                state.deforestation = 100;
+                state.airPollution = 95;
+                state.sunDistance = 0.72;
+                state.airPressure = 5.0;
+                state.gravity = 0.90;
+                state.temperature = 115;
+                state.iceCaps = 0;
+                state.clouds = 100;
+                state.volcanism = 85;
+                state.populationTarget = 0;
+                state.biodiversity = 0;
+            } else if (presetName === 'snowball') {
+                state.oxygen = 18.0;
+                state.co2 = 100;
+                state.water = 65;
+                state.forest = 5;
+                state.sunDistance = 1.38;
+                state.temperature = -50;
+                state.iceCaps = 98;
+                state.clouds = 35;
+                state.populationTarget = 0.5;
+                state.biodiversity = 15;
+            } else if (presetName === 'overload') {
+                state.oxygen = 11.5;
+                state.co2 = 3800;
+                state.water = 82;
+                state.forest = 4;
+                state.deforestation = 95;
+                state.waterPollution = 92;
+                state.airPollution = 90;
+                state.populationTarget = 18.5;
+                state.temperature = 68;
+                state.iceCaps = 0;
+                state.ozone = 40;
+                state.industrialization = 96;
+                state.volcanism = 75;
+                state.oceanAcidity = 92;
+                state.biodiversity = 5;
+            }
+
+            renderSliders(currentCategory);
+            if (outlookActive) { refreshOutlook(); } else {
+                evaluatePlanetaryHealth();
+                updateShaderUniforms();
+            }
+        }
+
+        /***********************************************************************
+         * 5. BIOSPHERE SCORE, POPULATION SIMULATION & DOOMSDAY STRESS LOGIC
+         ***********************************************************************/
+        function evaluatePlanetaryHealth() {
+            biosphereScore = computeScore(state);
+            planetaryStress = computeStress(state);
+
+            // Update Top-Left Biosphere UI Card
+            const scoreEl = document.getElementById('biosphere-score');
+            const statusEl = document.getElementById('biosphere-status');
+            const barEl = document.getElementById('biosphere-bar');
+            const cardEl = document.getElementById('biosphere-card');
+            const dotEl = document.getElementById('biosphere-dot');
+            const stressBadge = document.getElementById('stress-badge');
+
+            scoreEl.textContent = isExploded ? '0' : biosphereScore;
+            barEl.style.width = (isExploded ? 0 : biosphereScore) + '%';
+            stressBadge.textContent = `Stress: ${isExploded ? 100 : planetaryStress}%`;
+
+            if (biosphereScore >= 75 && planetaryStress < 40) {
+                statusEl.textContent = 'Thriving biosphere';
+                cardEl.dataset.tone = 'ok';
+            } else if (biosphereScore >= 40 && planetaryStress < 78) {
+                statusEl.textContent = 'Stressed ecosystem (Declining)';
+                cardEl.dataset.tone = 'warn';
+            } else {
+                statusEl.textContent = isExploded ? 'Planet Shattered & Extinct' : 'Critical collapse imminent!';
+                cardEl.dataset.tone = 'bad';
+            }
+
+            // Quick Telemetry Readout
+            document.getElementById('hud-temp').textContent = `${state.temperature > 0 ? '+' : ''}${state.temperature.toFixed(0)} °C`;
+            document.getElementById('hud-water').textContent = `${state.water}%`;
+            document.getElementById('hud-o2').textContent = `${state.oxygen.toFixed(1)}% O₂`;
+
+            // Footer Stress Bar
+            const footerStressVal = document.getElementById('footer-stress-val');
+            const footerStressBar = document.getElementById('footer-stress-bar');
+            footerStressBar.style.width = `${planetaryStress}%`;
+            if (planetaryStress < 45) {
+                footerStressVal.textContent = `${planetaryStress}% (Stable)`;
+                footerStressVal.dataset.tone = 'ok';
+            } else if (planetaryStress < 85) {
+                footerStressVal.textContent = `${planetaryStress}% (Warning)`;
+                footerStressVal.dataset.tone = 'warn';
+            } else {
+                footerStressVal.textContent = `${planetaryStress}% (Critical)`;
+                footerStressVal.dataset.tone = 'bad';
+            }
+
+            // Screen warning overlay when stress >= 85%
+            const critOverlay = document.getElementById('critical-overlay');
+            if (planetaryStress >= 85 && !isExploded) {
+                critOverlay.classList.remove('hidden');
+            } else {
+                critOverlay.classList.add('hidden');
+            }
+
+            // Auto-trigger blast if user pushes stress to 99%+
+            if (planetaryStress >= 99 && !isExploded && !outlookActive) {
+                explodeEarth();
+            }
+        }
+
+        /***********************************************************************
+         * 6. REAL-TIME POPULATION & TELEMETRY GRAPH ENGINE
+         ***********************************************************************/
+        const chartCanvas = document.getElementById('telemetry-chart');
+        const chartCtx = chartCanvas.getContext('2d');
+        const MAX_HISTORY = 70;
+        const popHistory = [];
+        const habHistory = [];
+        const stressHistory = [];
+
+        // Initialize baseline history
+        for (let i = 0; i < MAX_HISTORY; i++) {
+            popHistory.push(8.12);
+            habHistory.push(100);
+            stressHistory.push(8);
+        }
+
+        function updateTelemetrySimulation() {
+            if (outlookActive) return;
+            if (isExploded) {
+                simulatedPopulation = 0;
+            } else {
+                // Target carrying capacity depends on biosphereScore and water/land availability
+                const landAreaFactor = Math.max(0, Math.min(1.5, (100 - state.water) / 29));
+                const habitabilityFactor = Math.pow(biosphereScore / 100, 1.6);
+                const sustainablePop = state.populationTarget * habitabilityFactor * (0.4 + 0.6 * landAreaFactor);
+
+                // Smoothly drift simulatedPopulation toward sustainablePop with micro fluctuations
+                const delta = (sustainablePop - simulatedPopulation) * 0.12;
+                const jitter = (Math.random() - 0.49) * 0.03 * (simulatedPopulation > 0.1 ? 1 : 0);
+                simulatedPopulation = Math.max(0, simulatedPopulation + delta + jitter);
+                if (biosphereScore < 12 || state.oxygen < 4 || state.temperature > 65 || state.temperature < -48) {
+                    simulatedPopulation = Math.max(0, simulatedPopulation * 0.78 - 0.08);
+                }
+            }
+
+            popHistory.push(simulatedPopulation);
+            habHistory.push(isExploded ? 0 : biosphereScore);
+            stressHistory.push(isExploded ? 100 : planetaryStress);
+
+            if (popHistory.length > MAX_HISTORY) {
+                popHistory.shift();
+                habHistory.shift();
+                stressHistory.shift();
+            }
+
+            // Update DOM counters
+            const popCounter = document.getElementById('population-counter');
+            const popTrend = document.getElementById('population-trend');
+            popCounter.textContent = `${simulatedPopulation.toFixed(2)} Billion`;
+
+            const prevPop = popHistory[popHistory.length - 5] || simulatedPopulation;
+            const diff = simulatedPopulation - prevPop;
+
+            if (simulatedPopulation <= 0.01) {
+                popCounter.dataset.tone = 'bad';
+                popTrend.textContent = 'Extinction';
+                popTrend.dataset.tone = 'bad';
+            } else if (diff > 0.04) {
+                popCounter.dataset.tone = 'ok';
+                popTrend.textContent = 'Growing';
+                popTrend.dataset.tone = 'ok';
+            } else if (diff < -0.04) {
+                popCounter.dataset.tone = 'warn';
+                popTrend.textContent = 'Declining';
+                popTrend.dataset.tone = 'warn';
+            } else {
+                popCounter.dataset.tone = 'neutral';
+                popTrend.textContent = 'Equilibrium';
+                popTrend.dataset.tone = 'neutral';
+            }
+
+            drawTelemetryGraph();
+        }
+
+        function drawTelemetryGraph() {
+            const rect = chartCanvas.getBoundingClientRect();
+            if (chartCanvas.width !== rect.width || chartCanvas.height !== rect.height) {
+                chartCanvas.width = rect.width;
+                chartCanvas.height = rect.height;
+            }
+            const w = chartCanvas.width;
+            const h = chartCanvas.height;
+            chartCtx.clearRect(0, 0, w, h);
+
+            // Subtle background grid
+            chartCtx.strokeStyle = 'rgba(148, 163, 184, 0.08)';
+            chartCtx.lineWidth = 1;
+            for (let y = h * 0.25; y < h; y += h * 0.25) {
+                chartCtx.beginPath();
+                chartCtx.moveTo(0, y);
+                chartCtx.lineTo(w, y);
+                chartCtx.stroke();
+            }
+
+            // Helper to plot a line series
+            function plotSeries(data, maxVal, strokeColor, fillColor) {
+                chartCtx.beginPath();
+                for (let i = 0; i < data.length; i++) {
+                    const x = (i / (MAX_HISTORY - 1)) * w;
+                    const y = h - Math.min(1, Math.max(0, data[i] / maxVal)) * (h - 18) - 4;
+                    if (i === 0) chartCtx.moveTo(x, y);
+                    else chartCtx.lineTo(x, y);
+                }
+                chartCtx.strokeStyle = strokeColor;
+                chartCtx.lineWidth = 2;
+                chartCtx.stroke();
+
+                if (fillColor) {
+                    chartCtx.lineTo(w, h);
+                    chartCtx.lineTo(0, h);
+                    chartCtx.closePath();
+                    chartCtx.fillStyle = fillColor;
+                    chartCtx.fill();
+                }
+            }
+
+            // Plot Stress (Red), Habitability (Sky Blue), Population (Emerald Green)
+            plotSeries(stressHistory, 100, 'rgba(244, 63, 94, 0.75)', 'rgba(244, 63, 94, 0.08)');
+            plotSeries(habHistory, 100, 'rgba(56, 189, 248, 0.85)', null);
+            plotSeries(popHistory, 16, 'rgba(52, 211, 153, 1.0)', 'rgba(52, 211, 153, 0.14)');
+        }
+
+        /* OUTLOOK-MODEL-START */
+const OUTLOOK_YEARS = 100;
+const REF_SCORE = 89; // habitability of the default Earth, so today's population is in balance
+const clampN = (v, a, b) => Math.max(a, Math.min(b, v));
+
+function computeScore(st) {
+            // Calculate penalties from optimal Earth conditions
+            const o2Diff = Math.abs(st.oxygen - 21) * 2.1;
+            const co2Penalty = Math.max(0, (st.co2 - 450) / 75);
+            const waterPenalty = Math.abs(st.water - 71) * 0.55;
+            const forestBonus = (st.forest - 50) * 0.2;
+            const deforestPenalty = st.deforestation * 0.35;
+            const waterPollPenalty = st.waterPollution * 0.42;
+            const airPollPenalty = st.airPollution * 0.40;
+            const tempPenalty = Math.abs(st.temperature - 15) * 1.15;
+            const ozonePenalty = Math.max(0, (240 - st.ozone) * 0.15);
+            const industryPenalty = Math.max(0, (st.industrialization - 30) * 0.25);
+            const volcanoPenalty = Math.max(0, (st.volcanism - 20) * 0.35);
+            const acidPenalty = st.oceanAcidity * 0.25;
+            const pressurePenalty = Math.abs(st.airPressure - 1.0) * 12;
+
+            let rawScore = 100
+                - o2Diff
+                - co2Penalty
+                - waterPenalty
+                + forestBonus
+                - deforestPenalty
+                - waterPollPenalty
+                - airPollPenalty
+                - tempPenalty
+                - ozonePenalty
+                - industryPenalty
+                - volcanoPenalty
+                - acidPenalty
+                - pressurePenalty;
+            return Math.max(0, Math.min(100, Math.round(rawScore)));
+}
+function computeStress(st) {
+            let rawStress =
+                (st.deforestation * 0.22) +
+                (st.waterPollution * 0.20) +
+                (st.airPollution * 0.18) +
+                (Math.max(0, st.co2 - 421) / 4579 * 25) +
+                (Math.max(0, Math.abs(st.temperature - 15) - 10) * 0.45) +
+                (st.industrialization * 0.15) +
+                (st.volcanism * 0.22) +
+                (st.oceanAcidity * 0.15);
+            return Math.max(0, Math.min(100, Math.round(rawStress)));
+}
+
+// One year of change. The sliders are the starting conditions; this decides where they drift.
+function stepYear(s, b, pop) {
+    const n = Object.assign({}, s);
+    const warm = s.temperature - b.temperature;
+    const heat = Math.max(0, warm - 1.5);
+    const co2Base = Math.max(50, b.co2);
+
+    const emit = 0.06 * s.industrialization + 0.02 * s.deforestation + 0.01 * s.volcanism + 0.15 * pop;
+    const sink = s.co2 > 280 ? 0.0035 * (s.co2 - 280) * (0.2 + 0.8 * s.forest / 100) : 0;
+    n.co2 = clampN(s.co2 + emit - sink, 50, 5000);
+
+    const target = b.temperature + 3.4 * Math.log2(n.co2 / co2Base);
+    n.temperature = clampN(s.temperature + (target - s.temperature) * 0.05, -60, 120);
+    const w = n.temperature - b.temperature;
+
+    n.iceCaps = clampN(s.iceCaps - (w > 0 ? w * 0.09 : w * 0.05), 0, 100);
+    n.water = clampN(s.water + (s.iceCaps - n.iceCaps) * 0.05, 0, 100);
+    n.forest = clampN(s.forest - 0.012 * s.deforestation - 0.3 * heat + 0.012 * Math.max(0, 75 - s.forest) * (1 - s.deforestation / 100), 0, 100);
+    n.oxygen = clampN(s.oxygen + 0.0008 * (s.forest - 45) - 0.0004 * s.industrialization, 0, 50);
+    n.oceanAcidity = clampN(s.oceanAcidity + ((b.oceanAcidity + (n.co2 / co2Base - 1) * 40) - s.oceanAcidity) * 0.05, 0, 100);
+    n.airPollution = clampN(s.airPollution + (0.5 * s.industrialization - s.airPollution) * 0.015, 0, 100);
+    n.waterPollution = clampN(s.waterPollution + (0.35 * s.industrialization + 0.15 * s.deforestation - s.waterPollution) * 0.015, 0, 100);
+    n.ozone = clampN(s.ozone + (b.ozone - s.ozone) * 0.01 - 0.003 * Math.max(0, s.airPollution - 30), 0, 500);
+    n.biodiversity = clampN(s.biodiversity - 0.01 * s.deforestation - 0.15 * heat - 0.003 * (s.airPollution + s.waterPollution), 0, 100);
+
+    const score = computeScore(n), stress = computeStress(n);
+    const land = clampN((100 - n.water) / 29, 0, 1.5);
+    const cap = n.populationTarget * Math.pow(clampN(score / REF_SCORE, 0, 1.15), 1.3) * (0.4 + 0.6 * land);
+    let p = pop + (cap - pop) * 0.035;
+    if (score < 12 || n.oxygen < 4 || n.temperature > 65 || n.temperature < -48) p *= 0.78;
+    if (stress >= 99) p *= 0.6;
+    if (p < 0.005) p = 0;
+    return { s: n, pop: p, score: score, stress: stress };
+}
+
+function buildTrajectory(base, pop0) {
+    const b = Object.assign({}, base);
+    const traj = [{ s: Object.assign({}, b), pop: pop0, score: computeScore(b), stress: computeStress(b) }];
+    for (let i = 1; i <= OUTLOOK_YEARS; i++) {
+        const prev = traj[i - 1];
+        traj.push(stepYear(prev.s, b, prev.pop));
+    }
+    return traj;
+}
+
+// Pick out the moments worth pointing at (each fires once, in order)
+function detectEvents(traj) {
+    const ev = [], seen = {};
+    const add = (key, year, tone, text) => { if (!seen[key]) { seen[key] = 1; ev.push({ year: year, tone: tone, text: text }); } };
+    const t0 = traj[0], peak = traj.reduce((m, p, i) => p.pop > m.v ? { v: p.pop, i: i } : m, { v: 0, i: 0 });
+    traj.forEach((p, i) => {
+        if (i === 0) return;
+        const dT = p.s.temperature - t0.s.temperature;
+        if (dT >= 1.5) add('t15', i, 'warn', 'Warming passes +1.5 °C');
+        if (dT >= 2) add('t2', i, 'warn', 'Warming passes +2 °C');
+        if (dT >= 3) add('t3', i, 'bad', 'Warming passes +3 °C');
+        if (p.s.co2 >= 500 && t0.s.co2 < 500) add('c5', i, 'warn', 'CO₂ passes 500 ppm');
+        if (p.s.co2 >= 1000 && t0.s.co2 < 1000) add('c10', i, 'bad', 'CO₂ passes 1,000 ppm');
+        if (t0.s.iceCaps > 5 && p.s.iceCaps <= t0.s.iceCaps / 2) add('ice', i, 'warn', 'Polar ice is cut in half');
+        if (t0.s.forest > 10 && p.s.forest <= t0.s.forest * 0.75) add('for', i, 'warn', 'A quarter of the forests are gone');
+        if (t0.pop > 0.1 && p.pop <= t0.pop * 0.5) add('pop50', i, 'bad', 'Population falls by half');
+        if (t0.score >= 75 && p.score < 75) add('h75', i, 'warn', 'Biosphere is no longer thriving');
+        if (t0.score >= 40 && p.score < 40) add('h40', i, 'bad', 'Ecosystems in serious decline');
+        if (t0.score >= 12 && p.score < 12) add('h12', i, 'bad', 'Mass extinction');
+        if (p.stress >= 85) add('s85', i, 'bad', 'Planet enters critical danger');
+        if (p.stress >= 99) add('s99', i, 'bad', 'Tipping point: collapse');
+        if (t0.pop > 0.1 && p.pop <= 0.01) add('ext', i, 'bad', 'Human extinction');
+    });
+    if (peak.i > 0 && peak.i < OUTLOOK_YEARS && peak.v > t0.pop * 1.02 && traj[OUTLOOK_YEARS].pop < peak.v * 0.97)
+        add('peak', peak.i, 'neutral', 'Population peaks at ' + peak.v.toFixed(1) + ' billion');
+    ev.sort((a, b) => a.year - b.year);
+    if (!ev.length) ev.push({ year: OUTLOOK_YEARS, tone: 'ok', text: 'No major tipping points in 100 years' });
+    return ev;
+}
+/* OUTLOOK-MODEL-END */
+
+
+        /* ===== 100-YEAR OUTLOOK: UI + playback ===== */
+const START_YEAR = new Date().getFullYear();
+let outlookTraj = [], outlookEvents = [], outlookT = 0, outlookPlaying = false, outlookSpeed = 1;
+let outlookPop0 = 8.12, outlookLivePop = 8.12, outlookLast = 0, outlookRaf = 0;
+const olEl = id => document.getElementById(id);
+const OL_COLORS = { hab: '#5cc8ff', pop: '#4ade80', stress: '#f87171' };
+
+function lerpPoint(a, b, f) {
+    const s = {};
+    for (const k in a.s) s[k] = a.s[k] + (b.s[k] - a.s[k]) * f;
+    return { s: s, pop: a.pop + (b.pop - a.pop) * f };
+}
+
+function showOutlookYear(t) {
+    outlookT = clampN(t, 0, OUTLOOK_YEARS);
+    const i = Math.min(OUTLOOK_YEARS - 1, Math.floor(outlookT));
+    const p = lerpPoint(outlookTraj[i], outlookTraj[i + 1], outlookT - i);
+
+    // Show the projected world on the globe and in the status card, then put the starting sliders back
+    const backup = Object.assign({}, state);
+    Object.assign(state, p.s);
+    simulatedPopulation = p.pop;
+    evaluatePlanetaryHealth();
+    updateShaderUniforms();
+    Object.assign(state, backup);
+
+    const yr = Math.floor(outlookT);
+    olEl('ol-year').textContent = START_YEAR + yr;
+    olEl('ol-delta').textContent = yr === 0 ? 'Today' : '+' + yr + ' years';
+    const dT = p.s.temperature - outlookTraj[0].s.temperature;
+    olEl('ol-hab').textContent = biosphereScore + ' / 100';
+    olEl('ol-pop').textContent = p.pop.toFixed(2) + ' B';
+    olEl('ol-temp').textContent = Math.round(p.s.temperature) + ' °C (' + (dT >= 0 ? '+' : '') + dT.toFixed(1) + ')';
+    olEl('ol-co2').textContent = Math.round(p.s.co2) + ' ppm';
+    olEl('ol-forest').textContent = Math.round(p.s.forest) + '%';
+    olEl('ol-ice').textContent = Math.round(p.s.iceCaps) + '%';
+    olEl('ol-range').value = outlookT;
+    document.querySelectorAll('.ol-ev').forEach(b => b.classList.toggle('future', +b.dataset.y > outlookT));
+    drawOutlookChart();
+}
+
+function drawOutlookChart() {
+    const cv = olEl('ol-canvas');
+    if (!cv) return;
+    const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+    if (!r.width) return;
+    if (cv.width !== Math.round(r.width * dpr) || cv.height !== Math.round(r.height * dpr)) {
+        cv.width = Math.round(r.width * dpr); cv.height = Math.round(r.height * dpr);
+    }
+    const c = cv.getContext('2d');
+    c.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const W = r.width, H = r.height, L = 30, R = 8, T = 8, B = 20, pw = W - L - R, ph = H - T - B;
+    const X = i => L + pw * i / OUTLOOK_YEARS, Y = v => T + ph * (1 - v / 100);
+    c.clearRect(0, 0, W, H);
+    c.font = '10px Inter, system-ui, sans-serif';
+    c.textBaseline = 'middle';
+    c.lineWidth = 1;
+    [0, 50, 100].forEach(v => {
+        c.strokeStyle = 'rgba(255,255,255,.07)'; c.beginPath(); c.moveTo(L, Y(v)); c.lineTo(W - R, Y(v)); c.stroke();
+        c.fillStyle = '#8d99ad'; c.textAlign = 'right'; c.fillText(v, L - 6, Y(v));
+    });
+    c.textAlign = 'center'; c.textBaseline = 'alphabetic';
+    [0, 20, 40, 60, 80, 100].forEach(i => { c.fillStyle = '#8d99ad'; c.fillText(START_YEAR + i, clampN(X(i), L + 12, W - R - 12), H - 5); });
+
+    const maxPop = Math.max(1, ...outlookTraj.map(p => p.pop)) * 1.1;
+    const series = [
+        [OL_COLORS.stress, p => p.stress],
+        [OL_COLORS.pop, p => p.pop / maxPop * 100],
+        [OL_COLORS.hab, p => p.score]
+    ];
+    series.forEach(([col, f]) => {
+        c.strokeStyle = col; c.lineWidth = 2; c.lineJoin = 'round'; c.beginPath();
+        outlookTraj.forEach((p, i) => { i ? c.lineTo(X(i), Y(f(p))) : c.moveTo(X(i), Y(f(p))); });
+        c.stroke();
+    });
+
+    // event markers on the axis
+    outlookEvents.forEach(e => {
+        c.fillStyle = e.tone === 'bad' ? OL_COLORS.stress : e.tone === 'warn' ? '#fbbf24' : e.tone === 'ok' ? OL_COLORS.pop : OL_COLORS.hab;
+        c.beginPath(); c.arc(X(e.year), T + ph, 3.5, 0, 7); c.fill();
+    });
+
+    // playhead
+    const x = X(outlookT), i = Math.min(OUTLOOK_YEARS - 1, Math.floor(outlookT)), f = outlookT - i;
+    c.strokeStyle = 'rgba(255,255,255,.55)'; c.lineWidth = 1;
+    c.beginPath(); c.moveTo(x, T); c.lineTo(x, T + ph); c.stroke();
+    series.forEach(([col, fn]) => {
+        const v = fn(outlookTraj[i]) + (fn(outlookTraj[i + 1]) - fn(outlookTraj[i])) * f;
+        c.fillStyle = '#05080f'; c.strokeStyle = col; c.lineWidth = 2;
+        c.beginPath(); c.arc(x, Y(v), 4, 0, 7); c.fill(); c.stroke();
+    });
+    olEl('ol-poplegend').textContent = 'Population (peak ' + (maxPop / 1.1).toFixed(1) + ' B)';
+}
+
+function renderOutlookEvents() {
+    olEl('ol-events').innerHTML = outlookEvents.map(e =>
+        '<button class="ol-ev" data-tone="' + e.tone + '" data-y="' + e.year + '"><b>' + (START_YEAR + e.year) + '</b>' + e.text + '</button>').join('');
+}
+
+// Recompute the whole future from the current sliders (also called when a slider or preset changes)
+function refreshOutlook() {
+    outlookTraj = buildTrajectory(state, outlookPop0);
+    outlookEvents = detectEvents(outlookTraj);
+    renderOutlookEvents();
+    showOutlookYear(outlookT);
+}
+
+// Keep the globe clear of the timeline: size it to the free space above the panel
+function fitEarthForOutlook() {
+    const panel = olEl('outlook');
+    if (!outlookActive || !panel) return;
+    const H = window.innerHeight, top = panel.getBoundingClientRect().top;
+    const free = Math.max(160, top - 24);
+    const earthPx = clampN(free * 0.86, 150, 480);
+    const visH = 4.4 * H / earthPx;                 // world height that makes the globe earthPx tall
+    targetCamDistance = visH / (2 * Math.tan(21 * Math.PI / 180));
+    targetLookAtY = -((H / 2 - free / 2) / H) * visH;
+}
+
+function setOutlookPlaying(on) {
+    outlookPlaying = on;
+    olEl('ol-play').textContent = on ? 'Pause' : (outlookT >= OUTLOOK_YEARS ? 'Replay' : 'Play');
+}
+
+function outlookTick(ts) {
+    if (!outlookActive) return;
+    if (outlookPlaying) {
+        const dt = Math.min(0.1, (ts - outlookLast) / 1000);
+        outlookT = Math.min(OUTLOOK_YEARS, outlookT + dt * 4 * outlookSpeed);
+        if (outlookT >= OUTLOOK_YEARS) setOutlookPlaying(false);
+        showOutlookYear(outlookT);
+    }
+    outlookLast = ts;
+    outlookRaf = requestAnimationFrame(outlookTick);
+}
+
+function openOutlook() {
+    if (isExploded) restoreEarth(false);
+    outlookLivePop = simulatedPopulation;
+    outlookPop0 = simulatedPopulation;
+    outlookActive = true;
+    outlookT = 0;
+    document.body.classList.add('outlook-on');
+    olEl('outlook').classList.remove('hidden');
+    olEl('btn-outlook').classList.add('on');
+    playUISound(700, 0.08);
+    refreshOutlook();
+    fitEarthForOutlook();
+    setOutlookPlaying(true);
+    outlookLast = performance.now();
+    cancelAnimationFrame(outlookRaf);
+    outlookRaf = requestAnimationFrame(outlookTick);
+}
+
+function closeOutlook() {
+    if (!outlookActive) return;
+    outlookActive = false;
+    cancelAnimationFrame(outlookRaf);
+    document.body.classList.remove('outlook-on');
+    olEl('outlook').classList.add('hidden');
+    olEl('btn-outlook').classList.remove('on');
+    simulatedPopulation = outlookLivePop;
+    targetCamDistance = 9.2;
+    targetLookAtY = 0;
+    playUISound(480, 0.06);
+    evaluatePlanetaryHealth();
+    updateShaderUniforms();
+}
+
+function toggleOutlook() { outlookActive ? closeOutlook() : openOutlook(); }
+
+(function wireOutlook() {
+    document.addEventListener('DOMContentLoaded', () => {
+        olEl('ol-play').addEventListener('click', () => {
+            if (!outlookPlaying && outlookT >= OUTLOOK_YEARS) showOutlookYear(0);
+            setOutlookPlaying(!outlookPlaying);
+        });
+        olEl('ol-range').addEventListener('input', e => { setOutlookPlaying(false); showOutlookYear(+e.target.value); });
+        olEl('ol-speed').addEventListener('click', e => {
+            const b = e.target.closest('button'); if (!b) return;
+            outlookSpeed = +b.dataset.s;
+            olEl('ol-speed').querySelectorAll('button').forEach(x => x.classList.toggle('active', x === b));
+        });
+        olEl('ol-events').addEventListener('click', e => {
+            const b = e.target.closest('.ol-ev'); if (!b) return;
+            setOutlookPlaying(false); showOutlookYear(+b.dataset.y);
+        });
+        const cv = olEl('ol-canvas');
+        const scrub = e => {
+            const r = cv.getBoundingClientRect(), L = 30, R = 8;
+            setOutlookPlaying(false);
+            showOutlookYear(clampN((e.clientX - r.left - L) / (r.width - L - R), 0, 1) * OUTLOOK_YEARS);
+        };
+        let drag = false;
+        cv.addEventListener('pointerdown', e => { drag = true; cv.setPointerCapture(e.pointerId); scrub(e); });
+        cv.addEventListener('pointermove', e => { if (drag) scrub(e); });
+        cv.addEventListener('pointerup', () => { drag = false; });
+        window.addEventListener('resize', () => { if (outlookActive) { drawOutlookChart(); fitEarthForOutlook(); } });
+    });
+})();
+
+
+        /***********************************************************************
+         * 7. THREE.JS 3D REALISTIC EARTH & BLAST ENGINE
+         ***********************************************************************/
+        let scene, camera, renderer;
+        let earthRootGroup;
+        let atmoGlowMesh;
+        let explosionDebrisGroup, shockwaveRing;
+        let earthMaterial, cloudMaterial, atmoMaterial;
+        // Camera spherical orbit state
+        let camTheta = 0.35;
+        let camPhi = 1.38;
+        let camDistance = 9.2;
+        let targetCamTheta = 0.35;
+        let targetCamPhi = 1.38;
+        let targetCamDistance = 9.2;
+        let targetLookAtX = 0.0;
+        let currentLookAtX = 0.0;
+        let targetLookAtY = 0.0;
+        let currentLookAtY = 0.0;
+
+        // Custom GLSL Shader for Realistic Earth Continents, Oceans, Forests, Ice, Cities, Pollution & Lava Cracks
+        const earthVertexShader = `
+            varying vec3 vNormal;
+            varying vec3 vPosition;
+            varying vec3 vWorldPosition;
+            varying vec2 vUv;
+            uniform float uLandLevel;
+
+            void main() {
+                vUv = uv;
+                vPosition = normalize(position);
+                vNormal = normalize(normalMatrix * normal);
+                vec4 worldPos = modelMatrix * vec4(position, 1.0);
+                vWorldPosition = worldPos.xyz;
+                gl_Position = projectionMatrix * viewMatrix * worldPos;
+            }
+        `;
+
+        const earthFragmentShader = `
+            varying vec3 vNormal;
+            varying vec3 vPosition;
+            varying vec3 vWorldPosition;
+            varying vec2 vUv;
+
+            uniform float uTime;
+            uniform float uWaterLevel;       // 0.0 to 1.0 (default 0.71)
+            uniform float uLandLevel;        // 0.2 to 2.5
+            uniform float uForest;           // 0.0 to 1.0
+            uniform float uDeforestation;    // 0.0 to 1.0
+            uniform float uWaterPollution;   // 0.0 to 1.0
+            uniform float uAirPollution;     // 0.0 to 1.0
+            uniform float uTemperature;      // -60 to 120
+            uniform float uIceCaps;          // 0.0 to 1.0
+            uniform float uPopulation;       // 0 to 25
+            uniform float uIndustry;         // 0 to 1.0
+            uniform float uVolcanism;        // 0 to 1.0
+            uniform float uOceanAcidity;     // 0 to 1.0
+            uniform float uStress;           // 0 to 1.0
+            uniform float uOzone;            // 0 to 500
+            uniform vec3 uSunDir;
+
+            // 3D Simplex-style Hash & Value Noise for realistic coastlines & mountains
+            float hash(vec3 p) {
+                p = fract(p * 0.3183099 + 0.1);
+                p *= 17.0;
+                return fract(p.x * p.y * p.z * (p.x + p.y + p.z));
+            }
+
+            float noise(vec3 x) {
+                vec3 i = floor(x);
+                vec3 f = fract(x);
+                f = f * f * (3.0 - 2.0 * f);
+                return mix(
+                    mix(mix(hash(i + vec3(0,0,0)), hash(i + vec3(1,0,0)), f.x),
+                        mix(hash(i + vec3(0,1,0)), hash(i + vec3(1,1,0)), f.x), f.y),
+                    mix(mix(hash(i + vec3(0,0,1)), hash(i + vec3(1,0,1)), f.x),
+                        mix(hash(i + vec3(0,1,1)), hash(i + vec3(1,1,1)), f.x), f.y), f.z);
+            }
+
+            float fbm(vec3 p) {
+                float v = 0.0;
+                float a = 0.5;
+                vec3 shift = vec3(100.0);
+                for (int i = 0; i < 6; ++i) {
+                    v += a * noise(p);
+                    p = p * 2.04 + shift;
+                    a *= 0.5;
+                }
+                return v;
+            }
+
+            // Realistic World Map Continent Guide using spherical coordinates (lat, lon)
+            // Accurately places North/South America, Africa, Eurasia, India, Australia & Antarctica
+            float realWorldMapMask(vec3 dir) {
+                float lat = asin(clamp(dir.y, -1.0, 1.0)); // -1.57 to +1.57
+                float lon = atan(dir.x, dir.z);            // -3.14 to +3.14
+
+                float m = 0.0;
+
+                // North America
+                m += 0.85 * exp(-pow((lon + 1.75)/0.62, 2.0) - pow((lat - 0.78)/0.38, 2.0));
+                m += 0.55 * exp(-pow((lon + 1.55)/0.32, 2.0) - pow((lat - 0.42)/0.25, 2.0)); // Mexico / Central Am
+                m += 0.50 * exp(-pow((lon + 0.75)/0.26, 2.0) - pow((lat - 1.22)/0.16, 2.0)); // Greenland
+
+                // South America
+                m += 0.88 * exp(-pow((lon + 1.08)/0.30, 2.0) - pow((lat + 0.25)/0.45, 2.0));
+                m += 0.55 * exp(-pow((lon + 1.18)/0.16, 2.0) - pow((lat + 0.68)/0.32, 2.0));
+
+                // Africa
+                m += 0.92 * exp(-pow((lon - 0.32)/0.38, 2.0) - pow((lat - 0.12)/0.45, 2.0));
+                m += 0.70 * exp(-pow((lon - 0.45)/0.24, 2.0) - pow((lat + 0.32)/0.32, 2.0));
+
+                // Europe
+                m += 0.72 * exp(-pow((lon - 0.28)/0.42, 2.0) - pow((lat - 0.88)/0.22, 2.0));
+
+                // Asia & Middle East & India
+                m += 0.96 * exp(-pow((lon - 1.48)/0.88, 2.0) - pow((lat - 0.82)/0.42, 2.0));
+                m += 0.78 * exp(-pow((lon - 1.35)/0.22, 2.0) - pow((lat - 0.35)/0.24, 2.0)); // India Subcontinent
+                m += 0.65 * exp(-pow((lon - 1.85)/0.28, 2.0) - pow((lat - 0.28)/0.25, 2.0)); // SE Asia
+
+                // Australia
+                m += 0.82 * exp(-pow((lon - 2.35)/0.30, 2.0) - pow((lat + 0.44)/0.20, 2.0));
+
+                // Antarctica
+                m += 0.90 * smoothstep(-1.15, -1.42, lat);
+
+                return clamp(m, 0.0, 1.2);
+            }
+
+            void main() {
+                vec3 dir = normalize(vPosition);
+                float lat = abs(dir.y);
+
+                // Combine real-world continent mask with high-detail fractal coastlines
+                float continentBase = realWorldMapMask(dir);
+                float detailNoise = fbm(dir * 3.8);
+                float microNoise = fbm(dir * 14.0);
+
+                float rawElevation = (continentBase * 0.65 + detailNoise * 0.48 + microNoise * 0.12) * uLandLevel;
+
+                // Sea level threshold driven by Water Coverage slider
+                float seaLevel = mix(0.12, 0.92, uWaterLevel);
+                bool isLand = rawElevation > seaLevel;
+
+                // Normal perturbation for 3D mountain relief lighting
+                vec3 N = normalize(vNormal);
+                vec3 L = normalize(uSunDir);
+                vec3 V = normalize(cameraPosition - vWorldPosition);
+
+                if (isLand) {
+                    vec3 bump = vec3(
+                        fbm(dir * 22.0 + vec3(0.02, 0.0, 0.0)) - microNoise,
+                        fbm(dir * 22.0 + vec3(0.0, 0.02, 0.0)) - microNoise,
+                        fbm(dir * 22.0 + vec3(0.0, 0.0, 0.02)) - microNoise
+                    );
+                    N = normalize(N + bump * 1.4 * uLandLevel);
+                }
+
+                float NdotL = dot(N, L);
+                float diffuse = smoothstep(-0.15, 0.85, NdotL);
+                float nightFactor = smoothstep(0.1, -0.25, NdotL);
+
+                vec3 surfaceColor;
+                float specular = 0.0;
+
+                if (!isLand) {
+                    // --- OCEAN RENDERING ---
+                    float depth = clamp((seaLevel - rawElevation) * 3.2, 0.0, 1.0);
+                    vec3 shallowBlue = vec3(0.04, 0.46, 0.72);
+                    vec3 deepBlue = vec3(0.01, 0.10, 0.28);
+
+                    // Coral bleaching / Ocean Acidity shift
+                    shallowBlue = mix(shallowBlue, vec3(0.25, 0.55, 0.52), uOceanAcidity * 0.7);
+
+                    vec3 cleanWater = mix(shallowBlue, deepBlue, smoothstep(0.0, 0.65, depth));
+
+                    // Dirty Water & Ocean Toxicity turns water murky green-brown sludge
+                    vec3 dirtyWater = mix(vec3(0.18, 0.32, 0.12), vec3(0.26, 0.20, 0.08), microNoise);
+                    surfaceColor = mix(cleanWater, dirtyWater, uWaterPollution * 0.92);
+
+                    // Specular solar reflection on ocean waves
+                    vec3 H = normalize(L + V);
+                    float specAngle = max(dot(N, H), 0.0);
+                    specular = pow(specAngle, 48.0) * 0.75 * (1.0 - uWaterPollution * 0.65) * max(0.0, NdotL);
+                } else {
+                    // --- CONTINENTAL LAND RENDERING ---
+                    float heightAboveSea = clamp((rawElevation - seaLevel) * 2.4, 0.0, 1.0);
+
+                    // Lush green forests vs barren desert/deforested land
+                    float moisture = clamp(fbm(dir * 4.5 + vec3(4.2)) * 1.3 - abs(dir.y - 0.1) * 0.5, 0.0, 1.0);
+                    float effectiveForest = clamp(uForest * (1.0 - uDeforestation * 0.85), 0.0, 1.0);
+
+                    vec3 tropicalGreen = vec3(0.07, 0.36, 0.11);
+                    vec3 borealGreen = vec3(0.14, 0.44, 0.18);
+                    vec3 savannaGold = vec3(0.58, 0.49, 0.26);
+                    vec3 desertSand = vec3(0.76, 0.58, 0.36);
+                    vec3 deforestedScar = vec3(0.45, 0.26, 0.16);
+                    vec3 mountainRock = vec3(0.36, 0.33, 0.31);
+
+                    vec3 vegColor = mix(tropicalGreen, borealGreen, lat);
+                    vec3 dryColor = mix(desertSand, savannaGold, moisture);
+                    dryColor = mix(dryColor, deforestedScar, uDeforestation * 0.75);
+
+                    float greenMask = smoothstep(0.18, 0.75, moisture * effectiveForest * 1.4);
+                    vec3 lowlandColor = mix(dryColor, vegColor, greenMask);
+
+                    // High altitude mountains & snow peaks
+                    surfaceColor = mix(lowlandColor, mountainRock, smoothstep(0.45, 0.82, heightAboveSea));
+                    if (heightAboveSea > 0.78 && uTemperature < 45.0) {
+                        surfaceColor = mix(surfaceColor, vec3(0.95, 0.97, 1.0), smoothstep(0.78, 0.95, heightAboveSea));
+                    }
+                }
+
+                // --- POLAR ICE CAPS & GLOBAL TEMPERATURE GLACIATION ---
+                float tempIceBoost = clamp((0.0 - uTemperature) / 55.0, -0.3, 0.85);
+                float iceExtent = clamp(uIceCaps * 0.95 + tempIceBoost, 0.0, 1.0);
+                float iceThreshold = 1.0 - iceExtent * 0.95;
+                float iceMask = smoothstep(iceThreshold - 0.08, iceThreshold + 0.04, lat + microNoise * 0.08);
+                if (uTemperature > 48.0) iceMask = 0.0; // Melted completely
+                surfaceColor = mix(surfaceColor, vec3(0.92, 0.96, 1.0), iceMask);
+
+                // --- SCORCHED EARTH & VOLCANIC LAVA FISSURES ---
+                float heatFactor = clamp((uTemperature - 45.0) / 70.0, 0.0, 1.0);
+                surfaceColor = mix(surfaceColor, vec3(0.22, 0.11, 0.06), heatFactor * 0.8);
+
+                // Glowing magma cracks when Volcanism or Planetary Stress is high
+                float crackNoise = abs(fbm(dir * 11.0 + vec3(uTime * 0.04)) - 0.5);
+                float lavaIntensity = max(uVolcanism * 0.65, smoothstep(0.55, 0.98, uStress));
+                float lavaMask = smoothstep(0.045 * lavaIntensity, 0.0, crackNoise) * lavaIntensity;
+                vec3 lavaGlow = mix(vec3(1.0, 0.25, 0.0), vec3(1.0, 0.9, 0.3), smoothstep(0.02, 0.0, crackNoise));
+
+                // --- TOXIC SMOG & OZONE UV SCORCH ---
+                surfaceColor = mix(surfaceColor, vec3(0.42, 0.36, 0.26), uAirPollution * 0.45);
+                float uvDamage = clamp((150.0 - uOzone) / 150.0, 0.0, 1.0);
+                surfaceColor = mix(surfaceColor, vec3(0.48, 0.28, 0.42), uvDamage * 0.25);
+
+                // Combine sunlit diffuse + ambient starlight + ocean specular
+                vec3 litColor = surfaceColor * (diffuse * 0.92 + 0.08) + vec3(1.0, 0.97, 0.9) * specular;
+
+                // --- NIGHT-SIDE HUMAN CITY LIGHTS ---
+                if (isLand && iceMask < 0.5 && uPopulation > 0.1) {
+                    float cityDensity = smoothstep(0.52, 0.72, microNoise * detailNoise * 1.9);
+                    float popScale = clamp(uPopulation / 12.0, 0.0, 1.6) * (0.4 + 0.6 * uIndustry);
+                    vec3 cityGlow = vec3(1.0, 0.78, 0.35) * cityDensity * nightFactor * popScale * 1.3;
+                    litColor += cityGlow;
+                }
+
+                // Add glowing volcanic/tectonic magma fissures
+                litColor = mix(litColor, lavaGlow, clamp(lavaMask, 0.0, 1.0));
+
+                // Atmospheric rim Fresnel scattering on the planet surface
+                float fresnel = pow(1.0 - max(dot(N, V), 0.0), 3.2);
+                vec3 rimColor = mix(vec3(0.18, 0.62, 1.0), vec3(0.65, 0.45, 0.22), max(uAirPollution, heatFactor));
+                litColor += rimColor * fresnel * 0.35 * (diffuse + 0.2);
+
+                gl_FragColor = vec4(litColor, 1.0);
+            }
+        `;
+
+        // Cloud Layer Shader
+        const cloudVertexShader = `
+            varying vec3 vNormal;
+            varying vec3 vPosition;
+            varying vec3 vWorldPosition;
+            void main() {
+                vPosition = normalize(position);
+                vNormal = normalize(normalMatrix * normal);
+                vec4 worldPos = modelMatrix * vec4(position, 1.0);
+                vWorldPosition = worldPos.xyz;
+                gl_Position = projectionMatrix * viewMatrix * worldPos;
+            }
+        `;
+
+        const cloudFragmentShader = `
+            varying vec3 vNormal;
+            varying vec3 vPosition;
+            varying vec3 vWorldPosition;
+            uniform float uTime;
+            uniform float uClouds;
+            uniform float uAirPollution;
+            uniform vec3 uSunDir;
+
+            float hash(vec3 p) {
+                p = fract(p * 0.3183099 + 0.1);
+                p *= 17.0;
+                return fract(p.x * p.y * p.z * (p.x + p.y + p.z));
+            }
+            float noise(vec3 x) {
+                vec3 i = floor(x);
+                vec3 f = fract(x);
+                f = f * f * (3.0 - 2.0 * f);
+                return mix(
+                    mix(mix(hash(i + vec3(0,0,0)), hash(i + vec3(1,0,0)), f.x),
+                        mix(hash(i + vec3(0,1,0)), hash(i + vec3(1,1,0)), f.x), f.y),
+                    mix(mix(hash(i + vec3(0,0,1)), hash(i + vec3(1,0,1)), f.x),
+                        mix(hash(i + vec3(0,1,1)), hash(i + vec3(1,1,1)), f.x), f.y), f.z);
+            }
+            float fbm(vec3 p) {
+                float v = 0.0;
+                float a = 0.5;
+                for (int i = 0; i < 5; ++i) {
+                    v += a * noise(p);
+                    p = p * 2.1 + vec3(12.3);
+                    a *= 0.5;
+                }
+                return v;
+            }
+
+            void main() {
+                vec3 dir = normalize(vPosition);
+                // Swirling cyclone bands
+                vec3 samplePos = dir * 3.4 + vec3(uTime * 0.02, 0.0, uTime * 0.015);
+                float n = fbm(samplePos + fbm(samplePos * 1.8) * 0.45);
+
+                float threshold = mix(0.82, 0.22, uClouds);
+                float alpha = smoothstep(threshold, threshold + 0.25, n) * clamp(uClouds * 1.15, 0.0, 0.92);
+
+                float light = smoothstep(-0.2, 0.8, dot(normalize(vNormal), normalize(uSunDir))) * 0.88 + 0.12;
+                vec3 cleanCloud = vec3(1.0, 1.0, 1.0);
+                vec3 smogCloud = vec3(0.52, 0.43, 0.30);
+                vec3 cColor = mix(cleanCloud, smogCloud, uAirPollution * 0.85) * light;
+
+                gl_FragColor = vec4(cColor, alpha);
+            }
+        `;
+
+        // Outer Atmospheric Halo Shader
+        const atmoVertexShader = `
+            varying vec3 vNormal;
+            varying vec3 vWorldPosition;
+            void main() {
+                vNormal = normalize(normalMatrix * normal);
+                vec4 worldPos = modelMatrix * vec4(position, 1.0);
+                vWorldPosition = worldPos.xyz;
+                gl_Position = projectionMatrix * viewMatrix * worldPos;
+            }
+        `;
+
+        const atmoFragmentShader = `
+            varying vec3 vNormal;
+            varying vec3 vWorldPosition;
+            uniform float uAirPressure;
+            uniform float uAirPollution;
+            uniform float uOxygen;
+            uniform float uTemperature;
+            uniform float uMagnetic;
+            uniform float uTime;
+
+            void main() {
+                vec3 V = normalize(cameraPosition - vWorldPosition);
+                float rim = pow(0.68 - dot(vNormal, V), 2.6);
+
+                vec3 healthyBlue = vec3(0.15, 0.62, 1.0);
+                vec3 toxicSmog = vec3(0.68, 0.48, 0.22);
+                vec3 hotRed = vec3(0.95, 0.30, 0.10);
+
+                float heat = clamp((uTemperature - 35.0) / 70.0, 0.0, 1.0);
+                vec3 haloColor = mix(healthyBlue, toxicSmog, uAirPollution * 0.8);
+                haloColor = mix(haloColor, hotRed, heat * 0.7);
+
+                // Subtle polar aurora borealis when Magnetic Field is strong
+                float polar = smoothstep(0.78, 0.96, abs(normalize(vWorldPosition).y));
+                float auroraWave = sin(vWorldPosition.x * 6.0 + uTime * 2.0) * 0.5 + 0.5;
+                vec3 auroraColor = vec3(0.1, 0.95, 0.55) * polar * auroraWave * clamp(uMagnetic / 100.0, 0.0, 1.5);
+
+                float intensity = clamp(rim * clamp(uAirPressure * 0.85, 0.05, 1.6), 0.0, 1.0);
+                gl_FragColor = vec4(haloColor + auroraColor * 0.4, intensity * 0.82);
+            }
+        `;
+
+        function initThreeScene() {
+            const container = document.getElementById('canvas-container');
+            scene = new THREE.Scene();
+
+            camera = new THREE.PerspectiveCamera(42, window.innerWidth / window.innerHeight, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            renderer.toneMappingExposure = 1.1;
+            container.appendChild(renderer.domElement);
+
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0x334155, 0.7);
+            scene.add(ambientLight);
+
+            const sunLight = new THREE.DirectionalLight(0xfffbeb, 1.45);
+            sunLight.position.set(12, 5, 10);
+            scene.add(sunLight);
+
+            const rimLight = new THREE.DirectionalLight(0x38bdf8, 0.45);
+            rimLight.position.set(-10, -4, -8);
+            scene.add(rimLight);
+
+            // 1. Build Deep Space Starfield & Nebula Backdrop
+            buildStarfield();
+
+            // 2. Build Earth Root Group
+            earthRootGroup = new THREE.Group();
+            scene.add(earthRootGroup);
+
+            buildEarthModel();
+
+            // 3. Build Explosion Debris System (hidden until overload blast)
+            buildExplosionSystem();
+
+            // Setup Mouse & Touch Camera Orbit Controls
+            setupCameraInteraction(container);
+
+            window.addEventListener('resize', onWindowResize);
+        }
+
+        function buildStarfield() {
+            const starCount = 3200;
+            const starGeo = new THREE.BufferGeometry();
+            const positions = new Float32Array(starCount * 3);
+            const colors = new Float32Array(starCount * 3);
+
+            for (let i = 0; i < starCount; i++) {
+                const r = 65 + Math.random() * 140;
+                const theta = Math.random() * Math.PI * 2;
+                const phi = Math.acos(2 * Math.random() - 1);
+
+                positions[i * 3] = r * Math.sin(phi) * Math.cos(theta);
+                positions[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
+                positions[i * 3 + 2] = r * Math.cos(phi);
+
+                const tint = Math.random();
+                if (tint > 0.8) {
+                    colors[i * 3] = 0.75; colors[i * 3 + 1] = 0.88; colors[i * 3 + 2] = 1.0;
+                } else if (tint > 0.6) {
+                    colors[i * 3] = 1.0; colors[i * 3 + 1] = 0.92; colors[i * 3 + 2] = 0.78;
+                } else {
+                    colors[i * 3] = 0.92; colors[i * 3 + 1] = 0.95; colors[i * 3 + 2] = 1.0;
+                }
+            }
+
+            starGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            starGeo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+            const starMat = new THREE.PointsMaterial({
+                size: 0.35,
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.9
+            });
+            const stars = new THREE.Points(starGeo, starMat);
+            scene.add(stars);
+        }
+        function buildEarthModel() {
+            const RADIUS = 2.2;
+
+            // Custom Earth Surface Shader Material
+            earthMaterial = new THREE.ShaderMaterial({
+                vertexShader: earthVertexShader,
+                fragmentShader: earthFragmentShader,
+                uniforms: {
+                    uTime: { value: 0 },
+                    uWaterLevel: { value: 0.71 },
+                    uLandLevel: { value: 1.0 },
+                    uForest: { value: 0.65 },
+                    uDeforestation: { value: 0.12 },
+                    uWaterPollution: { value: 0.08 },
+                    uAirPollution: { value: 0.10 },
+                    uTemperature: { value: 15.0 },
+                    uIceCaps: { value: 0.18 },
+                    uPopulation: { value: 8.1 },
+                    uIndustry: { value: 0.25 },
+                    uVolcanism: { value: 0.10 },
+                    uOceanAcidity: { value: 0.10 },
+                    uStress: { value: 0.0 },
+                    uOzone: { value: 300.0 },
+                    uSunDir: { value: new THREE.Vector3(1.0, 0.35, 0.85).normalize() }
+                }
+            });
+
+            // Cloud Material
+            cloudMaterial = new THREE.ShaderMaterial({
+                vertexShader: cloudVertexShader,
+                fragmentShader: cloudFragmentShader,
+                transparent: true,
+                depthWrite: false,
+                uniforms: {
+                    uTime: { value: 0 },
+                    uClouds: { value: 0.55 },
+                    uAirPollution: { value: 0.10 },
+                    uSunDir: { value: new THREE.Vector3(1.0, 0.35, 0.85).normalize() }
+                }
+            });
+
+            // Whole globe + cloud layer
+            const earthMesh = new THREE.Mesh(new THREE.SphereGeometry(RADIUS, 128, 128), earthMaterial);
+            earthRootGroup.add(earthMesh);
+            const cloudMesh = new THREE.Mesh(new THREE.SphereGeometry(RADIUS * 1.018, 96, 96), cloudMaterial);
+            earthRootGroup.add(cloudMesh);
+
+
+            // Outer atmospheric halo
+            const atmoGeo = new THREE.SphereGeometry(RADIUS * 1.12, 64, 64);
+            atmoMaterial = new THREE.ShaderMaterial({
+                vertexShader: atmoVertexShader,
+                fragmentShader: atmoFragmentShader,
+                side: THREE.BackSide,
+                transparent: true,
+                blending: THREE.AdditiveBlending,
+                depthWrite: false,
+                uniforms: {
+                    uAirPressure: { value: 1.0 },
+                    uAirPollution: { value: 0.10 },
+                    uOxygen: { value: 0.21 },
+                    uTemperature: { value: 15.0 },
+                    uMagnetic: { value: 100.0 },
+                    uTime: { value: 0 }
+                }
+            });
+            atmoGlowMesh = new THREE.Mesh(atmoGeo, atmoMaterial);
+            earthRootGroup.add(atmoGlowMesh);
+        }
+
+        /***********************************************************************
+         * 8. PLANETARY BLAST / SHATTER DEBRIS SYSTEM
+         ***********************************************************************/
+        const debrisItems = [];
+
+        function buildExplosionSystem() {
+            explosionDebrisGroup = new THREE.Group();
+            explosionDebrisGroup.visible = false;
+            scene.add(explosionDebrisGroup);
+
+            const chunkGeo = new THREE.DodecahedronGeometry(0.18, 1);
+            for (let i = 0; i < 160; i++) {
+                const isMagma = Math.random() > 0.45;
+                const mat = new THREE.MeshStandardMaterial({
+                    color: isMagma ? 0xf97316 : 0x334155,
+                    emissive: isMagma ? 0xdc2626 : 0x7c2d12,
+                    emissiveIntensity: isMagma ? 0.9 : 0.25,
+                    roughness: 0.6
+                });
+                const mesh = new THREE.Mesh(chunkGeo, mat);
+                const scale = 0.3 + Math.random() * 1.6;
+                mesh.scale.set(scale, scale * (0.6 + Math.random() * 0.6), scale);
+
+                const dir = new THREE.Vector3(
+                    (Math.random() - 0.5) * 2,
+                    (Math.random() - 0.5) * 2,
+                    (Math.random() - 0.5) * 2
+                ).normalize();
+
+                const speed = 1.5 + Math.random() * 6.5;
+                debrisItems.push({
+                    mesh,
+                    velocity: dir.multiplyScalar(speed),
+                    rotSpeed: new THREE.Vector3(Math.random() * 4, Math.random() * 4, Math.random() * 4)
+                });
+                explosionDebrisGroup.add(mesh);
+            }
+
+            // Expanding Superheated Shockwave Ring
+            const ringGeo = new THREE.RingGeometry(0.8, 1.35, 64);
+            const ringMat = new THREE.MeshBasicMaterial({
+                color: 0xfb923c,
+                transparent: true,
+                opacity: 0.9,
+                side: THREE.DoubleSide,
+                blending: THREE.AdditiveBlending
+            });
+            shockwaveRing = new THREE.Mesh(ringGeo, ringMat);
+            shockwaveRing.rotation.x = Math.PI * 0.35;
+            explosionDebrisGroup.add(shockwaveRing);
+        }
+
+        function triggerCatastrophicOverload() {
+            if (outlookActive) closeOutlook();
+            // Set sliders to catastrophic human overload limits and trigger the blast
+            applyPreset('overload');
+            state.deforestation = 100;
+            state.waterPollution = 100;
+            state.airPollution = 100;
+            state.co2 = 5000;
+            state.temperature = 115;
+            renderSliders(currentCategory);
+            evaluatePlanetaryHealth();
+            updateShaderUniforms();
+            explodeEarth();
+        }
+
+        function explodeEarth() {
+            if (isExploded) return;
+            isExploded = true;
+            explosionTime = 0;
+
+            playExplosionSound();
+
+            // Reset debris positions to center
+            debrisItems.forEach(item => {
+                item.mesh.position.copy(item.velocity). normalize().multiplyScalar(Math.random() * 1.4);
+            });
+            shockwaveRing.scale.set(1, 1, 1);
+            shockwaveRing.material.opacity = 1.0;
+
+            earthRootGroup.visible = false;
+            explosionDebrisGroup.visible = true;
+
+            document.getElementById('disaster-banner').classList.remove('hidden');
+            document.getElementById('critical-overlay').classList.remove('hidden');
+            evaluatePlanetaryHealth();
+        }
+
+        function restoreEarth(resetSlidersToDefault = true) {
+            isExploded = false;
+            explosionDebrisGroup.visible = false;
+            earthRootGroup.visible = true;
+            document.getElementById('disaster-banner').classList.add('hidden');
+            document.getElementById('critical-overlay').classList.add('hidden');
+
+            if (resetSlidersToDefault) {
+                simulatedPopulation = 8.12;
+                applyPreset('earth');
+            }
+        }
+
+        /***********************************************************************
+         * 10. SHADER UNIFORM SYNC & CAMERA INTERACTION
+         ***********************************************************************/
+        function updateShaderUniforms() {
+            if (!earthMaterial) return;
+            earthMaterial.uniforms.uWaterLevel.value = state.water / 100;
+            earthMaterial.uniforms.uLandLevel.value = state.landLevel;
+            earthMaterial.uniforms.uForest.value = state.forest / 100;
+            earthMaterial.uniforms.uDeforestation.value = state.deforestation / 100;
+            earthMaterial.uniforms.uWaterPollution.value = state.waterPollution / 100;
+            earthMaterial.uniforms.uAirPollution.value = state.airPollution / 100;
+            earthMaterial.uniforms.uTemperature.value = state.temperature;
+            earthMaterial.uniforms.uIceCaps.value = state.iceCaps / 100;
+            earthMaterial.uniforms.uPopulation.value = simulatedPopulation;
+            earthMaterial.uniforms.uIndustry.value = state.industrialization / 100;
+            earthMaterial.uniforms.uVolcanism.value = state.volcanism / 100;
+            earthMaterial.uniforms.uOceanAcidity.value = state.oceanAcidity / 100;
+            earthMaterial.uniforms.uStress.value = planetaryStress / 100;
+            earthMaterial.uniforms.uOzone.value = state.ozone;
+
+            cloudMaterial.uniforms.uClouds.value = state.clouds / 100;
+            cloudMaterial.uniforms.uAirPollution.value = state.airPollution / 100;
+
+            atmoMaterial.uniforms.uAirPressure.value = state.airPressure;
+            atmoMaterial.uniforms.uAirPollution.value = state.airPollution / 100;
+            atmoMaterial.uniforms.uOxygen.value = state.oxygen / 100;
+            atmoMaterial.uniforms.uTemperature.value = state.temperature;
+            atmoMaterial.uniforms.uMagnetic.value = state.magneticField;
+
+            // Subtle gravity scale response
+            const gravScale = 1.0 + (1.0 - state.gravity) * 0.06;
+            earthRootGroup.scale.set(gravScale, gravScale, gravScale);
+        }
+
+        function setupCameraInteraction(domEl) {
+            let isDragging = false;
+            let prevX = 0, prevY = 0;
+
+            domEl.addEventListener('mousedown', e => {
+                isDragging = true;
+                prevX = e.clientX;
+                prevY = e.clientY;
+            });
+
+            window.addEventListener('mousemove', e => {
+                if (!isDragging) return;
+                const dx = e.clientX - prevX;
+                const dy = e.clientY - prevY;
+                prevX = e.clientX;
+                prevY = e.clientY;
+
+                earthRootGroup.rotation.y += dx * 0.007;
+                    earthRootGroup.rotation.x = Math.max(-1.1, Math.min(1.1, earthRootGroup.rotation.x + dy * 0.006));
+            });
+
+            window.addEventListener('mouseup', () => { isDragging = false; });
+
+            // Touch Support for Mobile/Tablet
+            domEl.addEventListener('touchstart', e => {
+                if (e.touches.length === 1) {
+                    isDragging = true;
+                    prevX = e.touches[0].clientX;
+                    prevY = e.touches[0].clientY;
+                }
+            }, { passive: true });
+
+            window.addEventListener('touchmove', e => {
+                if (!isDragging || e.touches.length !== 1) return;
+                const dx = e.touches[0].clientX - prevX;
+                const dy = e.touches[0].clientY - prevY;
+                prevX = e.touches[0].clientX;
+                prevY = e.touches[0].clientY;
+
+                earthRootGroup.rotation.y += dx * 0.007;
+                    earthRootGroup.rotation.x = Math.max(-1.1, Math.min(1.1, earthRootGroup.rotation.x + dy * 0.006));
+            }, { passive: true });
+
+            window.addEventListener('touchend', () => { isDragging = false; });
+
+            // Mouse Wheel Zoom
+            domEl.addEventListener('wheel', e => {
+                e.preventDefault();
+                targetCamDistance = Math.max(5.5, Math.min(14, targetCamDistance + e.deltaY * 0.004));
+            }, { passive: false });
+        }
+
+        function toggleAutoRotate() {
+            autoRotate = !autoRotate;
+            document.getElementById('spin-state-text').textContent = autoRotate ? 'On' : 'Off';
+            playUISound(540, 0.05);
+        }
+
+        function resetCameraView() {
+            targetCamTheta = 0.28;
+            targetCamPhi = 1.38;
+            targetCamDistance = 9.2;
+            if (outlookActive) fitEarthForOutlook();
+            earthRootGroup.rotation.set(0.12, -0.35, 0);
+            playUISound(600, 0.05);
+        }
+
+        function onWindowResize() {
+            if (!camera || !renderer) return;
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            drawTelemetryGraph();
+        }
+
+        /***********************************************************************
+         * 11. MAIN ANIMATION LOOP
+         ***********************************************************************/
+        let clock = new THREE.Clock();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            const dt = Math.min(clock.getDelta(), 0.1);
+            const elapsed = clock.getElapsedTime();
+
+            // Update Shader Time
+            if (earthMaterial) {
+                earthMaterial.uniforms.uTime.value = elapsed * state.rotationSpeed;
+                earthMaterial.uniforms.uPopulation.value = simulatedPopulation;
+            }
+            if (cloudMaterial) {
+                cloudMaterial.uniforms.uTime.value = elapsed * state.rotationSpeed;
+            }
+            if (atmoMaterial) {
+                atmoMaterial.uniforms.uTime.value = elapsed;
+            }
+
+
+            // Spin Earth in normal view
+            if (autoRotate && !isExploded) {
+                earthRootGroup.rotation.y += dt * 0.18 * state.rotationSpeed;
+            }
+
+            // Shake Earth violently when Planetary Stress is critical (>85%)
+            if (planetaryStress >= 85 && !isExploded) {
+                const shake = ((planetaryStress - 85) / 15) * 0.035;
+                earthRootGroup.position.set(
+                    (Math.random() - 0.5) * shake,
+                    (Math.random() - 0.5) * shake,
+                    (Math.random() - 0.5) * shake
+                );
+            } else {
+                earthRootGroup.position.set(0, 0, 0);
+            }
+
+            // Animate Explosion Debris if planet blasted
+            if (isExploded) {
+                explosionTime += dt;
+                debrisItems.forEach(item => {
+                    item.mesh.position.addScaledVector(item.velocity, dt * (1.0 / (1.0 + explosionTime * 0.4)));
+                    item.mesh.rotation.x += item.rotSpeed.x * dt;
+                    item.mesh.rotation.y += item.rotSpeed.y * dt;
+                });
+                shockwaveRing.scale.addScalar(dt * 9.5);
+                shockwaveRing.material.opacity = Math.max(0, 1.0 - explosionTime * 0.65);
+            }
+
+            // Smooth Camera Orbit Interpolation
+            // Offset globe slightly left on large screens so the right customizer panel never overlaps the planet
+            const desktopOffset = window.innerWidth >= 900 ? 0.5 : 0.0;
+            camTheta += (targetCamTheta - camTheta) * 0.08;
+            camPhi += (targetCamPhi - camPhi) * 0.08;
+            camDistance += (targetCamDistance - camDistance) * 0.08;
+            currentLookAtX += ((targetLookAtX + desktopOffset) - currentLookAtX) * 0.08;
+
+            camera.position.x = currentLookAtX + camDistance * Math.sin(camPhi) * Math.sin(camTheta);
+            currentLookAtY += (targetLookAtY - currentLookAtY) * 0.08;
+            camera.position.y = camDistance * Math.cos(camPhi) + currentLookAtY;
+            camera.position.z = camDistance * Math.sin(camPhi) * Math.cos(camTheta);
+            camera.lookAt(currentLookAtX, currentLookAtY, 0);
+
+            renderer.render(scene, camera);
+        }
+
+        // Start application on window load
+        window.onload = function () {
+            renderSliders('all');
+            initThreeScene();
+            evaluatePlanetaryHealth();
+            updateShaderUniforms();
+            drawTelemetryGraph();
+            setInterval(updateTelemetrySimulation, 450);
+            animate();
+        };
+    </script>
+</body>
+</html>

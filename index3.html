@@ -1,0 +1,1394 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Chandrayaan-3 Vikram Lander</title>
+  <style>
+    html,
+    body {
+      margin: 0;
+      background: #05060a
+    }
+
+    body {
+      padding-top: env(safe-area-inset-top, 0px);
+      padding-bottom: env(safe-area-inset-bottom, 0px)
+    }
+
+    /* Demo only: give the widget a size. On your site, set any width/height on the .vk element's parent. */
+    .demo {
+      height: calc(100vh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+      height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px))
+    }
+
+    /* ===== VIKRAM WIDGET CSS (copy) ===== */
+    .vk {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      min-height: 320px;
+      background: #000;
+      overflow: hidden;
+      color: #f2efe6;
+      font-family: Georgia, "Times New Roman", serif;
+      touch-action: pan-y
+    }
+
+    .vk canvas {
+      display: block;
+      width: 100%;
+      height: 100%
+    }
+
+    .vk .vk-t {
+      position: absolute;
+      top: 62px;
+      left: 18px;
+      right: 18px;
+      pointer-events: none;
+      text-shadow: 0 1px 6px #000
+    }
+
+    .vk .vk-t b {
+      display: block;
+      font-weight: 400;
+      font-size: clamp(20px, 4.5vw, 30px)
+    }
+
+    .vk .vk-t span {
+      font-size: 14px;
+      color: #a9a69c
+    }
+
+    .vk .vk-ui {
+      position: absolute;
+      left: 18px;
+      right: 18px;
+      bottom: 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      pointer-events: none
+    }
+
+    .vk .vk-s {
+      font-size: 15px;
+      color: #e3b84a;
+      text-shadow: 0 1px 6px #000;
+      max-width: 62%
+    }
+
+    .vk button {
+      pointer-events: auto;
+      font: inherit;
+      font-size: 15px;
+      color: #f2efe6;
+      background: rgba(5, 6, 10, .6);
+      border: 1px solid rgba(242, 239, 230, .25);
+      border-radius: 999px;
+      padding: 9px 18px;
+      cursor: pointer
+    }
+
+    .vk button:hover {
+      border-color: #e3b84a
+    }
+
+    .vk button:focus-visible {
+      outline: 2px solid #e3b84a;
+      outline-offset: 2px
+    }
+
+    .vk [hidden] {
+      display: none !important
+    }
+
+    .vk .vk-chips {
+      position: absolute;
+      left: 18px;
+      right: 18px;
+      bottom: 68px;
+      display: flex;
+      gap: 14px;
+      overflow-x: auto;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(223, 190, 58, 0.5) rgba(255, 255, 255, 0.05);
+      padding: 6px 0 12px 0;
+      align-items: flex-start;
+      pointer-events: auto;
+      z-index: 15;
+    }
+
+    .vk .vk-chips::-webkit-scrollbar {
+      height: 6px;
+    }
+
+    .vk .vk-chips::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 999px;
+    }
+
+    .vk .vk-chips::-webkit-scrollbar-thumb {
+      background: rgba(227, 184, 74, 0.5);
+      border-radius: 999px;
+    }
+
+    .vk .vk-chips::-webkit-scrollbar-thumb:hover {
+      background: rgba(227, 184, 74, 0.8);
+    }
+
+    .vk .vk-part-group {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      flex: 0 0 auto
+    }
+
+    .vk .vk-group-title {
+      font: 11px Arial, sans-serif;
+      letter-spacing: .13em;
+      text-transform: uppercase;
+      color: #b8b7bd;
+      padding-left: 5px
+    }
+
+    .vk .vk-chip-row {
+      display: flex;
+      gap: 8px;
+      align-items: center
+    }
+
+    .vk .vk-chips.in {
+      animation: vkUp .6s both
+    }
+
+    .vk .vk-chips button {
+      position: relative;
+      z-index: 5;
+      touch-action: manipulation
+    }
+
+    .vk .vk-chip {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+      padding: 7px 14px;
+      font-size: 14px;
+      -webkit-backdrop-filter: blur(8px);
+      backdrop-filter: blur(8px)
+    }
+
+    .vk .vk-chip i {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      box-shadow: 0 0 8px currentColor
+    }
+
+    .vk .vk-chip.on {
+      background: rgba(255, 255, 255, .14);
+      border-color: var(--c)
+    }
+
+    .vk .vk-card {
+      position: absolute;
+      left: 18px;
+      right: 18px;
+      bottom: 112px;
+      padding: 20px 20px 16px;
+      border-radius: 18px;
+      overflow: hidden;
+      pointer-events: auto;
+      z-index: 20;
+      background: linear-gradient(160deg, rgba(18, 22, 36, .84), rgba(8, 10, 18, .8));
+      -webkit-backdrop-filter: blur(16px);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, .14);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, .5), 0 0 34px -8px var(--c)
+    }
+
+    .vk .vk-card::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 3px;
+      width: 100%;
+      background: linear-gradient(90deg, var(--c), transparent);
+      transform-origin: left
+    }
+
+    .vk .vk-card.on {
+      animation: vkIn .55s cubic-bezier(.2, .9, .2, 1) both
+    }
+
+    .vk .vk-card.on::before {
+      animation: vkLine .9s .1s cubic-bezier(.2, .9, .2, 1) both
+    }
+
+    .vk .vk-x {
+      position: absolute;
+      top: 10px;
+      right: 12px;
+      width: 30px;
+      height: 30px;
+      padding: 0;
+      border-radius: 50%;
+      font-size: 18px;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: auto;
+      cursor: pointer;
+      z-index: 25;
+    }
+
+    .vk .vk-k {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--c)
+    }
+
+    .vk .vk-k i {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--c);
+      box-shadow: 0 0 10px var(--c)
+    }
+
+    .vk .vk-card.on .vk-k {
+      animation: vkUp .5s .08s both
+    }
+
+    .vk .vk-n {
+      margin: 6px 0 8px;
+      font-weight: 400;
+      font-size: 25px;
+      letter-spacing: .01em
+    }
+
+    .vk .vk-n span {
+      display: inline-block;
+      animation: vkLetter .5s calc(.12s + var(--i)*.03s) both
+    }
+
+    .vk .vk-d {
+      margin: 0;
+      font-size: 15px;
+      line-height: 1.55;
+      color: #d9d6cc;
+      min-height: 4.6em
+    }
+
+    .vk .vk-d.typing::after {
+      content: "";
+      display: inline-block;
+      width: 2px;
+      height: 1em;
+      margin-left: 2px;
+      vertical-align: -2px;
+      background: var(--c);
+      animation: vkBlink .7s steps(2) infinite
+    }
+
+    .vk .vk-st {
+      display: flex;
+      gap: 10px;
+      margin-top: 14px
+    }
+
+    .vk .vk-st div {
+      flex: 1;
+      padding: 8px 10px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, .06);
+      border: 1px solid rgba(255, 255, 255, .09);
+      animation: vkUp .5s calc(.45s + var(--i)*.1s) both
+    }
+
+    .vk .vk-st small {
+      display: block;
+      font-size: 11px;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: #a9a69c
+    }
+
+    .vk .vk-st b {
+      font-weight: 400;
+      font-size: 15px;
+      color: var(--c)
+    }
+
+    @media(min-width:760px) {
+      .vk .vk-card {
+        left: auto;
+        right: 24px;
+        top: 96px;
+        bottom: auto;
+        width: 340px
+      }
+    }
+
+    @keyframes vkIn {
+      from {
+        opacity: 0;
+        transform: translateY(18px) scale(.96);
+        filter: blur(6px)
+      }
+
+      to {
+        opacity: 1;
+        transform: none;
+        filter: none
+      }
+    }
+
+    @keyframes vkUp {
+      from {
+        opacity: 0;
+        transform: translateY(10px)
+      }
+
+      to {
+        opacity: 1;
+        transform: none
+      }
+    }
+
+    @keyframes vkLine {
+      from {
+        transform: scaleX(0)
+      }
+
+      to {
+        transform: scaleX(1)
+      }
+    }
+
+    @keyframes vkLetter {
+      from {
+        opacity: 0;
+        transform: translateY(.5em);
+        filter: blur(4px)
+      }
+
+      to {
+        opacity: 1;
+        transform: none;
+        filter: none
+      }
+    }
+
+    @keyframes vkBlink {
+      50% {
+        opacity: 0
+      }
+    }
+
+    @media(prefers-reduced-motion:reduce) {
+      .vk * {
+        animation: none !important
+      }
+    }
+  </style>
+  <style id="fx-css">
+    /* ===== FX layer v2: replayable scroll reveal, 3D tab transition, 3D viewer, responsive polish ===== */
+    :root {
+      --fx-e: cubic-bezier(.16, 1, .3, 1)
+    }
+
+    html {
+      overflow-x: clip;
+      scroll-padding-top: 5rem;
+      -webkit-text-size-adjust: 100%
+    }
+
+    body {
+      min-height: 100vh !important
+    }
+
+    .fx-wait body {
+      opacity: 0
+    }
+
+    html:not(.fx-wait) body {
+      animation: fxFade .6s ease backwards
+    }
+
+    @keyframes fxFade {
+      from {
+        opacity: 0
+      }
+    }
+
+    body [data-fx]:not(.fx-in) {
+      opacity: 0;
+      translate: var(--fx-x, 0) var(--fx-y, 0);
+      scale: var(--fx-s, 1);
+      rotate: var(--fx-r, 0deg)
+    }
+
+    body [data-fx].fx-fade:not(.fx-in) {
+      translate: 0 0;
+      scale: 1;
+      rotate: 0deg
+    }
+
+    body [data-fx].fx-run {
+      transition: opacity var(--fx-t, .8s) var(--fx-e), translate var(--fx-t, .8s) var(--fx-e), scale var(--fx-t, .8s) var(--fx-e), rotate var(--fx-t, .8s) var(--fx-e);
+      transition-delay: var(--fx-d, 0s);
+      will-change: opacity, translate, scale, rotate
+    }
+
+    button:active {
+      scale: .97
+    }
+
+    .fx-bar {
+      position: fixed;
+      inset: 0 0 auto 0;
+      height: 3px;
+      z-index: 60;
+      transform-origin: 0 50%;
+      transform: scaleX(0);
+      background: linear-gradient(90deg, #8b5cf6, #38bdf8, #f472b6);
+      pointer-events: none
+    }
+
+    .fx-top {
+      position: fixed;
+      left: max(1rem, env(safe-area-inset-left));
+      bottom: max(1rem, env(safe-area-inset-bottom));
+      z-index: 60;
+      width: 2.75rem;
+      height: 2.75rem;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      border: 1px solid rgba(167, 139, 250, .5);
+      background: rgba(15, 23, 42, .82);
+      color: #ddd6fe;
+      backdrop-filter: blur(8px);
+      opacity: 0;
+      translate: 0 16px;
+      scale: .8;
+      pointer-events: none;
+      transition: opacity .4s, translate .5s var(--fx-e), scale .5s var(--fx-e), background-color .3s
+    }
+
+    .fx-top.on {
+      opacity: 1;
+      translate: 0 0;
+      scale: 1;
+      pointer-events: auto
+    }
+
+    .fx-top:hover {
+      background: rgba(124, 58, 237, .92)
+    }
+
+    .fx-tab-out {
+      animation: fxTabOut .26s ease-in both
+    }
+
+    .fx-tab-in {
+      animation: fxTabIn .8s var(--fx-e) both
+    }
+
+    @keyframes fxTabOut {
+      to {
+        opacity: 0;
+        transform: perspective(1200px) rotateX(9deg) translateY(-24px) scale(.97)
+      }
+    }
+
+    @keyframes fxTabIn {
+      from {
+        opacity: 0;
+        transform: perspective(1200px) rotateX(-14deg) translateY(36px) scale(.96)
+      }
+    }
+
+    .fx-3d {
+      position: fixed;
+      inset: 0;
+      z-index: 80;
+      display: grid;
+      place-items: center;
+      padding: max(.75rem, env(safe-area-inset-top)) max(.75rem, env(safe-area-inset-right)) max(.75rem, env(safe-area-inset-bottom)) max(.75rem, env(safe-area-inset-left));
+      background: rgba(2, 3, 8, .82);
+      backdrop-filter: blur(6px);
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity .35s, visibility 0s .35s;
+      perspective: 1400px
+    }
+
+    .fx-3d.on {
+      opacity: 1;
+      visibility: visible;
+      transition: opacity .35s
+    }
+
+    .fx-3d>div {
+      position: relative;
+      width: min(1100px, 100%);
+      height: min(760px, 100%);
+      border-radius: 18px;
+      overflow: hidden;
+      border: 1px solid rgba(167, 139, 250, .35);
+      box-shadow: 0 30px 80px rgba(0, 0, 0, .6);
+      transform: rotateX(14deg) translateY(40px) scale(.92);
+      opacity: 0;
+      transition: transform .7s var(--fx-e), opacity .5s
+    }
+
+    .fx-3d.on>div {
+      transform: none;
+      opacity: 1
+    }
+
+    .fx-3d iframe {
+      display: block;
+      width: 100%;
+      height: 100%;
+      border: 0;
+      background: #000
+    }
+
+    .fx-3d .fx-x {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 2;
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, .3);
+      background: rgba(5, 6, 10, .7);
+      color: #fff;
+      font-size: 1.3rem;
+      line-height: 1;
+      cursor: pointer
+    }
+
+    @media(max-width:640px) {
+
+      input,
+      select,
+      textarea {
+        font-size: 16px !important
+      }
+
+      [class*="h-[260px]"] {
+        height: auto !important;
+        min-height: 260px
+      }
+
+      h1,
+      h2 {
+        overflow-wrap: anywhere
+      }
+    }
+
+    @media(prefers-reduced-motion:reduce) {
+      body [data-fx] {
+        opacity: 1 !important;
+        translate: none !important;
+        scale: none !important;
+        transition: none !important
+      }
+
+      html:not(.fx-wait) body {
+        animation: none
+      }
+
+      .fx-tab-in,
+      .fx-tab-out {
+        animation: none
+      }
+
+      .fx-3d>div {
+        transform: none
+      }
+
+      .fx-top,
+      .fx-bar {
+        transition: none
+      }
+    }
+  </style>
+  <script>if (!matchMedia("(prefers-reduced-motion:reduce)").matches) { document.documentElement.classList.add("fx-wait"); setTimeout(function () { document.documentElement.classList.remove("fx-wait") }, 2500) }</script>
+  <style id="vk-css">
+    /* ===== Lander viewer: view bar + responsive ===== */
+    .vk canvas {
+      touch-action: none
+    }
+
+    .vk .vk-views {
+      position: absolute;
+      left: 18px;
+      right: 18px;
+      top: 80px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      overflow-x: auto;
+      scrollbar-width: none;
+      padding: 4px 0;
+      pointer-events: auto;
+      z-index: 5
+    }
+
+    .vk .vk-views::-webkit-scrollbar {
+      display: none
+    }
+
+    .vk .vk-views:not([hidden]) {
+      animation: vkUp .6s both
+    }
+
+    .vk .vk-views button {
+      flex: 0 0 auto;
+      padding: 6px 13px;
+      font-size: 13px;
+      -webkit-backdrop-filter: blur(8px);
+      backdrop-filter: blur(8px);
+      transition: border-color .25s, background-color .25s, transform .25s
+    }
+
+    .vk .vk-views button.on {
+      border-color: #e3b84a;
+      background: rgba(227, 184, 74, .16)
+    }
+
+    .vk .vk-views button:active {
+      transform: scale(.94)
+    }
+
+    .vk .vk-views i {
+      flex: 0 0 1px;
+      align-self: stretch;
+      background: rgba(242, 239, 230, .2)
+    }
+
+    @media(min-width:760px) {
+      .vk .vk-views {
+        left: auto;
+        right: 18px;
+        top: 50%;
+        translate: 0 -50%;
+        flex-direction: column;
+        align-items: stretch;
+        overflow: visible;
+        width: max-content
+      }
+
+      .vk .vk-views i {
+        flex: 0 0 1px;
+        height: 1px;
+        width: auto;
+        align-self: auto
+      }
+
+      /* keep the view buttons clear of the info card, which also sits on the right */
+      .vk .vk-views {
+        transition: right .35s ease
+      }
+
+      .vk:has(.vk-card.on) .vk-views {
+        right: 380px
+      }
+    }
+
+    @media(max-width:759px) {
+      .vk .vk-card {
+        max-height: 44%;
+        overflow-y: auto
+      }
+    }
+
+    @media(max-width:480px) {
+      .vk .vk-card {
+        padding: 14px
+      }
+
+      .vk .vk-n {
+        font-size: 21px
+      }
+
+      .vk .vk-d {
+        font-size: 14px;
+        min-height: 0
+      }
+
+      .vk .vk-st {
+        flex-wrap: wrap
+      }
+
+      .vk .vk-st div {
+        flex: 1 1 40%
+      }
+    }
+
+    @media(max-height:520px) and (orientation:landscape) {
+      .vk .vk-t span {
+        display: none
+      }
+
+      .vk .vk-views button {
+        padding: 4px 10px;
+        font-size: 12px
+      }
+
+      .vk .vk-card {
+        left: auto;
+        right: 14px;
+        top: 56px;
+        bottom: auto;
+        width: min(320px, 46vw);
+        max-height: calc(100% - 140px);
+        overflow-y: auto
+      }
+    }
+  </style>
+  <script src="script2.js"></script>
+  <style>
+    /* ===== Go Back button ===== */
+    .back-btn {
+      --back-accent: #e3b84a;
+      position: fixed;
+      top: calc(env(safe-area-inset-top, 0px) + 12px);
+      left: max(14px, env(safe-area-inset-left, 0px));
+      z-index: 1000;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      height: 36px;
+      padding: 0 15px 0 11px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, .18);
+      background: rgba(8, 14, 26, .55);
+      -webkit-backdrop-filter: blur(12px) saturate(140%);
+      backdrop-filter: blur(12px) saturate(140%);
+      color: #eef2fb;
+      font: 600 13px/1 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      letter-spacing: .04em;
+      text-decoration: none;
+      white-space: nowrap;
+      box-shadow: 0 4px 18px rgba(0, 0, 0, .4);
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+      transition: background .2s, border-color .2s, color .2s, transform .2s
+    }
+
+    .back-btn svg {
+      width: 16px;
+      height: 16px;
+      flex: none;
+      transition: transform .2s
+    }
+
+    .back-btn:hover {
+      background: rgba(8, 14, 26, .82);
+      border-color: var(--back-accent);
+      color: #fff
+    }
+
+    .back-btn:hover svg {
+      transform: translateX(-3px)
+    }
+
+    .back-btn:focus-visible {
+      outline: 2px solid var(--back-accent);
+      outline-offset: 3px
+    }
+
+    .back-btn:active {
+      transform: scale(.96)
+    }
+
+    @media (prefers-reduced-motion:reduce) {
+
+      .back-btn,
+      .back-btn svg {
+        transition: none
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <a class="back-btn" href="index2.html" aria-label="Go back to the home page"><svg viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M15 6l-6 6 6 6" />
+    </svg><span>Go Back</span></a>
+
+  <div class="demo">
+    <!-- ===== VIKRAM WIDGET HTML (copy) ===== -->
+    <div class="vk" id="vikram">
+      <div class="vk-t"><b>Chandrayaan-3: Vikram lander</b><span>Interactive lunar surface • Vikram + Pragyan</span>
+      </div>
+      <div class="vk-ui"><span class="vk-s">Descending…</span><button type="button" class="vk-r">Replay landing</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== VIKRAM WIDGET JS (copy) ===== -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script>
+    function VikramLander(root, opt) {
+      opt = Object.assign({ rover: true }, opt || {});
+      const sEl = root.querySelector('.vk-s'), setS = t => { if (sEl) sEl.textContent = t };
+      const canvas = document.createElement('canvas'); root.insertBefore(canvas, root.firstChild);
+      const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+      renderer.setPixelRatio(Math.min(devicePixelRatio, 2)); renderer.shadowMap.enabled = true;
+      const scene = new THREE.Scene(); scene.background = new THREE.Color(0); scene.fog = new THREE.Fog(0, 45, 115);
+      const camera = new THREE.PerspectiveCamera(45, 1, .1, 400);
+      const V3 = (a) => new THREE.Vector3(a[0], a[1], a[2]);
+
+      // ---- Sky, light
+      {
+        const n = 1500, p = new Float32Array(n * 3);
+        for (let i = 0; i < n; i++) { const u = Math.random() * 2 - 1, t = Math.random() * 6.283, r = Math.sqrt(1 - u * u); p[i * 3] = 180 * r * Math.cos(t); p[i * 3 + 1] = Math.abs(180 * u) * .8 + 8; p[i * 3 + 2] = 180 * r * Math.sin(t); }
+        const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(p, 3));
+        scene.add(new THREE.Points(g, new THREE.PointsMaterial({ color: 0xffffff, size: .9, sizeAttenuation: false, fog: false })));
+      }
+      scene.add(new THREE.HemisphereLight(0x8a93b8, 0x2a2622, .5));
+      const sun = new THREE.DirectionalLight(0xfff2dc, 1.7); sun.position.set(-14, 10, 11); sun.castShadow = true;
+      sun.shadow.mapSize.set(2048, 2048); Object.assign(sun.shadow.camera, { left: -16, right: 16, top: 16, bottom: -16, near: 1, far: 60 }); scene.add(sun);
+
+      // ---- Terrain: procedural lunar regolith texture
+      function lunarTexture() {
+        const c = document.createElement('canvas'); c.width = 1024; c.height = 1024; const x = c.getContext('2d'), im = x.createImageData(1024, 1024);
+        for (let i = 0; i < im.data.length; i += 4) { const n = (Math.random() - .5) * 30, v = 137 + n; im.data[i] = v + 2; im.data[i + 1] = v + 1; im.data[i + 2] = v - 2; im.data[i + 3] = 255; }
+        x.putImageData(im, 0, 0);
+        for (let i = 0; i < 4200; i++) { const r = .3 + Math.random() * 4; x.fillStyle = `rgba(${Math.random() > .5 ? '55,53,50' : '225,222,211'},${Math.random() * .22})`; x.beginPath(); x.arc(Math.random() * 1024, Math.random() * 1024, r, 0, Math.PI * 2); x.fill(); }
+        const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(5, 5); t.anisotropy = 4; return t;
+      }
+      const lunarAlbedo = lunarTexture();
+      // ---- Terrain
+      const craters = [[12, -8, 5], [-14, 6, 6], [8, 14, 4], [-9, -13, 4.5], [22, 5, 3.2], [-24, -8, 4.2], [18, -22, 2.8], [-4, 26, 3.6], [29, 20, 5.5], [-30, 18, 3.8], [3, -29, 4.5]];
+      function hgt(x, z) {
+        const r = Math.hypot(x, z);
+        let y = Math.sin(x * .35) * Math.cos(z * .3) * .5 + Math.sin(x * .9 + z * .7) * .15 + Math.sin(z * 1.7 - x * .4) * .07;
+        let k = Math.min(1, Math.max(0, (r - 5) / 8)); k = k * k * (3 - 2 * k); y *= k;
+        for (const c of craters) { const d = Math.hypot(x - c[0], z - c[1]) / c[2]; if (d < 1) y -= (1 - d * d) * .9; else if (d < 1.3) y += Math.exp(-Math.pow((d - 1) * 6, 2)) * .25; }
+        return y;
+      }
+      {
+        const g = new THREE.PlaneGeometry(140, 140, 170, 170); g.rotateX(-Math.PI / 2); const p = g.attributes.position;
+        for (let i = 0; i < p.count; i++)p.setY(i, hgt(p.getX(i), p.getZ(i))); g.computeVertexNormals();
+        const m = new THREE.Mesh(g, new THREE.MeshStandardMaterial({ map: lunarAlbedo, bumpMap: lunarAlbedo, bumpScale: .12, color: 0xb1aea6, roughness: 1 })); m.receiveShadow = true; scene.add(m);
+        const rg = new THREE.DodecahedronGeometry(1, 0), rm = new THREE.MeshStandardMaterial({ color: 0x6f6d69, roughness: 1 });
+        for (let i = 0; i < 60; i++) {
+          const a = Math.random() * 6.283, d = 6 + Math.random() * 30, x = Math.cos(a) * d, z = Math.sin(a) * d, s = .1 + Math.random() * .35;
+          const r = new THREE.Mesh(rg, rm); r.position.set(x, hgt(x, z) + s * .3, z); r.scale.set(s, s * .7, s); r.rotation.set(Math.random() * 3, Math.random() * 3, 0); r.castShadow = r.receiveShadow = true; scene.add(r);
+        }
+      }
+
+      // ---- Textures & materials
+      const cv = (w, h) => { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; };
+      function foilTex() {
+        const c = cv(256, 256), x = c.getContext('2d'); x.fillStyle = '#cfa81c'; x.fillRect(0, 0, 256, 256);
+        for (let i = 0; i < 450; i++) {
+          x.strokeStyle = `hsla(${44 + Math.random() * 10},${70 + Math.random() * 30}%,${34 + Math.random() * 50}%,.55)`; x.lineWidth = 1 + Math.random() * 5;
+          const a = Math.random() * 256, b = Math.random() * 256; x.beginPath(); x.moveTo(a, b); x.lineTo(a + (Math.random() - .5) * 70, b + (Math.random() - .5) * 70); x.stroke();
+        }
+        const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; return t;
+      }
+      function cellTex(nx, ny, bg, ln, bd) {
+        const c = cv(256, 256), x = c.getContext('2d'); x.fillStyle = bg || '#0d1836'; x.fillRect(0, 0, 256, 256);
+        x.strokeStyle = ln || '#364b86'; x.lineWidth = 1.5;
+        for (let i = 0; i <= nx; i++) { x.beginPath(); x.moveTo(i * 256 / nx, 0); x.lineTo(i * 256 / nx, 256); x.stroke(); }
+        for (let j = 0; j <= ny; j++) { x.beginPath(); x.moveTo(0, j * 256 / ny); x.lineTo(256, j * 256 / ny); x.stroke(); }
+        x.strokeStyle = bd || '#b8a878'; x.lineWidth = 8; x.strokeRect(0, 0, 256, 256); return new THREE.CanvasTexture(c);
+      }
+      function chkTex(n) {
+        const c = cv(128, 128), x = c.getContext('2d'), s = 128 / n;
+        for (let i = 0; i < n; i++)for (let j = 0; j < n; j++) { x.fillStyle = (i + j) % 2 ? '#f4f4f0' : '#111'; x.fillRect(i * s, j * s, s, s); } return new THREE.CanvasTexture(c);
+      }
+      function flagTex() {
+        const c = cv(150, 100), x = c.getContext('2d'); x.fillStyle = '#ff9933'; x.fillRect(0, 0, 150, 34); x.fillStyle = '#f6f6f2'; x.fillRect(0, 33, 150, 34); x.fillStyle = '#138808'; x.fillRect(0, 66, 150, 34);
+        x.strokeStyle = '#1a2a8c'; x.lineWidth = 2; x.beginPath(); x.arc(75, 50, 12, 0, 6.283); x.stroke();
+        for (let i = 0; i < 12; i++) { const a = i * Math.PI / 6; x.beginPath(); x.moveTo(75, 50); x.lineTo(75 + 12 * Math.cos(a), 50 + 12 * Math.sin(a)); x.stroke(); }
+        return new THREE.CanvasTexture(c);
+      }
+      const ft = foilTex();
+      const gold = new THREE.MeshStandardMaterial({ map: ft, bumpMap: ft, bumpScale: 1.5, metalness: .45, roughness: .38, emissive: 0x3d2c00 });
+      const brass = new THREE.MeshStandardMaterial({ color: 0xb59a5b, metalness: .5, roughness: .4, emissive: 0x1c1608 });
+      const silver = new THREE.MeshStandardMaterial({ color: 0xd0d3d8, metalness: .5, roughness: .35, emissive: 0x16171a, side: THREE.DoubleSide });
+      const dark = new THREE.MeshStandardMaterial({ color: 0x17181b, metalness: .3, roughness: .6 });
+      const nozMat = new THREE.MeshStandardMaterial({ color: 0x3d4045, metalness: .5, roughness: .5, side: THREE.DoubleSide });
+      const padMat = new THREE.MeshStandardMaterial({ color: 0x2e3034, metalness: .3, roughness: .8 });
+      const white = new THREE.MeshStandardMaterial({ color: 0xf2f2ee, metalness: .2, roughness: .45, emissive: 0x1c1c1a });
+      const black = new THREE.MeshStandardMaterial({ color: 0x0a0a0c, roughness: .3, metalness: .6 });
+      const lsolar = new THREE.MeshStandardMaterial({ map: cellTex(30, 12, '#0b0b0d', '#c4502e', '#1b1b1d'), metalness: .3, roughness: .5 });
+      const panelMat = new THREE.MeshStandardMaterial({ map: cellTex(22, 10), metalness: .3, roughness: .35, emissive: 0x0a1230 });
+
+      // ---- Vikram lander
+      const lander = new THREE.Group(), model = new THREE.Group(); lander.add(model); scene.add(lander);
+      function tag(o, n) { o.traverse(c => { c.userData.part = n; }); return o; }
+      function put(geo, mat, x, y, z, parent) { const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); (parent || model).add(m); return m; }
+      function strut(a, b, r, mat) {
+        const A = V3(a), B = V3(b), d = B.clone().sub(A); const m = new THREE.Mesh(new THREE.CylinderGeometry(r, r, d.length(), 8), mat || brass);
+        m.position.copy(A.clone().add(B).multiplyScalar(.5)); m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.normalize()); m.userData.part = 'legs'; model.add(m);
+      }
+      const B = (w, h, d) => new THREE.BoxGeometry(w, h, d), C = (a, b, h, s) => new THREE.CylinderGeometry(a, b, h, s || 14);
+      // body + white top deck + gold turret + elbow antenna with black dish
+      put(B(1.5, .75, 1.1), gold, 0, 0, 0);
+      put(B(1.62, .05, 1.22), white, 0, .4, 0);
+      put(C(.24, .26, .3, 24), gold, .35, .575, -.25);
+      put(new THREE.SphereGeometry(.24, 24, 10, 0, 6.283, 0, 1.57), gold, .35, .725, -.25).scale.set(1, .7, 1);
+      for (const x of [.25, .33, .41]) put(C(.025, .025, .16, 10), white, x, .9, -.4);
+      tag(put(C(.035, .035, .34, 10), gold, -.55, .59, -.4), 'antenna'); tag(put(new THREE.SphereGeometry(.05, 12, 10), gold, -.55, .77, -.4), 'antenna');
+      tag(put(C(.035, .035, .2, 10), gold, -.45, .77, -.4), 'antenna').rotation.z = Math.PI / 2;
+      {
+        const dg2 = new THREE.Group(); dg2.position.set(-.3, .8, -.4); dg2.rotation.y = .5; model.add(dg2);
+        put(C(.14, .14, .02, 24), black, 0, 0, 0, dg2).rotation.x = Math.PI / 2; put(new THREE.TorusGeometry(.14, .012, 8, 28), white, 0, 0, 0, dg2); tag(dg2, 'antenna');
+      }
+      put(C(.07, .07, .05, 16), gold, .1, .45, .3); put(C(.05, .05, .12, 12), gold, -.2, .48, .1); put(C(.025, .025, .2, 8), gold, -.2, .6, .1);
+
+      // Science payloads on lander top deck (chaste, ilsa, rambha)
+      tag(put(B(.12, .25, .12), gold, -.4, .52, .2), 'chaste');
+      tag(put(B(.15, .08, .15), dark, .4, .45, .2), 'ilsa');
+      tag(put(C(.015, .015, .3, 8), silver, 0, .6, -.2), 'rambha');
+
+      // +z ramp door: hinged at the bottom, folds out into a ramp with a second leaf that unfolds
+      const door = new THREE.Group(); door.position.set(-.15, -.4, .575); model.add(door);
+      put(B(.74, .8, .04), dark, 0, .4, 0, door);
+      for (const x of [-.41, .41]) put(B(.08, .88, .1), dark, x, .44, 0, door);
+      put(new THREE.PlaneGeometry(.3, .2), new THREE.MeshBasicMaterial({ map: flagTex() }), 0, .68, .025, door);
+      put(new THREE.PlaneGeometry(.26, .24), gold, 0, .43, .025, door);
+      put(new THREE.PlaneGeometry(.26, .26), new THREE.MeshBasicMaterial({ map: chkTex(8) }), 0, .17, .025, door);
+      for (const x of [-.41, .41]) for (const y of [.62, .42]) put(new THREE.PlaneGeometry(.05, .07), new THREE.MeshBasicMaterial({ color: 0xc9a227 }), x, y, .052, door);
+      const ext = new THREE.Group(); ext.position.set(0, .8, 0); ext.rotation.x = -Math.PI; door.add(ext);
+      put(B(.74, 1.2, .03), dark, 0, .6, .035, ext);
+      const bay = put(new THREE.PlaneGeometry(.74, .8), new THREE.MeshBasicMaterial({ color: 0x040404 }), -.15, 0, .556); bay.visible = false; tag(door, 'ramp');
+      // -x black solar panel with red cell grid, hinged at the top, leaning out slightly
+      {
+        const pv = new THREE.Group(); pv.position.set(-.76, .34, 0); pv.rotation.z = -.14; model.add(pv);
+        put(B(.03, .84, 1.0), gold, .015, -.42, 0, pv); put(B(.05, .78, .94), lsolar, -.01, -.42, 0, pv); tag(pv, 'solar');
+      }
+      // side details: thrusters
+      for (let i = 0; i < 10; i++) { const s = i < 5 ? 1 : -1, x = -.6 + (i % 5) * .3, m = put(C(.035, .045, .13, 10), dark, x, i % 2 ? .2 : -.15, s * .6); m.rotation.x = Math.PI / 2 * s; }
+      // +x thin black instrument plate with white boom instruments
+      put(B(.03, .72, .95), dark, .8, -.02, 0);
+      for (let i = 0; i < 4; i++) { const y = .22 - i * .17, z = -.3 + (i % 2) * .3; put(C(.015, .015, .28, 8), white, .94, y, z).rotation.z = Math.PI / 2; put(B(.05, .05, .05), white, 1.08, y, z); }
+      // engine bay (ribbed) + 4 bell nozzles with flames
+      tag(put(C(.26, .26, .3, 24), white, 0, -.52, 0), 'engine');
+      for (let i = 0; i < 8; i++)tag(put(C(.27, .27, .018, 24), silver, 0, -.4 - i * .037, 0), 'engine');
+      const bell = new THREE.LatheGeometry([[.05, 0], [.07, -.05], [.09, -.14], [.15, -.27], [.18, -.32]].map(p => new THREE.Vector2(p[0], p[1])), 16);
+      const nozzles = [];
+      for (const sx of [-1, 1]) for (const sz of [-1, 1]) {
+        tag(put(bell, nozMat, sx * .34, -.4, sz * .3), 'engine');
+        const pv = new THREE.Group(); pv.position.set(sx * .34, -.72, sz * .3);
+        const o = new THREE.Mesh(new THREE.ConeGeometry(.17, 1, 14, 1, true), new THREE.MeshBasicMaterial({ color: 0xff7a1f, transparent: true, opacity: .65, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide, fog: false }));
+        const n = new THREE.Mesh(new THREE.ConeGeometry(.09, .7, 12, 1, true), new THREE.MeshBasicMaterial({ color: 0xfff1b8, transparent: true, opacity: .9, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide, fog: false }));
+        o.rotation.x = n.rotation.x = Math.PI; o.position.y = -.5; n.position.y = -.35; pv.add(o, n); model.add(pv); nozzles.push(pv);
+        // legs: main strut, two braces, footpad
+        strut([sx * .65, -.3, sz * .45], [sx * 1.5, -1.4, sz * 1.2], .05, gold);
+        strut([sx * .72, .1, sz * .5], [sx * 1.13, -.82, sz * .9], .028, white);
+        strut([sx * .4, -.42, sz * .3], [sx * 1.26, -1.15, sz * 1.0], .022, white);
+        tag(put(C(.07, .07, .16, 10), gold, sx * 1.5, -1.38, sz * 1.2), 'legs');
+        tag(put(C(.25, .25, .16, 28), padMat, sx * 1.5, -1.44, sz * 1.2), 'legs');
+        tag(put(C(.2, .25, .03, 28), dark, sx * 1.5, -1.35, sz * 1.2), 'legs');
+      }
+      model.traverse(o => { if (o.isMesh && o.material.type === 'MeshStandardMaterial') o.castShadow = true; });
+      const glow = new THREE.PointLight(0xff8a3a, 0, 14); glow.position.set(0, -1.6, 0); model.add(glow);
+      const REST = 1.52, RL = 2.0, AL = Math.asin((REST - .4 + .0082) / RL);
+
+      // ---- Pragyan rover
+      const clip = new THREE.Plane(), rover = new THREE.Group(), wheels = []; renderer.localClippingEnabled = true; rover.rotation.order = 'YZX'; model.add(rover);
+      function setClip(on) { rover.traverse(o => { if (o.isMesh) { o.material.clippingPlanes = on ? [clip] : null; o.material.needsUpdate = true; } }); }
+      if (opt.rover) {
+        const m = (g, mt, x, y, z, p) => { const c = mt.clone(); c.clippingPlanes = [clip]; const o = put(g, c, x, y, z, p || rover); o.castShadow = true; return o; };
+        const UP = new THREE.Vector3(0, 1, 0), WY = .144, black = new THREE.MeshStandardMaterial({ color: 0x0a0a0c, roughness: .3, metalness: .6 });
+        const st = (a, b, r, mt, part) => { const d = V3(b).sub(V3(a)), o = m(C(r, r, d.length(), 8), mt || dark, (a[0] + b[0]) / 2, (a[1] + b[1]) / 2, (a[2] + b[2]) / 2); o.quaternion.setFromUnitVectors(UP, d.normalize()); if (part) o.userData.part = part; return o; };
+
+        // Main rover component 1: chassis (highlighted amber)
+        const chassisGroup = new THREE.Group(); rover.add(chassisGroup);
+        m(B(.7, .16, .36), gold, 0, .34, 0, chassisGroup); m(B(.72, .03, .38), dark, 0, .265, 0, chassisGroup); m(B(.72, .02, .38), silver, 0, .425, 0, chassisGroup);
+        for (const z of [-.19, .19]) m(B(.22, .1, .02), silver, .18, .34, z, chassisGroup);
+        tag(chassisGroup, 'roverBody');
+
+        // Rover Science Instruments: LIBS & APXS
+        const libsObj = m(B(.1, .08, .1), dark, .25, .44, 0, chassisGroup); libsObj.userData.part = 'libs';
+        const apxsObj = m(B(.09, .09, .09), silver, -.25, .44, 0, chassisGroup); apxsObj.userData.part = 'apxs';
+
+        // Front stereo navigation cameras
+        for (const z of [-.09, .09]) { const camHousing = m(B(.05, .045, .05), silver, .36, .465, z); camHousing.userData.part = 'roverCameras'; const lens = m(C(.014, .014, .03, 10), black, .395, .465, z); lens.rotation.z = Math.PI / 2; lens.userData.part = 'roverCameras'; }
+        // Rear instrument arm and communications antenna
+        const antBase = m(C(.03, .03, .07, 12), silver, -.375, .32, .1); antBase.rotation.z = Math.PI / 2; antBase.userData.part = 'roverAntenna'; const antTip = m(C(.02, .02, .02, 10), black, -.42, .32, .1); antTip.rotation.z = Math.PI / 2; antTip.userData.part = 'roverAntenna';
+        st([-.28, .43, .12], [-.28, .58, .12], .01, silver); m(new THREE.SphereGeometry(.05, 12, 6, 0, 6.283, 0, 1.4), silver, -.28, .58, .12).rotation.x = -.7;
+        // framed solar panel with back struts
+        const sp = new THREE.Group(); sp.position.set(0, .43, -.12); sp.rotation.x = -.18; rover.add(sp);
+        m(B(.7, .44, .02), silver, 0, .22, -.008, sp); m(B(.64, .38, .02), panelMat, 0, .22, .008, sp);
+        for (const x of [-.22, .22]) st([x, .43, .1], [x, .55, -.15], .011, silver, 'roverSolar'); tag(sp, 'roverSolar');
+        // rocker-bogie suspension + six spoked, treaded wheels
+        for (const s of [-1, 1]) {
+          const z = s * .21, P = [.02, .31], Q = [-.15, .23];
+          st([P[0], P[1], z], [.3, WY, z], .014, dark, 'roverSuspension'); st([P[0], P[1], z], [Q[0], Q[1], z], .014, dark, 'roverSuspension');
+          st([Q[0], Q[1], z], [0, WY, z], .012, dark, 'roverSuspension'); st([Q[0], Q[1], z], [-.3, WY, z], .012, dark, 'roverSuspension');
+          m(C(.035, .035, .07, 12), silver, P[0], P[1], s * .19).rotation.x = Math.PI / 2;
+          for (const x of [.3, 0, -.3]) {
+            m(C(.016, .016, .08, 8), silver, x, WY, s * .245).rotation.x = Math.PI / 2;
+            const pv = new THREE.Group(); pv.position.set(x, WY, s * .28); rover.add(pv); wheels.push(pv);
+            m(C(.125, .125, .1, 28), silver, 0, 0, 0, pv).rotation.x = Math.PI / 2;
+            for (const zz of [-.052, .052]) {
+              m(C(.1, .1, .006, 24), dark, 0, 0, zz, pv).rotation.x = Math.PI / 2;
+              for (let k = 0; k < 3; k++)m(B(.2, .014, .012), silver, 0, 0, zz * 1.12, pv).rotation.z = k * Math.PI / 3;
+            }
+            m(C(.04, .04, .12, 12), black, 0, 0, 0, pv).rotation.x = Math.PI / 2;
+            for (let i = 0; i < 18; i++) { const a = i / 18 * 6.283; m(B(.022, .05, .108), dark, Math.cos(a) * .13, Math.sin(a) * .13, 0, pv).rotation.z = a; }
+            tag(pv, 'roverWheels');
+          }
+        }
+      }
+
+      // ---- Dust
+      const N = 500, dp = new Float32Array(N * 3).fill(-100), dv = new Float32Array(N * 3), dl = new Float32Array(N);
+      const dg = new THREE.BufferGeometry(); dg.setAttribute('position', new THREE.BufferAttribute(dp, 3));
+      const dust = new THREE.Points(dg, new THREE.PointsMaterial({ color: 0xb5afa4, size: .13, transparent: true, opacity: .55, depthWrite: false })); dust.frustumCulled = false; scene.add(dust);
+      let di = 0;
+      function emit(n, sp) {
+        for (let k = 0; k < n; k++) {
+          const i = di = (di + 1) % N, a = Math.random() * 6.283, s = sp * (.4 + Math.random());
+          dp[i * 3] = Math.cos(a) * .5; dp[i * 3 + 1] = .06; dp[i * 3 + 2] = Math.sin(a) * .5; dv[i * 3] = Math.cos(a) * s; dv[i * 3 + 1] = .2 + Math.random() * sp * .25; dv[i * 3 + 2] = Math.sin(a) * s; dl[i] = 1.5 + Math.random() * 2;
+        }
+      }
+      function stepDust(dt) {
+        for (let i = 0; i < N; i++) {
+          if (dl[i] <= 0) continue; dl[i] -= dt; if (dl[i] <= 0) { dp[i * 3 + 1] = -100; continue; }
+          const f = Math.max(0, 1 - 1.4 * dt); dv[i * 3] *= f; dv[i * 3 + 2] *= f; dv[i * 3 + 1] = Math.max(dv[i * 3 + 1] - 1.6 * dt, -.2);
+          dp[i * 3] += dv[i * 3] * dt; dp[i * 3 + 1] = Math.max(.04, dp[i * 3 + 1] + dv[i * 3 + 1] * dt); dp[i * 3 + 2] += dv[i * 3 + 2] * dt;
+        }
+        dg.attributes.position.needsUpdate = true;
+      }
+
+      // ---- State & interaction
+      const T = 10, H = 16, RA = .9, RC = 1.5, RV = .55, S0 = [-.15, -.4, -.3], HP = [-.15, -.4, .575];
+      let t = 0, landed = false, tl = 0, yaw = 0, el = .22, dist = 12, distB = 12, distT = 12, yawT = null, elT = null, vel = 0, camY = 3, throttle = 1, acc = 0, visible = true, down = false, lx = 0, ly = 0, sx = 0, sy = 0, rdone = false, clipOff = false, hotOn = false, sel = null;
+      const focus = new THREE.Vector3(0, 1.3, 0), focusTarget = focus.clone(); let focusPinned = false;
+      const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      function reset() {
+        t = 0; landed = false; tl = 0; yaw = .9; vel = 0; el = .22; rdone = false; clipOff = false; canvas.style.cursor = ''; setS('Descending…'); dl.fill(0); dp.fill(-100);
+        door.rotation.x = 0; ext.rotation.x = -Math.PI; bay.visible = false;
+        model.add(rover); rover.position.set(S0[0], S0[1], S0[2]); rover.rotation.set(0, -Math.PI / 2, 0); rover.scale.setScalar(.85); rover.visible = opt.rover; setClip(true); wheels.forEach(w => w.rotation.z = 0); resetHot();
+      }
+      const rb = root.querySelector('.vk-r'); if (rb) rb.onclick = reset;
+      canvas.addEventListener('pointerdown', e => { if (!landed || !rdone) return; down = true; lx = sx = e.clientX; ly = sy = e.clientY; vel = 0; yawT = elT = null; canvas.setPointerCapture(e.pointerId); canvas.style.cursor = 'grabbing'; });
+      canvas.addEventListener('pointermove', e => {
+        if (!down) return; const dx = e.clientX - lx, dy = e.clientY - ly; lx = e.clientX; ly = e.clientY;
+        yaw += dx * .01; vel = dx * .01; el = Math.min(1.1, Math.max(.05, el + dy * .005));
+      });
+      const up = () => { down = false; if (rdone) canvas.style.cursor = 'grab'; };
+      canvas.addEventListener('pointerup', up); canvas.addEventListener('pointercancel', up);
+      // ---- Interactive part guide: tap a part to inspect it
+      const PARTS = [
+        { id: 'solar', n: 'Solar panel', tag: 'Power', c: '#38bdf8', y: 1.2, e: .2, d: 'Sunlight is the only energy source on the Moon. This panel turns it into electricity that runs Vikram’s computers, radios and science instruments, and charges its batteries. The lander was built to work for one lunar day, about 14 Earth days.', s: [['Role', 'Power supply'], ['Mission', '1 lunar day']] },
+        { id: 'ramp', n: 'Ramp door', tag: 'Rover deployment', c: '#fb923c', y: .45, e: .2, d: 'This hinged side panel folds down to the surface and becomes a ramp. A few hours after touchdown, the Pragyan rover rolled down it and began exploring the area around the landing site.', s: [['Carried', 'Pragyan rover'], ['Rover wheels', '6']] },
+        { id: 'engine', n: 'Landing engines', tag: 'Powered descent', c: '#f43f5e', y: .7, e: .04, d: 'Four throttleable engines slowed Vikram in the final minutes of descent. By changing their thrust, the lander controlled its speed and steered itself to a soft touchdown near the lunar south pole.', s: [['Engines', '4 × 800 N'], ['Type', 'Throttleable']] },
+        { id: 'legs', n: 'Landing legs', tag: 'Touchdown', c: '#4ade80', y: .9, e: .1, d: 'Four legs with broad footpads absorb the shock of landing and keep the lander steady on uneven ground. They were designed to survive touchdown at about 3 m/s downward and 2 m/s sideways.', s: [['Legs', '4'], ['Vertical speed', '3 m/s']] },
+        { id: 'antenna', n: 'Antenna dish', tag: 'Communication', c: '#c084fc', y: .1, e: .5, d: 'The dish and antennas link Vikram with the Chandrayaan-2 orbiter and with Earth, so commands reach the lander and its measurements come home. Ground stations near Bengaluru received the signals.', s: [['Link', 'Orbiter + Earth'], ['Ground', 'Bengaluru']] },
+        { id: 'chaste', n: 'ChaSTE Probe', tag: 'Thermal Science', c: '#facc15', y: .8, e: .15, d: 'Chandra’s Surface Thermo-Physical Experiment (ChaSTE) measures the thermal conductivity and temperature profile of the lunar topsoil around the south pole, probing up to 10 cm deep.', s: [['Target', 'Soil temperature'], ['Depth', 'Up to 10 cm']] },
+        { id: 'ilsa', n: 'ILSA Seismometer', tag: 'Lunar Quakes', c: '#34d399', y: .6, e: .2, d: 'Instrument for Lunar Seismic Activity (ILSA) listens for moonquakes and impacts, helping scientists understand the structure of the lunar crust and mantle.', s: [['Type', 'MEMS Seismometer'], ['Goal', 'Crust structure']] },
+        { id: 'rambha', n: 'RAMBHA-LP', tag: 'Plasma Physics', c: '#60a5fa', y: .5, e: .25, d: 'Langmuir Probe (RAMBHA-LP) measures the near-surface plasma density and its changes over time in the lunar atmosphere.', s: [['Target', 'Plasma density'], ['Environment', 'Exosphere']] },
+        { id: 'roverBody', n: 'Pragyan chassis', tag: 'Rover platform', c: '#fbbf24', y: 1.0, e: .18, d: 'The chassis is Pragyan’s central frame. It supports the electronics, power system, cameras and science payloads while protecting onboard systems during the rover’s lunar traverse.', s: [['Vehicle', 'Pragyan'], ['Mass', 'About 27 kg']] },
+        { id: 'roverSolar', n: 'Rover solar panel', tag: 'Power', c: '#38bdf8', y: 1.4, e: .2, d: 'The solar panel converts sunlight into electrical power for the rover, supporting its drive motors, computers, cameras and science instruments during the lunar day.', s: [['Energy', 'Sunlight'], ['Use', 'Electrical power']] },
+        { id: 'roverWheels', n: 'Six wheels', tag: 'Mobility', c: '#4ade80', y: .8, e: .18, d: 'Six wheels move Pragyan over loose lunar soil and small rocks. Their treaded surfaces improve grip while the rover drives slowly across uneven ground.', s: [['Wheels', '6'], ['Drive', 'Electric motors']] },
+        { id: 'roverCameras', n: 'Navigation cameras', tag: 'Vision', c: '#fb923c', y: .2, e: .35, d: 'The front stereo cameras provide views of the terrain. Images help operators understand the rover’s surroundings and plan a safe route around rocks and uneven ground.', s: [['Purpose', 'Stereo vision'], ['Use', 'Route planning']] },
+        { id: 'roverSuspension', n: 'Rocker-bogie suspension', tag: 'Terrain handling', c: '#c084fc', y: .65, e: .25, d: 'This linked suspension helps keep the rover stable as its wheels cross uneven ground, allowing the wheels to follow different heights over the lunar surface.', s: [['Design', 'Rocker-bogie'], ['Benefit', 'Stability']] },
+        { id: 'roverAntenna', n: 'Rover antenna', tag: 'Communication', c: '#f472b6', y: .05, e: .45, d: 'The antenna carries commands and telemetry between Pragyan and Vikram. The lander acts as a communication relay, forwarding rover information toward Earth.', s: [['Relay', 'Via Vikram'], ['Data', 'Commands + telemetry']] },
+        { id: 'libs', n: 'LIBS Spectroscope', tag: 'Element Analysis', c: '#fb7185', y: .3, e: .3, d: 'Laser-Induced Breakdown Spectroscope (LIBS) fires high-power laser pulses at lunar rocks and soil to vaporize them, analyzing the emitted light to determine elemental composition.', s: [['Method', 'Laser ablation'], ['Elements', 'Mg, Al, Si, Fe']] },
+        { id: 'apxs', n: 'APXS Spectrometer', tag: 'Mineralogy', c: '#a78bfa', y: .25, e: .32, d: 'Alpha Particle X-Ray Spectrometer (APXS) exposes surface samples to alpha particles and X-rays to identify minor and major rock-forming elements on the Moon.', s: [['Source', 'Cm-244 sources'], ['Science', 'Surface chemistry']] }
+      ];
+      for (const p of PARTS) { p.mat = new THREE.MeshBasicMaterial({ color: p.c, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2, fog: false }); p.hl = []; p.objects = []; p.glowStart = -1e9; p.glowUntil = -1e9; }
+      {
+        const meshes = []; scene.updateMatrixWorld(true); model.traverse(o => { if (o.isMesh) meshes.push(o); });
+        for (const o of meshes) { let a = o, part = null; while (a && a !== scene) { if (a.userData && a.userData.part) { part = PARTS.find(q => q.id === a.userData.part); if (part) break; } a = a.parent; } if (!part) continue; part.objects.push(o); const h = new THREE.Mesh(o.geometry, part.mat); h.scale.setScalar(1.035); h.userData.part = part.id; h.visible = false; o.add(h); part.hl.push(h); }
+      }
+      root.insertAdjacentHTML('beforeend', '<div class="vk-chips" hidden><section class="vk-part-group"><b class="vk-group-title">Vikram Lander & Payloads</b><div class="vk-chip-row vk-lander-chips"></div></section><section class="vk-part-group"><b class="vk-group-title">Pragyan Rover & Payloads</b><div class="vk-chip-row vk-rover-chips"></div></section></div><div class="vk-card" hidden><button type="button" class="vk-x" aria-label="Close">×</button><div class="vk-k"><i></i><span class="vk-tag"></span></div><h2 class="vk-n"></h2><p class="vk-d"></p><div class="vk-st"></div></div>');
+      const chips = root.querySelector('.vk-chips'), card = root.querySelector('.vk-card'), $c = q => card.querySelector(q);
+      const landerChips = root.querySelector('.vk-lander-chips'), roverChips = root.querySelector('.vk-rover-chips');
+      PARTS.forEach(p => {
+        const b = document.createElement('button'); b.type = 'button'; b.className = 'vk-chip'; b.style.setProperty('--c', p.c); b.innerHTML = '<i style="background:' + p.c + ';color:' + p.c + '"></i>' + p.n; b.onclick = () => select(p.id); p.chip = b;
+        const isRoverPart = p.id.startsWith('rover') || p.id === 'libs' || p.id === 'apxs';
+        (isRoverPart ? roverChips : landerChips).appendChild(b);
+      });
+      let tw = 0;
+      function type(el, text) { clearInterval(tw); el.textContent = ''; if (reduce) { el.textContent = text; return; } el.classList.add('typing'); let i = 0; tw = setInterval(() => { i += 2; el.textContent = text.slice(0, i); if (i >= text.length) { clearInterval(tw); el.classList.remove('typing'); } }, 18); }
+      function select(id) {
+        vwOff(1);
+        const p = PARTS.find(q => q.id === id);
+        if (!p || !hotOn) return;
+        sel = id;
+        const now = clock.elapsedTime;
+
+        PARTS.forEach(q => {
+          if (q.id === id) {
+            q.glowStart = now;
+            q.glowUntil = now + 10;
+            q.hl.forEach(h => h.visible = true);
+          } else {
+            q.hl.forEach(h => h.visible = false);
+            q.mat.opacity = 0;
+          }
+        });
+
+        const isRover = p.id.startsWith('rover') || p.id === 'libs' || p.id === 'apxs';
+        focusPinned = true;
+        if (isRover) {
+          const box = new THREE.Box3(); let found = false; scene.updateMatrixWorld(true);
+          for (const q of PARTS.filter(q => q.id.startsWith('rover') || q.id === 'libs' || q.id === 'apxs')) {
+            for (const o of q.objects || []) { if (o.isMesh) { box.expandByObject(o); found = true; } }
+          }
+          if (found && !box.isEmpty()) focusTarget.copy(box.getCenter(new THREE.Vector3()));
+          else focusTarget.set(rover.position.x, rover.position.y + .3, rover.position.z);
+          distT = Math.max(3.4, distB * .42);
+        } else {
+          focusTarget.set(0, 1.15, 0);
+          distT = Math.max(5.5, distB * .72);
+        }
+        yawT = .9 + (isRover ? -.35 : .15);
+        elT = isRover ? .38 : .22;
+        PARTS.forEach(q => q.chip.classList.toggle('on', q === p));
+        card.style.setProperty('--c', p.c);
+        card.hidden = false;
+        card.classList.remove('on');
+        void card.offsetWidth;
+        card.classList.add('on');
+        $c('.vk-tag').textContent = (isRover ? 'PRAGYAN ROVER' : 'VIKRAM LANDER') + ' · ' + p.tag;
+        $c('.vk-n').innerHTML = [...p.n].map((ch, i) => '<span style="--i:' + i + '">' + (ch === ' ' ? '&nbsp;' : ch) + '</span>').join('');
+        $c('.vk-st').innerHTML = p.s.map((s, i) => '<div style="--i:' + i + '"><small>' + s[0] + '</small><b>' + s[1] + '</b></div>').join('');
+        type($c('.vk-d'), p.d);
+      }
+      function closeCard() {
+        sel = null;
+        yawT = null;
+        elT = .22;
+        distT = distB;
+        card.hidden = true;
+        card.classList.remove('on');
+        clearInterval(tw);
+        PARTS.forEach(q => {
+          q.hl.forEach(h => { h.visible = false; });
+          q.mat.opacity = 0;
+          q.chip.classList.remove('on');
+        });
+      }
+
+      const closeBtn = $c('.vk-x');
+      if (closeBtn) {
+        closeBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          closeCard();
+        });
+      }
+
+      let autoSpin = false;
+      const vwBar = document.createElement('div'); vwBar.className = 'vk-views'; vwBar.hidden = true;
+      const VIEWS = [['Front', 0, .22], ['Left', Math.PI / 2, .22], ['Back', Math.PI, .22], ['Right', -Math.PI / 2, .22], ['Top', 0, 1.3]];
+      vwBar.innerHTML = VIEWS.map((v, i) => '<button type="button" data-i="' + i + '">' + v[0] + '</button>').join('') + '<i></i><button type="button" data-z="-1" aria-label="Zoom in">+</button><button type="button" data-z="1" aria-label="Zoom out">&minus;</button><button type="button" data-a="1" aria-pressed="false">Auto-orbit</button>';
+      root.appendChild(vwBar);
+      const vwOff = all => { vwBar.querySelectorAll(all ? '.on' : '[data-i]').forEach(x => x.classList.remove('on')); if (all) { autoSpin = false; vwBar.lastChild.setAttribute('aria-pressed', 'false'); } };
+      canvas.addEventListener('pointerdown', () => vwOff());
+      vwBar.addEventListener('click', e => {
+        const b = e.target.closest('button'); if (!b) return;
+        if (b.dataset.z) { distT = Math.min(distB * 1.8, Math.max(3.5, distT * (b.dataset.z > 0 ? 1.25 : .8))); return; }
+        if (b.dataset.a) { autoSpin = !autoSpin; b.classList.toggle('on', autoSpin); b.setAttribute('aria-pressed', autoSpin); return; }
+        const v = VIEWS[b.dataset.i]; vwOff(1); closeCard(); focusPinned = false; yawT = .9 + v[1]; elT = v[2]; distT = distB; b.classList.add('on');
+      });
+
+      function enableHot() {
+        hotOn = true;
+        vwBar.hidden = false;
+        PARTS.forEach(p => {
+          p.hl.forEach(h => { h.visible = false; });
+          p.mat.opacity = 0;
+        });
+        chips.hidden = false;
+        chips.classList.remove('in');
+        void chips.offsetWidth;
+        chips.classList.add('in');
+        setS('Touchdown complete. Select any part below to inspect it.');
+      }
+      function resetHot() { hotOn = false; vwBar.hidden = true; vwOff(1); focusPinned = false; sel = null; yawT = null; elT = null; distT = distB; focusTarget.set(0, 1.3, 0); clearInterval(tw); PARTS.forEach(p => { p.hl.forEach(h => { h.visible = false; }); p.mat.opacity = 0; p.chip.classList.remove('on'); }); chips.hidden = true; card.hidden = true; card.classList.remove('on'); }
+      const ray = new THREE.Raycaster(), mv = new THREE.Vector2();
+      const shown = o => { for (; o; o = o.parent)if (!o.visible) return false; return true; };
+      function pick(e) {
+        const r = canvas.getBoundingClientRect(); mv.set((e.clientX - r.left) / r.width * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1); ray.setFromCamera(mv, camera);
+        const hits = ray.intersectObjects(scene.children, true); for (const hit of hits) { let o = hit.object, partId = null; while (o) { if (o.userData && o.userData.part) { partId = o.userData.part; break; } o = o.parent; } if (partId && shown(hit.object)) { select(partId); return; } }
+      }
+      canvas.addEventListener('pointerup', e => { if (hotOn && Math.hypot(e.clientX - sx, e.clientY - sy) < 6) pick(e); });
+
+      function resize() { const w = root.clientWidth || 300, h = root.clientHeight || 300; renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); distB = dist = distT = w / h < 1 ? 16 : 12; }
+      new ResizeObserver(resize).observe(root); resize();
+      new IntersectionObserver(e => { visible = e[0].isIntersecting }).observe(root);
+      reset();
+
+      const clock = new THREE.Clock();
+      function frame() {
+        requestAnimationFrame(frame);
+        const dt = Math.min(clock.getDelta(), .05); if (!visible) return;
+        if (!landed) {
+          t += dt * (reduce ? 2 : 1); const p = Math.min(1, t / T), q = (1 - p) * (1 - p), height = H * q;
+          lander.position.set(3.5 * q * (1 - p), REST + height, 0); lander.rotation.z = -.14 * q; model.rotation.y = yaw + 1.6 * q;
+          throttle = .7 + .3 * p;
+          if (height < 6) acc += dt * 140 * (1 - height / 6);
+          const n = Math.floor(acc); if (n > 0) { emit(n, 3 + (1 - height / 6) * 3); acc -= n; }
+          if (p >= 1) {
+            landed = true; tl = 0; emit(160, 6); lander.position.set(0, REST, 0); lander.rotation.z = 0;
+            rdone = !opt.rover; setS(rdone ? 'Touchdown. Drag to rotate the lander.' : 'Touchdown. Opening the ramp…'); canvas.style.cursor = rdone ? 'grab' : ''; if (rdone) enableHot();
+          }
+        } else {
+          tl += dt; throttle = Math.max(0, 1 - tl / .7);
+          if (yawT !== null && !down) { const d = ((yawT - yaw + Math.PI) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI) - Math.PI; yaw += d * Math.min(1, dt * 3); vel = 0; if (Math.abs(d) < .004) yawT = null; }
+          else if (!down) { yaw += vel; vel *= .94; }
+          if (elT !== null && !down) { el += (elT - el) * Math.min(1, dt * 3); if (Math.abs(elT - el) < .003) elT = null; }
+          dist += (distT - dist) * Math.min(1, dt * 3);
+          if (autoSpin && !down && yawT === null) yaw += dt * .5;
+          model.rotation.y = .9;
+          const sm = x => { x = Math.min(1, Math.max(0, x)); return x * x * (3 - 2 * x); };
+          const ob = sm((tl - 1.2) / 2.2);
+          door.rotation.x = (Math.PI / 2 + AL) * ob; ext.rotation.x = -Math.PI * (1 - sm((tl - 2.5) / 1.3)); bay.visible = ob > .05;
+          if (opt.rover && !rdone && tl > 3.8) {
+            const l = Math.min(RA + RL + RC, (tl - 3.8) * RV), ds = Math.sin(AL), dc = Math.cos(AL);
+            if (l < .05) setS('Pragyan rover is rolling down the ramp…');
+            if (l < RA) rover.position.set(S0[0], S0[1], S0[2] + (HP[2] - S0[2]) * l / RA);
+            else if (l < RA + RL) { const s = l - RA; rover.position.set(HP[0], HP[1] - ds * s + .01 * dc, HP[2] + dc * s + .01 * ds); }
+            else rover.position.set(HP[0], -REST, HP[2] + dc * RL + (l - RA - RL));
+            rover.rotation.z = -AL * sm((l - RA + .25) / .5) * (1 - sm((l - RA - RL + .25) / .5));
+            for (const w of wheels) w.rotation.z -= dt * RV / .12;
+            if (l > 1.6 && !clipOff) { clipOff = true; setClip(false); }
+            if (l >= RA + RL + RC) { rdone = true; rover.updateMatrix(); scene.attach(rover); canvas.style.cursor = 'grab'; enableHot(); }
+          }
+        }
+        const fl = throttle * (.9 + Math.random() * .2);
+        for (const n of nozzles) { n.scale.set(.6 + fl * .5, Math.max(.001, 2.4 * fl), .6 + fl * .5); n.visible = fl > .01; }
+        glow.intensity = throttle * 3.5; stepDust(dt);
+
+        if (hotOn) {
+          const now = clock.elapsedTime;
+          for (const p of PARTS) {
+            if (sel === p.id) {
+              p.hl.forEach(h => { h.visible = true; });
+              let a = 0;
+              if (now < p.glowUntil) {
+                const k = .5 + .5 * Math.sin(now * 6.0);
+                a = 0.5 + 0.25 * k;
+              } else {
+                a = 0.45;
+              }
+              p.mat.opacity = a;
+            } else {
+              p.hl.forEach(h => { h.visible = false; });
+              p.mat.opacity = 0;
+            }
+          }
+        }
+
+        const ty = landed ? 1.3 : Math.max(1.5, lander.position.y * .55); camY += (ty - camY) * Math.min(1, dt * 3);
+        if (!focusPinned) { focusTarget.set(0, camY, 0); } focus.lerp(focusTarget, Math.min(1, dt * 3));
+        camera.position.set(focus.x + Math.sin(yaw) * Math.cos(el) * dist, focus.y + Math.sin(el) * dist, focus.z + Math.cos(yaw) * Math.cos(el) * dist); camera.lookAt(focus);
+        model.updateMatrixWorld(true); clip.setFromNormalAndCoplanarPoint(new THREE.Vector3(0, 0, 1).transformDirection(model.matrixWorld), new THREE.Vector3(-.15, 0, .557).applyMatrix4(model.matrixWorld));
+        renderer.render(scene, camera);
+      }
+      frame();
+      return { replay: reset };
+    }
+    VikramLander(document.getElementById('vikram'));
+  </script>
+  <script id="fx-js">
+    (() => {
+      const $$ = (s, r = document) => [...r.querySelectorAll(s)], E = id => document.getElementById(id),
+        root = document.documentElement, RM = matchMedia('(prefers-reduced-motion:reduce)').matches;
+
+      const D = { u: [0, 1, 1, 0], d: [0, -1, 1, 0], l: [-1, 0, 1, 0], r: [1, 0, 1, 0], tl: [-1, -1, 1, -3], tr: [1, -1, 1, 3], bl: [-1, 1, 1, 3], br: [1, 1, 1, -3], z: [0, 0, .8, 0] },
+        ORD = ['l', 'u', 'r', 'bl', 'z', 'br', 'tl', 'd', 'tr'],
+        SEL = $$('.vk').length ? '.vk-t,.vk-ui' : 'h1,h2,h3,h4,p,img,figure,form,table,li,button,.glass-panel,.grid>*',
+        SKIP = '.fixed,.sticky,header,nav,[id*=odal],[class*=odal],[id*=oast],.toast,[hidden],.rv,[class*=reveal-],[class*=animate-],.fx-top,.fx-bar,.fx-3d',
+        all = new Set(); let n = 0;
+      const VX = () => Math.min(innerWidth * .22, 260), VY = () => Math.min(innerHeight * .16, 130),
+        clampX = (el, x) => { const r = el.getBoundingClientRect(); return x < 0 ? Math.min(0, Math.max(x, 24 - r.right)) : x > 0 ? Math.max(0, Math.min(x, innerWidth - 24 - r.left)) : 0 },
+        clampY = (el, y) => { const r = el.getBoundingClientRect(); if (r.bottom < 0 || r.top > innerHeight) return y; return y < 0 ? Math.min(0, Math.max(y, 24 - r.bottom)) : y > 0 ? Math.max(0, Math.min(y, innerHeight - 24 - r.top)) : 0 },
+        pick = el => {
+          const r = el.getBoundingClientRect(), k = n++, cx = (r.left + r.width / 2) / Math.max(1, innerWidth);
+          if (r.width > innerWidth * .7 || (cx > .34 && cx < .66)) return ['u', 'd', 'z', 'bl', 'tr', 'br', 'tl'][k % 7];
+          return cx <= .34 ? ['l', 'tl', 'l', 'bl'][k % 4] : ['r', 'tr', 'r', 'br'][k % 4]
+        };
+      const run = (el, st, d, t) => {
+        el.style.setProperty('--fx-d', d + 's'); el.style.setProperty('--fx-t', t + 's');
+        el.classList.add('fx-run'); el.classList.toggle('fx-in', st == 'in'); el.classList.toggle('fx-fade', st == 'fade');
+        clearTimeout(el._f); el._f = setTimeout(() => el.classList.remove('fx-run'), (d + t) * 1e3 + 150);
+      };
+      const show = (el, i) => el.classList.contains('fx-in') || run(el, 'in', Math.min(i, 7) * .09 + (el.dataset.fx == 'n' ? .15 : 0), .85);
+      const byPos = (a, b) => a.boundingClientRect.top - b.boundingClientRect.top || a.boundingClientRect.left - b.boundingClientRect.left;
+      const ioIn = new IntersectionObserver(es => { let i = 0; es.filter(e => e.isIntersecting).sort(byPos).forEach(e => show(e.target, i++)) }, { rootMargin: '0px 0px ' + Math.round(VY() - innerHeight * .09) + 'px 0px' }),
+        ioOut = new IntersectionObserver(es => es.forEach(e => { if (!e.isIntersecting && e.target.classList.contains('fx-in')) run(e.target, 'fade', 0, .4) })),
+        ioFar = new IntersectionObserver(es => es.forEach(e => { if (!e.isIntersecting) { const el = e.target; clearTimeout(el._f); el.classList.remove('fx-run', 'fx-in', 'fx-fade') } }), { rootMargin: '160px 0px' });
+
+      const prep = (r = document) => {
+        if (RM) return;
+        const f = innerWidth < 640 ? .5 : 1;
+        [...(r.matches && r.matches(SEL) ? [r] : []), ...$$(SEL, r)].forEach(el => {
+          if (el.hasAttribute('data-fx') || el.closest(SKIP)) return;
+          const par = el.parentElement, nest = par && par.closest('[data-fx]');
+          let d;
+          if (nest || el.tagName == 'P') d = 'u';
+          else {
+            const sib = [...par.children].filter(c => c.matches(SEL)), i = sib.indexOf(el);
+            d = sib.length > 2 ? ORD[i % 9] : pick(el)
+          }
+          const [x, y, s, rt] = D[d], g = nest ? .4 : f;
+          el.style.setProperty('--fx-x', Math.round(nest ? x * VX() * g : clampX(el, x * VX() * g)) + 'px'); el.style.setProperty('--fx-y', Math.round(nest ? y * VY() * g : clampY(el, y * VY() * g)) + 'px'); el.style.setProperty('--fx-s', nest ? .96 : s); el.style.setProperty('--fx-r', (nest ? 0 : rt) + 'deg');
+          el.setAttribute('data-fx', nest ? 'n' : '');
+          all.add(el); ioIn.observe(el); ioOut.observe(el); ioFar.observe(el);
+        });
+      };
+      const settle = () => { let i = 0; all.forEach(el => { const r = el.getBoundingClientRect(); if (r.height && r.bottom > 0 && r.top < innerHeight) show(el, i++) }) };
+
+      const own = !E('bar'), bar = own ? Object.assign(document.createElement('div'), { className: 'fx-bar' }) : null, top = document.createElement('button');
+      top.className = 'fx-top'; top.type = 'button'; top.setAttribute('aria-label', 'Back to top');
+      top.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>';
+      top.onclick = () => scrollTo({ top: 0, behavior: 'smooth' });
+      document.body.append(...[bar, top].filter(Boolean));
+      let tick = 0;
+      const onScroll = () => {
+        if (tick) return; tick = requestAnimationFrame(() => {
+          tick = 0;
+          const max = Math.max(1, root.scrollHeight - innerHeight);
+          if (own) bar.style.transform = `scaleX(${Math.min(1, scrollY / max)})`;
+          top.classList.toggle('on', scrollY > innerHeight * .6);
+          if (max - scrollY < 8) settle();
+        })
+      };
+      addEventListener('scroll', onScroll, { passive: true }); addEventListener('resize', onScroll);
+
+      const sw = window.switchTab; let tk = 0;
+      if (typeof sw == 'function') window.switchTab = function (id) {
+        const a = arguments, my = ++tk, nx = E('section-' + id),
+          cur = $$('.tab-section').find(s => !s.classList.contains('hidden') && !s.classList.contains('fx-tab-out')); $$('.fx-tab-out,.fx-tab-in').forEach(s => s.classList.remove('fx-tab-out', 'fx-tab-in')); if (RM || !cur || !nx || cur === nx) return sw.apply(this, a); cur.classList.add('fx-tab-out'); setTimeout(() => { if (my != tk) return; cur.classList.remove('fx-tab-out'); sw.apply(this, a); nx.classList.add('fx-tab-in'); setTimeout(() => nx.classList.remove('fx-tab-in'), 850) }, 260);
+      };
+
+      new MutationObserver(ms => ms.forEach(m => m.addedNodes.forEach(x => x.nodeType == 1 && prep(x)))).observe(document.body, { childList: true, subtree: true });
+      prep(); onScroll();
+      requestAnimationFrame(() => requestAnimationFrame(() => root.classList.remove('fx-wait')));
+    })();
+  </script>
+  <script src="script3.js" defer></script>
+</body>
+
+</html>
