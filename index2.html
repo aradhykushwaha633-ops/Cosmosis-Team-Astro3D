@@ -1,0 +1,1339 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COSMOSIS - Explore the Infinite Universe</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        orbitron: ['Orbitron', 'sans-serif'],
+                    },
+                    colors: {
+                        space: {
+                            900: '#030712',
+                            950: '#000000',
+                        },
+                        twilight: {
+                            50: '#f8fafc',
+                            100: '#f1f5f9',
+                            800: '#1e293b',
+                            900: '#0f172a'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- BoxIcons & Google Fonts -->
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Orbitron:wght@400;600;800;900&display=swap"
+        rel="stylesheet">
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(139, 92, 246, 0.4);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(139, 92, 246, 0.7);
+        }
+
+        .glass-panel {
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            transition: background-color 0.4s ease, border-color 0.4s ease, color 0.4s ease, transform 0.4s ease, box-shadow 0.4s ease;
+        }
+
+        .dark .glass-panel {
+            background: rgba(15, 23, 42, 0.75);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #f8fafc;
+        }
+
+        .light .glass-panel {
+            background: rgba(255, 255, 255, 0.92);
+            border: 1px solid rgba(99, 102, 241, 0.18);
+            box-shadow: 0 12px 35px -5px rgba(99, 102, 241, 0.12);
+            color: #0f172a;
+        }
+
+        @keyframes pulseGlow {
+
+            0%,
+            100% {
+                opacity: 0.4;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.8;
+                transform: scale(1.06);
+            }
+        }
+
+        .animate-pulse-glow {
+            animation: pulseGlow 7s ease-in-out infinite;
+        }
+
+        @keyframes floatSlow {
+
+            0%,
+            100% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .animate-float {
+            animation: floatSlow 5s ease-in-out infinite;
+        }
+
+        /* Multi-Directional Scroll Animations */
+        .reveal-left {
+            opacity: 0;
+            transform: translateX(-90px);
+            transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .reveal-right {
+            opacity: 0;
+            transform: translateX(90px);
+            transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .reveal-top {
+            opacity: 0;
+            transform: translateY(-80px);
+            transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .reveal-bottom {
+            opacity: 0;
+            transform: translateY(80px);
+            transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .reveal-scale {
+            opacity: 0;
+            transform: scale(0.85);
+            transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .reveal-left.active,
+        .reveal-right.active,
+        .reveal-top.active,
+        .reveal-bottom.active,
+        .reveal-scale.active {
+            opacity: 1;
+            transform: translate(0) scale(1);
+        }
+
+        body {
+            min-height: 650vh;
+        }
+
+        .section-slide {
+            height: 100vh;
+            background-color: transparent;
+            border-bottom: 1px solid rgba(77, 77, 78, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding: 2rem;
+        }
+    </style>
+
+    <style>
+        /* ===== Upgrades: layout, reveal, nav, toast ===== */
+        .section-slide {
+            height: auto;
+            min-height: 100vh;
+            padding: 6.5rem 1.5rem 3rem;
+        }
+
+        :focus-visible {
+            outline: 2px solid #a78bfa;
+            outline-offset: 3px;
+        }
+
+        /* Reveal: direction comes from --x/--y (set per element by JS) */
+        @keyframes rvIn {
+            from {
+                opacity: 0;
+                transform: translate3d(var(--x, 0), var(--y, 40px), 0) scale(.96);
+            }
+        }
+
+        .rv:not(.in) {
+            opacity: 0;
+        }
+
+        .rv.in {
+            animation: rvIn .9s cubic-bezier(.16, 1, .3, 1) var(--d, 0s) backwards;
+        }
+
+        /* Card hover: gentle scale + glow in each mission's accent colour */
+        #MOM {
+            --g: #f8717199;
+        }
+
+        #AdityaL1 {
+            --g: #fbbf2499;
+        }
+
+        #Gaganyaan {
+            --g: #818cf899;
+        }
+
+        .glass-panel.group {
+            transition: opacity .8s cubic-bezier(.16, 1, .3, 1), transform .8s cubic-bezier(.16, 1, .3, 1), scale .4s, box-shadow .4s, border-color .4s;
+        }
+
+        .glass-panel.group:hover {
+            scale: 1.02;
+            box-shadow: 0 0 40px -6px var(--g, #8b5cf699);
+        }
+
+        /* Micro-interactions */
+        button,
+        a {
+            transition: scale .3s, box-shadow .3s, background-color .3s, border-color .3s, color .3s;
+        }
+
+        button:hover {
+            scale: 1.06;
+            box-shadow: 0 0 18px rgba(167, 139, 250, .5);
+        }
+
+        button:active {
+            scale: .95;
+        }
+
+        .nav-a {
+            padding: .4rem .8rem;
+            border-radius: 9999px;
+            font: 700 10px Orbitron, sans-serif;
+            letter-spacing: .08em;
+            color: #cbd5e1;
+        }
+
+        .nav-a:hover {
+            color: #fff;
+            background: rgba(139, 92, 246, .28);
+            scale: 1.07;
+            box-shadow: 0 0 16px rgba(139, 92, 246, .5);
+        }
+
+        .nav-a.on {
+            color: #fff;
+            background: rgba(139, 92, 246, .5);
+        }
+
+        /* ===== Dot nav: always visible, glass rail, labels on hover (dock + drawer now live on the LEFT) ===== */
+        .dotnav {
+            padding: .75rem .5rem;
+            border-radius: 9999px;
+            background: rgba(15, 10, 40, .72);
+            border: 1px solid rgba(167, 139, 250, .45);
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 24px rgba(124, 58, 237, .35);
+            animation: dotIn 1s cubic-bezier(.16, 1, .3, 1) 1.2s backwards;
+        }
+
+        @keyframes dotIn {
+            from {
+                opacity: 0;
+                transform: translate(34px, -50%);
+            }
+        }
+
+        .dotnav a {
+            position: relative;
+            display: block;
+            background: rgba(167, 139, 250, .6);
+        }
+
+        .dotnav a::after {
+            content: attr(title);
+            position: absolute;
+            right: calc(100% + 16px);
+            top: 50%;
+            translate: 10px -50%;
+            opacity: 0;
+            pointer-events: none;
+            white-space: nowrap;
+            padding: .3rem .7rem;
+            border-radius: 9999px;
+            font: 700 10px Orbitron, sans-serif;
+            letter-spacing: .06em;
+            color: #fff;
+            background: rgba(124, 58, 237, .95);
+            box-shadow: 0 0 14px rgba(124, 58, 237, .6);
+            transition: opacity .3s, translate .4s cubic-bezier(.16, 1, .3, 1);
+        }
+
+        .dotnav a:hover::after,
+        .dotnav a:focus-visible::after {
+            opacity: 1;
+            translate: 0 -50%;
+        }
+
+        @media (max-width: 767px) {
+            .dotnav a::after {
+                display: none;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .dotnav {
+                animation: none;
+            }
+        }
+
+        a[title].on {
+            background: #a78bfa;
+            scale: 1.6;
+            box-shadow: 0 0 12px #a78bfa;
+        }
+
+        /* Toasts + modal entrance */
+        #toasts {
+            position: fixed;
+            right: 1rem;
+            bottom: 1rem;
+            z-index: 60;
+            display: flex;
+            flex-direction: column;
+            gap: .5rem;
+            pointer-events: none;
+        }
+
+        .toast {
+            transition: opacity .4s, transform .4s;
+            animation: tIn .5s cubic-bezier(.16, 1, .3, 1) backwards;
+        }
+
+        .toast.out {
+            opacity: 0;
+            transform: translateX(40px);
+        }
+
+        @keyframes tIn {
+            from {
+                opacity: 0;
+                transform: translateX(40px) scale(.95);
+            }
+        }
+
+        @media (prefers-reduced-motion:reduce) {
+            .rv:not(.in) {
+                opacity: 1;
+            }
+
+            .rv.in {
+                animation: none;
+            }
+        }
+
+        /* Section footer button -> main page (stacks under each mission's content) */
+        #Chandrayaan,
+        #MOM,
+        #AdityaL1,
+        #Gaganyaan {
+            flex-direction: column;
+            gap: 2.5rem;
+        }
+
+        #Chandrayaan {
+            --a: #a78bfa;
+        }
+
+        #MOM {
+            --a: #f87171;
+        }
+
+        #AdityaL1 {
+            --a: #fbbf24;
+        }
+
+        #Gaganyaan {
+            --a: #818cf8;
+        }
+
+        .sec-cta {
+            z-index: 10;
+        }
+
+        .sec-cta a {
+            display: inline-flex;
+            align-items: center;
+            gap: .6rem;
+            padding: 1rem 2rem;
+            border-radius: .75rem;
+            font: 600 .8rem Orbitron, sans-serif;
+            letter-spacing: .06em;
+            color: #e2e8f0;
+            background: rgba(15, 23, 42, .75);
+            -webkit-backdrop-filter: blur(16px);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--g, #a78bfa99);
+            transition: scale .3s, box-shadow .3s, border-color .3s, color .3s;
+        }
+
+        .sec-cta a:hover {
+            scale: 1.05;
+            color: #fff;
+            border-color: var(--a);
+            box-shadow: 0 0 28px -4px var(--a);
+        }
+
+        .sec-cta i {
+            font-size: 1.1rem;
+            transition: translate .3s;
+        }
+
+        .sec-cta a:hover i {
+            translate: -4px 0;
+        }
+    </style>
+    <style id="fx-css">
+        :root {
+            --fx-e: cubic-bezier(.16, 1, .3, 1);
+        }
+
+        html {
+            overflow-x: clip;
+            scroll-padding-top: 5rem;
+            -webkit-text-size-adjust: 100%;
+        }
+
+        body {
+            min-height: 100vh !important;
+        }
+
+        .fx-wait body {
+            opacity: 0;
+        }
+
+        html:not(.fx-wait) body {
+            animation: fxFade .6s ease backwards;
+        }
+
+        @keyframes fxFade {
+            from {
+                opacity: 0;
+            }
+        }
+
+        body [data-fx]:not(.fx-in) {
+            opacity: 0;
+            translate: var(--fx-x, 0) var(--fx-y, 0);
+            scale: var(--fx-s, 1);
+            rotate: var(--fx-r, 0deg);
+        }
+
+        body [data-fx].fx-fade:not(.fx-in) {
+            translate: 0 0;
+            scale: 1;
+            rotate: 0deg
+        }
+
+        body [data-fx].fx-run {
+            transition: opacity var(--fx-t, .8s) var(--fx-e), translate var(--fx-t, .8s) var(--fx-e), scale var(--fx-t, .8s) var(--fx-e), rotate var(--fx-t, .8s) var(--fx-e);
+            transition-delay: var(--fx-d, 0s);
+            will-change: opacity, translate, scale, rotate;
+        }
+
+        button:active {
+            scale: .97;
+        }
+
+        .fx-bar {
+            position: fixed;
+            inset: 0 0 auto 0;
+            height: 3px;
+            z-index: 60;
+            transform-origin: 0 50%;
+            transform: scaleX(0);
+            background: linear-gradient(90deg, #8b5cf6, #38bdf8, #f472b6);
+            pointer-events: none;
+        }
+
+        .fx-top {
+            position: fixed;
+            left: max(1rem, env(safe-area-inset-left));
+            bottom: max(1rem, env(safe-area-inset-bottom));
+            z-index: 60;
+            width: 2.75rem;
+            height: 2.75rem;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            cursor: pointer;
+            border: 1px solid rgba(167, 139, 250, .5);
+            background: rgba(15, 23, 42, .82);
+            color: #ddd6fe;
+            backdrop-filter: blur(8px);
+            opacity: 0;
+            translate: 0 16px;
+            scale: .8;
+            pointer-events: none;
+            transition: opacity .4s, translate .5s var(--fx-e), scale .5s var(--fx-e), background-color .3s;
+        }
+
+        .fx-top.on {
+            opacity: 1;
+            translate: 0 0;
+            scale: 1;
+            pointer-events: auto;
+        }
+
+        .fx-top:hover {
+            background: rgba(124, 58, 237, .92);
+        }
+
+        .fx-tab-out {
+            animation: fxTabOut .26s ease-in both;
+        }
+
+        .fx-tab-in {
+            animation: fxTabIn .8s var(--fx-e) both;
+        }
+
+        @keyframes fxTabOut {
+            to {
+                opacity: 0;
+                transform: perspective(1200px) rotateX(9deg) translateY(-24px) scale(.97);
+            }
+        }
+
+        @keyframes fxTabIn {
+            from {
+                opacity: 0;
+                transform: perspective(1200px) rotateX(-14deg) translateY(36px) scale(.96);
+            }
+        }
+
+        .fx-3d {
+            position: fixed;
+            inset: 0;
+            z-index: 80;
+            display: grid;
+            place-items: center;
+            padding: max(.75rem, env(safe-area-inset-top)) max(.75rem, env(safe-area-inset-right)) max(.75rem, env(safe-area-inset-bottom)) max(.75rem, env(safe-area-inset-left));
+            background: rgba(2, 3, 8, .82);
+            backdrop-filter: blur(6px);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity .35s, visibility 0s .35s;
+            perspective: 1400px;
+        }
+
+        .fx-3d.on {
+            opacity: 1;
+            visibility: visible;
+            transition: opacity .35s;
+        }
+
+        .fx-3d>div {
+            position: relative;
+            width: min(1100px, 100%);
+            height: min(760px, 100%);
+            border-radius: 18px;
+            overflow: hidden;
+            border: 1px solid rgba(167, 139, 250, .35);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, .6);
+            transform: rotateX(14deg) translateY(40px) scale(.92);
+            opacity: 0;
+            transition: transform .7s var(--fx-e), opacity .5s;
+        }
+
+        .fx-3d.on>div {
+            transform: none;
+            opacity: 1;
+        }
+
+        .fx-3d iframe {
+            display: block;
+            width: 100%;
+            height: 100%;
+            border: 0;
+            background: #000;
+        }
+
+        .fx-3d .fx-x {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 2;
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, .3);
+            background: rgba(5, 6, 10, .7);
+            color: #fff;
+            font-size: 1.3rem;
+            line-height: 1;
+            cursor: pointer;
+        }
+
+        @media(max-width:640px) {
+
+            input,
+            select,
+            textarea {
+                font-size: 16px !important;
+            }
+
+            [class*="h-[260px]"] {
+                height: auto !important;
+                min-height: 260px;
+            }
+
+            h1,
+            h2 {
+                overflow-wrap: anywhere;
+            }
+        }
+
+        @media(prefers-reduced-motion:reduce) {
+            body [data-fx] {
+                opacity: 1 !important;
+                translate: none !important;
+                scale: none !important;
+                transition: none !important;
+            }
+
+            html:not(.fx-wait) body {
+                animation: none;
+            }
+
+            .fx-tab-in,
+            .fx-tab-out {
+                animation: none;
+            }
+
+            .fx-3d>div {
+                transform: none;
+            }
+
+            .fx-top,
+            .fx-bar {
+                transition: none;
+            }
+        }
+    </style>
+    <script>if (!matchMedia("(prefers-reduced-motion:reduce)").matches) { document.documentElement.classList.add("fx-wait"); setTimeout(function () { document.documentElement.classList.remove("fx-wait") }, 2500) }</script>
+    <script src="script2.js"></script>
+    <script src="script3.js" defer></script>
+    <script src="https://cdn.botpress.cloud/webchat/v5.0/inject.js"></script>
+    <script src="https://files.bpcontent.cloud/2026/10/29/09/20261029093700-0PX2QJP3.js" defer></script>
+</head>
+
+<body class="bg-black text-slate-100 font-sans min-h-screen relative overflow-x-hidden transition-colors duration-500">
+
+    <!-- Starry & Particle Canvas Background -->
+    <canvas id="starCanvas" class="fixed inset-0 pointer-events-none z-0"></canvas>
+
+    <!-- Top Live Telemetry Header Bar -->
+    <header class="fixed top-0 left-0 right-0 z-40 px-6 py-4 flex justify-between items-center pointer-events-none">
+        <div
+            class="glass-panel px-4 py-2 rounded-full pointer-events-auto flex items-center gap-3 border border-purple-500/30 shadow-lg reveal-top">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+            <span class="text-xs font-orbitron tracking-widest text-purple-300">LIVE TELEMETRY: ACTIVE</span>
+        </div>
+        <div class="hidden sm:flex items-center gap-2 pointer-events-auto">
+            <div class="glass-panel px-3 py-1.5 rounded-xl text-[11px] font-orbitron text-slate-300 reveal-top">
+                COSMOSIS ENGINE: <span class="text-purple-400">ONLINE</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sticky nav + scroll progress -->
+    <div id="bar"
+        style="position:fixed;top:0;left:0;width:100%;height:2px;z-index:60;transform-origin:0 50%;transform:scaleX(0);background:linear-gradient(90deg,#8b5cf6,#38bdf8,#f472b6)">
+    </div>
+    <nav
+        class="fixed inset-x-0 mx-auto w-max max-w-[96vw] top-[3.6rem] lg:top-3 z-40 glass-panel rounded-full px-1.5 py-1 flex gap-0.5 border border-purple-500/30 shadow-lg reveal-top">
+        <a class="nav-a" href="#Introduction">Home</a><a class="nav-a" href="#Chandrayaan">Lunar</a><a class="nav-a"
+            href="#MOM">Mars</a><a class="nav-a" href="#AdityaL1">Sun</a><a class="nav-a" href="#Gaganyaan">Crew</a>
+    </nav>
+    <!-- Fixed Slide Pagination Dots on Right -->
+   
+
+    <!-- SECTION 1: Introduction -->
+    <section class="section-slide" id="Introduction">
+        <div class="max-w-5xl mx-auto text-center z-10 px-4 reveal-scale animate-float">
+            <div
+                class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-panel mb-6 border border-purple-500/30 text-purple-400 text-xs font-orbitron tracking-widest uppercase shadow-lg shadow-purple-500/10">
+                <i class='bx bxs-rocket text-sm'></i> Welcome to Cosmosis Odyssey
+            </div>
+            <h1
+                class="text-4xl md:text-7xl font-extrabold font-orbitron tracking-tight mb-6 bg-gradient-to-r from-white via-purple-200 to-purple-500 bg-clip-text text-transparent">
+                EXPLORE THE INFINITE UNIVERSE
+            </h1>
+            <p class="text-base md:text-xl text-slate-300 max-w-2xl mx-auto mb-10 leading-relaxed font-light">
+                Embark on an immersive voyage through distant galaxies, active stellar nurseries, and groundbreaking
+                cosmic anomalies curated for modern stargazers.
+            </p>
+            <div class="flex flex-wrap justify-center gap-4">
+                <a href="#Chandrayaan"
+                    class="px-8 py-4 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-semibold font-orbitron text-sm tracking-wider shadow-lg shadow-purple-600/40 hover:shadow-purple-600/70 hover:scale-105 transition-all duration-300">
+                    Start Exploring
+                </a>
+                <a href="index.html"
+                    class="px-8 py-4 rounded-xl glass-panel text-slate-200 font-semibold font-orbitron text-sm tracking-wider hover:border-purple-500/60 hover:scale-105 transition-all duration-300">
+                    Back To Main Page
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 2: Chandrayaan -->
+    <section class="section-slide" id="Chandrayaan">
+        <div class="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-8 items-center z-10">
+            <div class="lg:col-span-4 space-y-6 text-left reveal-left">
+                <div
+                    class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg glass-panel text-purple-400 text-xs font-orbitron tracking-wider">
+                    <i class='bx bx-moon'></i> Lunar Exploration Program
+                </div>
+                <h2 class="text-3xl md:text-4xl font-extrabold font-orbitron tracking-wide text-white">
+                    Chandrayaan 3 Program
+                </h2>
+                <p class="text-slate-300 text-sm md:text-base leading-relaxed">
+                    India's landmark lunar series featuring comprehensive architecture: heavy launch vehicles, surface
+                    landers, polar orbiters, and robotic rovers.
+                </p>
+                <div class="flex gap-4 pt-2">
+                    <div class="glass-panel px-4 py-3 rounded-xl border border-purple-500/20">
+                        <span class="block text-xl font-bold font-orbitron text-purple-400">2-in-1</span>
+                        <span class="text-xs text-slate-400">Core Modules</span>
+                    </div>
+                    <div class="glass-panel px-4 py-3 rounded-xl border border-purple-500/20">
+                        <span class="block text-xl font-bold font-orbitron text-purple-400">South Pole</span>
+                        <span class="text-xs text-slate-400">Target Zone</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Video Boxes Grid -->
+            <div class="lg:col-span-8 grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <!-- Box 1: Vikram Landing Video -->
+                <div
+                    class="glass-panel rounded-2xl flex flex-col justify-between p-4 relative overflow-hidden border border-purple-500/30 group hover:border-purple-500/80 transition-all duration-500 shadow-xl reveal-top">
+                    <div class="w-full flex justify-between items-center z-10 mb-3">
+                        <span
+                            class="px-2.5 py-1 rounded bg-purple-900/40 border border-purple-500/30 text-[9px] font-orbitron text-purple-300">VIKRAM
+                            LANDING</span>
+                        <i class='bx bxs-rocket text-purple-400 text-lg'></i>
+                    </div>
+
+                    <!-- Video Container -->
+                    <div class="w-full aspect-video rounded-xl overflow-hidden bg-black/50 border border-purple-500/20">
+                        <video class="w-full h-full object-cover cursor-pointer" loop playsinline
+                            onmouseenter="this.play()" onmouseleave="this.pause()"
+                            onclick="this.paused ? this.play() : this.pause()">
+                            <source src="vd1.mp4" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                    </div>
+
+                    <!-- Bottom Status Bar -->
+                    <div
+                        class="w-full flex justify-between items-center text-[10px] text-purple-200 font-mono z-10 bg-black/50 px-3 py-1.5 rounded-lg border-t border-purple-500/30 mt-3">
+                        <span>STATUS: TOUCHDOWN</span>
+                        <span>CH-3-LANDING</span>
+                    </div>
+                </div>
+
+                <!-- Box 2: Pragyan Rover Deployment Video -->
+                <div
+                    class="glass-panel rounded-2xl flex flex-col justify-between p-4 relative overflow-hidden border border-purple-500/30 group hover:border-purple-500/80 transition-all duration-500 shadow-xl reveal-right">
+                    <div class="w-full flex justify-between items-center z-10 mb-3">
+                        <span
+                            class="px-2.5 py-1 rounded bg-purple-900/40 border border-purple-500/30 text-[9px] font-orbitron text-purple-300">ROVER
+                            DEPLOYMENT</span>
+                        <i class='bx bx-moon text-indigo-400 text-lg'></i>
+                    </div>
+
+                    <!-- Video Container -->
+                    <div class="w-full aspect-video rounded-xl overflow-hidden bg-black/50 border border-purple-500/20">
+                        <video class="w-full h-full object-cover cursor-pointer" loop playsinline
+                            onmouseenter="this.play()" onmouseleave="this.pause()"
+                            onclick="this.paused ? this.play() : this.pause()">
+                            <source src="vd2.mp4" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                    </div>
+
+                    <!-- Bottom Status Bar -->
+                    <div
+                        class="w-full flex justify-between items-center text-[10px] text-indigo-200 font-mono z-10 bg-black/50 px-3 py-1.5 rounded-lg border-t border-purple-500/30 mt-3">
+                        <span>TRAVERSE MODE</span>
+                        <span>CH-3-ROVER</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="sec-cta">
+            <a href="index3.html"><i class='bx bx-arrow-back'></i>View Live Landing and Study Parts </a>
+        </div>
+
+    </section>
+
+    <!-- SECTION 3: Mars Orbiter Mission (MOM) -->
+    <section class="section-slide" id="MOM">
+        <div class="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-8 items-center z-10">
+            <div class="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-6 order-2 lg:order-1 reveal-left">
+                <!-- Box 1: PSLV Launcher -->
+                <div
+                    class="glass-panel rounded-2xl flex flex-col justify-between p-4 relative overflow-hidden border border-red-500/30 group hover:border-red-500/80 transition-all duration-500 shadow-xl">
+                    <div class="w-full flex justify-between items-center z-10 mb-3">
+                        <span
+                            class="px-2.5 py-1 rounded bg-red-900/40 border border-red-500/30 text-[9px] font-orbitron text-red-300">Successfully
+                            reached Mars orbit</span>
+                        <i class='bx bx-paper-plane text-red-400 text-lg'></i>
+                    </div>
+
+                    <!-- Video Container -->
+                    <div class="w-full aspect-video rounded-xl overflow-hidden bg-black/50 border border-red-500/20">
+                        <video class="w-full h-full object-cover cursor-pointer" loop playsinline
+                            onmouseenter="this.play()" onmouseleave="this.pause()"
+                            onclick="this.paused ? this.play() : this.pause()">
+                            <source src="vd3.mp4" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                    </div>
+
+                    <!-- Bottom Status Bar -->
+                    <div
+                        class="w-full flex justify-between items-center text-[10px] text-red-200 font-mono z-10 bg-black/50 px-3 py-1.5 rounded-lg border-t border-red-500/30 mt-3">
+                        <span>STATUS: ORBIT INSERTION</span>
+                        <span>MOM-RK-01</span>
+                    </div>
+                </div>
+
+                <!-- Box 2: Mangalyaan Orbiter -->
+                <div
+                    class="glass-panel rounded-2xl flex flex-col justify-between p-4 relative overflow-hidden border border-red-500/30 group hover:border-red-500/80 transition-all duration-500 shadow-xl">
+                    <div class="w-full flex justify-between items-center z-10 mb-3">
+                        <span
+                            class="px-2.5 py-1 rounded bg-red-900/40 border border-red-500/30 text-[9px] font-orbitron text-red-300">1<sup>st</sup>
+                            Image of the Mars</span>
+                        <i class='bx bxs-planet text-orange-400 text-lg'></i>
+                    </div>
+
+                    <!-- Video Container -->
+                    <div class="w-full aspect-video rounded-xl overflow-hidden bg-black/50 border border-red-500/20">
+                        <video class="w-full h-full object-cover cursor-pointer" loop playsinline
+                            onmouseenter="this.play()" onmouseleave="this.pause()"
+                            onclick="this.paused ? this.play() : this.pause()">
+                            <source src="vd4.mp4" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                    </div>
+
+                    <!-- Bottom Status Bar -->
+                    <div
+                        class="w-full flex justify-between items-center text-[10px] text-orange-200 font-mono z-10 bg-black/50 px-3 py-1.5 rounded-lg border-t border-red-500/30 mt-3">
+                        <span>MARTIAN TELEMETRY</span>
+                        <span>MOM-OR-02</span>
+                    </div>
+                </div>
+            </div>
+            <div class="lg:col-span-5 space-y-6 text-left order-1 lg:order-2 reveal-right">
+                <div
+                    class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg glass-panel text-red-400 text-xs font-orbitron tracking-wider">
+                    <i class='bx bxs-planet'></i> Interplanetary Mission
+                </div>
+                <h2 class="text-3xl md:text-4xl font-extrabold font-orbitron tracking-wide text-white">
+                    Mars Orbiter Mission (MOM)
+                </h2>
+                <p class="text-slate-300 text-sm md:text-base leading-relaxed">
+                    Mangalyaan marked Asia's maiden voyage to Martian orbit. ISRO achieved global acclaim by
+                    successfully entering Mars orbit on its inaugural attempt.
+                </p>
+                <div class="flex gap-4 pt-2">
+                    <div class="glass-panel px-4 py-3 rounded-xl border border-red-500/20">
+                        <span class="block text-xl font-bold font-orbitron text-red-400">1st</span>
+                        <span class="text-xs text-slate-400">Attempt Success</span>
+                    </div>
+                    <div class="glass-panel px-4 py-3 rounded-xl border border-red-500/20">
+                        <span class="block text-xl font-bold font-orbitron text-red-400">Red Planet</span>
+                        <span class="text-xs text-slate-400">Orbital Telemetry</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Button to the main page -->
+        <div class="sec-cta">
+            <a href="index4.html"><i class='bx bx-arrow-back'></i>View Live Landing and Study Parts </a>
+        </div>
+
+    </section>
+
+    <!-- SECTION 4: Aditya-L1 Solar Mission -->
+    <section class="section-slide" id="AdityaL1">
+        <div class="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-8 items-center z-10">
+            <div class="lg:col-span-5 space-y-6 text-left reveal-left">
+                <div
+                    class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg glass-panel text-amber-400 text-xs font-orbitron tracking-wider">
+                    <i class='bx bxs-sun'></i> Solar Observatory
+                </div>
+                <h2 class="text-3xl md:text-4xl font-extrabold font-orbitron tracking-wide text-white">
+                    Aditya-L1 Mission
+                </h2>
+                <p class="text-slate-300 text-sm md:text-base leading-relaxed">
+                    India's first space-based solar observatory positioned at Lagrange point 1 (L1). Designed to study
+                    coronal mass ejections and solar flares.
+                </p>
+                <div class="flex gap-4 pt-2">
+                    <div class="glass-panel px-4 py-3 rounded-xl border border-amber-500/20">
+                        <span class="block text-xl font-bold font-orbitron text-amber-400">PSLV-C57</span>
+                        <span class="text-xs text-slate-400">Launch Vehicle</span>
+                    </div>
+                    <div class="glass-panel px-4 py-3 rounded-xl border border-amber-500/20">
+                        <span class="block text-xl font-bold font-orbitron text-amber-400">Lagrange 1</span>
+                        <span class="text-xs text-slate-400">Halo Orbit</span>
+                    </div>
+                </div>
+            </div>
+            <div class="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-6 reveal-right">
+                <!-- Box 1: Core Launcher -->
+                <div
+                    class="glass-panel rounded-2xl flex flex-col justify-between p-4 relative overflow-hidden border border-amber-500/30 group hover:border-amber-500/80 transition-all duration-500 shadow-xl">
+                    <div class="w-full flex justify-between items-center z-10 mb-3">
+                        <span
+                            class="px-2.5 py-1 rounded bg-amber-900/40 border border-amber-500/30 text-[9px] font-orbitron text-amber-300">Sucessful
+                            Launch</span>
+                        <i class='bx bx-up-arrow-alt text-amber-400 text-lg'></i>
+                    </div>
+
+                    <!-- Video Container -->
+                    <div class="w-full aspect-video rounded-xl overflow-hidden bg-black/50 border border-amber-500/20">
+                        <video class="w-full h-full object-cover cursor-pointer" loop playsinline
+                            onmouseenter="this.play()" onmouseleave="this.pause()"
+                            onclick="this.paused ? this.play() : this.pause()">
+                            <source src="vd6.mp4" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                    </div>
+
+                    <!-- Bottom Status Bar -->
+                    <div
+                        class="w-full flex justify-between items-center text-[10px] text-amber-200 font-mono z-10 bg-black/50 px-3 py-1.5 rounded-lg border-t border-amber-500/30 mt-3">
+                        <span>SOLAR TRAJECTORY</span>
+                        <span>AD-RK-01</span>
+                    </div>
+                </div>
+
+                <!-- Box 2: Observatory Payload -->
+                <div
+                    class="glass-panel rounded-2xl flex flex-col justify-between p-4 relative overflow-hidden border border-amber-500/30 group hover:border-amber-500/80 transition-all duration-500 shadow-xl">
+                    <div class="w-full flex justify-between items-center z-10 mb-3">
+                        <span
+                            class="px-2.5 py-1 rounded bg-amber-900/40 border border-amber-500/30 text-[9px] font-orbitron text-yellow-300">1<sup>st</sup>
+                            image from the ADITYA-L1</span>
+                        <i class='bx bxs-sun text-yellow-400 text-lg'></i>
+                    </div>
+
+                    <!-- Video Container -->
+                    <div class="w-full aspect-video rounded-xl overflow-hidden bg-black/50 border border-amber-500/20">
+                        <video class="w-full h-full object-cover cursor-pointer" loop playsinline
+                            onmouseenter="this.play()" onmouseleave="this.pause()"
+                            onclick="this.paused ? this.play() : this.pause()">
+                            <source src="vd5.mp4" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                    </div>
+
+                    <!-- Bottom Status Bar -->
+                    <div
+                        class="w-full flex justify-between items-center text-[10px] text-yellow-200 font-mono z-10 bg-black/50 px-3 py-1.5 rounded-lg border-t border-amber-500/30 mt-3">
+                        <span>L1 HALO ORBIT</span>
+                        <span>AD-OB-02</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Button to the main page -->
+        <div class="sec-cta">
+            <a href="index5.html"><i class='bx bx-arrow-back'></i>View Live Landing and Study Parts</a>
+        </div>
+
+    </section>
+
+    <!-- SECTION 5: Aryabhatta Spaceflight -->
+    <section class="section-slide" id="Gaganyaan">
+        <div class="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-8 items-center z-10">
+            <div class="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-6 order-2 lg:order-1 reveal-bottom">
+                <!-- Box 1: Kosmos Launcher -->
+                <div
+                    class="glass-panel rounded-2xl flex flex-col justify-between p-4 relative overflow-hidden border border-indigo-500/30 group hover:border-indigo-500/80 transition-all duration-500 shadow-xl">
+                    <div class="w-full flex justify-between items-center z-10 mb-3">
+                        <span
+                            class="px-2.5 py-1 rounded bg-indigo-900/40 border border-indigo-500/30 text-[9px] font-orbitron text-indigo-300">About
+                            Aryabhatta</span>
+                        <i class='bx bx-rocket text-indigo-400 text-lg'></i>
+                    </div>
+
+                    <!-- Video Container -->
+                    <div class="w-full aspect-video rounded-xl overflow-hidden bg-black/50 border border-indigo-500/20">
+                        <video class="w-full h-full object-cover cursor-pointer" loop playsinline
+                            onmouseenter="this.play()" onmouseleave="this.pause()"
+                            onclick="this.paused ? this.play() : this.pause()">
+                            <source src="vd7.mp4" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                    </div>
+
+                    <!-- Bottom Status Bar -->
+                    <div
+                        class="w-full flex justify-between items-center text-[10px] text-indigo-200 font-mono z-10 bg-black/50 px-3 py-1.5 rounded-lg border-t border-indigo-500/30 mt-3">
+                        <span>HISTORIC LAUNCH</span>
+                        <span>AB-RK-01</span>
+                    </div>
+                </div>
+
+                <!-- Box 2: Aryabhatta Satellite Module -->
+                <div
+                    class="glass-panel rounded-2xl flex flex-col justify-between p-4 relative overflow-hidden border border-indigo-500/30 group hover:border-indigo-500/80 transition-all duration-500 shadow-xl">
+                    <div class="w-full flex justify-between items-center z-10 mb-3">
+                        <span
+                            class="px-2.5 py-1 rounded bg-indigo-900/40 border border-indigo-500/30 text-[9px] font-orbitron text-blue-300">3D
+                            Animated Launch</span>
+                        <i class='bx bxs-space-capsule text-blue-400 text-lg'></i>
+                    </div>
+
+                    <!-- Video Container -->
+                    <div class="w-full aspect-video rounded-xl overflow-hidden bg-black/50 border border-indigo-500/20">
+                        <video class="w-full h-full object-cover cursor-pointer" loop playsinline
+                            onmouseenter="this.play()" onmouseleave="this.pause()"
+                            onclick="this.paused ? this.play() : this.pause()">
+                            <source src="vd8.mp4" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                    </div>
+
+                    <!-- Bottom Status Bar -->
+                    <div
+                        class="w-full flex justify-between items-center text-[10px] text-blue-200 font-mono z-10 bg-black/50 px-3 py-1.5 rounded-lg border-t border-indigo-500/30 mt-3">
+                        <span>LEO SATELLITE</span>
+                        <span>GG-CM-02</span>
+                    </div>
+                </div>
+            </div>
+            <div class="lg:col-span-5 space-y-6 text-left order-1 lg:order-2 reveal-scale">
+                <div
+                    class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg glass-panel text-indigo-400 text-xs font-orbitron tracking-wider">
+                    <i class='bx bx-user-voice'></i> LEO Satellite
+                </div>
+                <h2 class="text-3xl md:text-4xl font-extrabold font-orbitron tracking-wide text-white">
+                    Aryabhatta
+                </h2>
+                <p class="text-slate-300 text-sm md:text-base leading-relaxed">
+                    India's first satellite making the start of the new world of space science.
+                </p>
+                <div class="flex gap-4 pt-2">
+                    <div class="glass-panel px-4 py-3 rounded-xl border border-indigo-500/20">
+                        <span class="block text-xl font-bold font-orbitron text-indigo-400">LEO</span>
+                        <span class="text-xs text-slate-400">Low Earth Orbit</span>
+                    </div>
+                    <div class="glass-panel px-4 py-3 rounded-xl border border-indigo-500/20">
+                        <span class="block text-xl font-bold font-orbitron text-indigo-400">First Satellite</span>
+                        <span class="text-xs text-slate-400">Starting of the new world of space science in India</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Button to the main page -->
+        <div class="sec-cta">
+            <a href="index6.html"><i class='bx bx-arrow-back'></i>View Live Landing And Study Parts</a>
+        </div>
+
+    </section>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // HTML5 Canvas Starfield & Shooting Stars Animation
+        const canvas = document.getElementById('starCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let width, height;
+        let stars = [];
+        let shootingStars = [];
+
+        function resizeCanvas() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        function initStars() {
+            stars = [];
+            const starCount = Math.floor((window.innerWidth * window.innerHeight) / 3500);
+            for (let i = 0; i < starCount; i++) {
+                stars.push({
+                    x: Math.random() * width,
+                    y: Math.random() * height,
+                    radius: Math.random() * 1.5 + 0.4,
+                    alpha: Math.random(),
+                    dAlpha: (Math.random() * 0.02 + 0.005) * (Math.random() < 0.5 ? 1 : -1),
+                    vx: (Math.random() - 0.5) * 0.08,
+                    vy: (Math.random() - 0.5) * 0.08
+                });
+            }
+        }
+        initStars();
+
+        function maybeSpawnShootingStar() {
+            if (Math.random() < 0.015 && shootingStars.length < 2) {
+                shootingStars.push({
+                    x: Math.random() * width,
+                    y: 0,
+                    length: Math.random() * 80 + 40,
+                    speed: Math.random() * 12 + 8,
+                    angle: Math.PI / 4
+                });
+            }
+        }
+
+        function animateCanvas() {
+            ctx.clearRect(0, 0, width, height);
+
+            const isDark = document.documentElement.classList.contains('dark');
+            const starColor = isDark ? '255, 255, 255' : '79, 70, 229';
+
+            stars.forEach(star => {
+                star.alpha += star.dAlpha;
+                if (star.alpha <= 0.2 || star.alpha >= 1) star.dAlpha *= -1;
+
+                star.x += star.vx;
+                star.y += star.vy;
+
+                if (star.x < 0) star.x = width;
+                if (star.x > width) star.x = 0;
+                if (star.y < 0) star.y = height;
+                if (star.y > height) star.y = 0;
+
+                ctx.beginPath();
+                ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(${starColor}, ${star.alpha})`;
+                ctx.fill();
+            });
+
+            maybeSpawnShootingStar();
+            ctx.strokeStyle = isDark ? 'rgba(255, 255, 255, 0.8)' : 'rgba(99, 102, 241, 0.8)';
+            ctx.lineWidth = 1.5;
+            shootingStars.forEach((ss, index) => {
+                ctx.beginPath();
+                ctx.moveTo(ss.x, ss.y);
+                ctx.lineTo(ss.x - ss.length * Math.cos(ss.angle), ss.y - ss.length * Math.sin(ss.angle));
+                ctx.stroke();
+
+                ss.x += ss.speed * Math.cos(ss.angle);
+                ss.y += ss.speed * Math.sin(ss.angle);
+
+                if (ss.x > width || ss.y > height) {
+                    shootingStars.splice(index, 1);
+                }
+            });
+
+            requestAnimationFrame(animateCanvas);
+        }
+
+        animateCanvas();
+
+        // Multi-Directional Scroll Intersection Observer
+        const observerOptions = {
+            root: null,
+            threshold: 0.15
+        };
+
+        const scrollObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                } else {
+                    entry.target.classList.remove('active');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.reveal-left, .reveal-right, .reveal-top, .reveal-bottom, .reveal-scale').forEach(el => {
+            scrollObserver.observe(el);
+        });
+    </script>
+    <script>
+        /* ================= Upgrades: reveal, nav, toasts ================= */
+        (() => {
+            const $ = (s, r = document) => [...r.querySelectorAll(s)];
+
+            /* ---- 1. Toasts ---- */
+            const tw = Object.assign(document.createElement('div'), { id: 'toasts' });
+            document.body.append(tw);
+            window.toast = (msg, icon = 'bx-info-circle') => {
+                const t = document.createElement('div');
+                t.className = 'toast glass-panel px-4 py-3 rounded-xl text-xs font-orbitron text-purple-200 border border-purple-500/40 shadow-lg flex items-center gap-2';
+                t.innerHTML = `<i class='bx ${icon} text-purple-400 text-base'></i><span></span>`;
+                t.lastChild.textContent = msg;
+                tw.append(t);
+                setTimeout(() => { t.classList.add('out'); setTimeout(() => t.remove(), 400); }, 3200);
+            };
+
+            /* ---- 2. Scroll reveal ---- */
+            const DIRS = [['0px', '44px'], ['-60px', '0px'], ['60px', '0px'], ['0px', '-44px'], ['-46px', '-46px'], ['46px', '-46px'], ['-46px', '46px'], ['46px', '46px']];
+            const io = new IntersectionObserver(es => es.forEach(e => {
+                if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+            }), { threshold: .12, rootMargin: '0px 0px -6% 0px' });
+            const rv = (el, i) => {
+                const [x, y] = DIRS[i % 8];
+                el.style.setProperty('--x', x); el.style.setProperty('--y', y);
+                el.style.setProperty('--d', (i % 5) * .08 + 's');
+                el.classList.add('rv'); io.observe(el);
+            };
+
+            $('section').forEach((s, si) =>
+                $('h1,h2,h3,p,a,button,.glass-panel', s)
+                    .filter(el => !/reveal-|animate-/.test(el.className))
+                    .forEach((el, i) => rv(el, i + si * 3)));
+            $('a[title]').forEach((a, i) => rv(a, i % 2 ? 1 : 2));
+
+            /* ---- 3. Nav scroll-spy & interactions ---- */
+            const bar = document.getElementById('bar');
+            addEventListener('scroll', () => {
+                bar.style.transform = `scaleX(${scrollY / Math.max(1, document.documentElement.scrollHeight - innerHeight)})`;
+            }, { passive: true });
+            const spy = new IntersectionObserver(es => es.forEach(e => {
+                if (e.isIntersecting) $('a[href^="#"]').forEach(l => l.classList.toggle('on', l.hash === '#' + e.target.id));
+            }), { rootMargin: '-45% 0px -45% 0px' });
+            $('section').forEach(s => spy.observe(s));
+            $('#Introduction a[href="#Chandrayaan"]').forEach(a => a.addEventListener('click', () => toast('Launch sequence started', 'bx-rocket')));
+
+            addEventListener('pointermove', e => {
+                if (typeof stars === 'undefined') return;
+                for (const s of stars) {
+                    const dx = s.x - e.clientX, dy = s.y - e.clientY;
+                    if (dx * dx + dy * dy < 9e3) { s.x += dx * .05; s.y += dy * .05; }
+                }
+            }, { passive: true });
+
+            setTimeout(() => toast('Scroll to explore the missions', 'bx-rocket'), 2200);
+        })();
+    </script>
+    <script id="fx-js">
+        (() => {
+            const $$ = (s, r = document) => [...r.querySelectorAll(s)], E = id => document.getElementById(id),
+                root = document.documentElement, RM = matchMedia('(prefers-reduced-motion:reduce)').matches;
+
+            const D = { u: [0, 1, 1, 0], d: [0, -1, 1, 0], l: [-1, 0, 1, 0], r: [1, 0, 1, 0], tl: [-1, -1, 1, -3], tr: [1, -1, 1, 3], bl: [-1, 1, 1, 3], br: [1, 1, 1, -3], z: [0, 0, .8, 0] },
+                ORD = ['l', 'u', 'r', 'bl', 'z', 'br', 'tl', 'd', 'tr'],
+                SEL = $$('.vk').length ? '.vk-t,.vk-ui' : 'h1,h2,h3,h4,p,img,figure,form,table,li,button,.glass-panel,.grid>*',
+                SKIP = '.fixed,.sticky,header,nav,[id*=odal],[class*=odal],[id*=oast],.toast,[hidden],.rv,[class*=reveal-],[class*=animate-],.fx-top,.fx-bar,.fx-3d',
+                all = new Set(); let n = 0;
+            const VX = () => Math.min(innerWidth * .22, 260), VY = () => Math.min(innerHeight * .16, 130),
+                clampX = (el, x) => { const r = el.getBoundingClientRect(); return x < 0 ? Math.min(0, Math.max(x, 24 - r.right)) : x > 0 ? Math.max(0, Math.min(x, innerWidth - 24 - r.left)) : 0 },
+                clampY = (el, y) => { const r = el.getBoundingClientRect(); if (r.bottom < 0 || r.top > innerHeight) return y; return y < 0 ? Math.min(0, Math.max(y, 24 - r.bottom)) : y > 0 ? Math.max(0, Math.min(y, innerHeight - 24 - r.top)) : 0 },
+                pick = el => {
+                    const r = el.getBoundingClientRect(), k = n++, cx = (r.left + r.width / 2) / Math.max(1, innerWidth);
+                    if (r.width > innerWidth * .7 || (cx > .34 && cx < .66)) return ['u', 'd', 'z', 'bl', 'tr', 'br', 'tl'][k % 7];
+                    return cx <= .34 ? ['l', 'tl', 'l', 'bl'][k % 4] : ['r', 'tr', 'r', 'br'][k % 4]
+                };
+            const run = (el, st, d, t) => {
+                el.style.setProperty('--fx-d', d + 's'); el.style.setProperty('--fx-t', t + 's');
+                el.classList.add('fx-run'); el.classList.toggle('fx-in', st == 'in'); el.classList.toggle('fx-fade', st == 'fade');
+                clearTimeout(el._f); el._f = setTimeout(() => el.classList.remove('fx-run'), (d + t) * 1e3 + 150);
+            };
+            const show = (el, i) => el.classList.contains('fx-in') || run(el, 'in', Math.min(i, 7) * .09 + (el.dataset.fx == 'n' ? .15 : 0), .85);
+            const byPos = (a, b) => a.boundingClientRect.top - b.boundingClientRect.top || a.boundingClientRect.left - b.boundingClientRect.left;
+            const ioIn = new IntersectionObserver(es => { let i = 0; es.filter(e => e.isIntersecting).sort(byPos).forEach(e => show(e.target, i++)) }, { rootMargin: '0px 0px ' + Math.round(VY() - innerHeight * .09) + 'px 0px' }),
+                ioOut = new IntersectionObserver(es => es.forEach(e => { if (!e.isIntersecting && e.target.classList.contains('fx-in')) run(e.target, 'fade', 0, .4) })),
+                ioFar = new IntersectionObserver(es => es.forEach(e => { if (!e.isIntersecting) { const el = e.target; clearTimeout(el._f); el.classList.remove('fx-run', 'fx-in', 'fx-fade') } }), { rootMargin: '160px 0px' });
+
+            const prep = (r = document) => {
+                if (RM) return;
+                const f = innerWidth < 640 ? .5 : 1;
+                [...(r.matches && r.matches(SEL) ? [r] : []), ...$$(SEL, r)].forEach(el => {
+                    if (el.hasAttribute('data-fx') || el.closest(SKIP)) return;
+                    const par = el.parentElement, nest = par && par.closest('[data-fx]');
+                    let d;
+                    if (nest || el.tagName == 'P') d = 'u';
+                    else {
+                        const sib = [...par.children].filter(c => c.matches(SEL)), i = sib.indexOf(el);
+                        d = sib.length > 2 ? ORD[i % 9] : pick(el)
+                    }
+                    const [x, y, s, rt] = D[d], g = nest ? .4 : f;
+                    el.style.setProperty('--fx-x', Math.round(nest ? x * VX() * g : clampX(el, x * VX() * g)) + 'px'); el.style.setProperty('--fx-y', Math.round(nest ? y * VY() * g : clampY(el, y * VY() * g)) + 'px'); el.style.setProperty('--fx-s', nest ? .96 : s); el.style.setProperty('--fx-r', (nest ? 0 : rt) + 'deg');
+                    el.setAttribute('data-fx', nest ? 'n' : '');
+                    all.add(el); ioIn.observe(el); ioOut.observe(el); ioFar.observe(el);
+                });
+            };
+
+            const settle = () => { let i = 0; all.forEach(el => { const r = el.getBoundingClientRect(); if (r.height && r.bottom > 0 && r.top < innerHeight) show(el, i++) }) };
+
+            const own = !E('bar'), bar = own ? Object.assign(document.createElement('div'), { className: 'fx-bar' }) : null, top = document.createElement('button');
+            top.className = 'fx-top'; top.type = 'button'; top.setAttribute('aria-label', 'Back to top');
+            top.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>';
+            top.onclick = () => scrollTo({ top: 0, behavior: 'smooth' });
+            document.body.append(...[bar, top].filter(Boolean));
+            let tick = 0;
+            const onScroll = () => {
+                if (tick) return; tick = requestAnimationFrame(() => {
+                    tick = 0;
+                    const max = Math.max(1, root.scrollHeight - innerHeight);
+                    if (own) bar.style.transform = `scaleX(${Math.min(1, scrollY / max)})`;
+                    top.classList.toggle('on', scrollY > innerHeight * .6);
+                    if (max - scrollY < 8) settle();
+                })
+            };
+            addEventListener('scroll', onScroll, { passive: true }); addEventListener('resize', onScroll);
+
+            const sw = window.switchTab; let tk = 0;
+            if (typeof sw == 'function') window.switchTab = function (id) {
+                const a = arguments, my = ++tk, nx = E('section-' + id),
+                    cur = $$('.tab-section').find(s => !s.classList.contains('hidden') && !s.classList.contains('fx-tab-out'));
+                $$('.fx-tab-out,.fx-tab-in').forEach(s => s.classList.remove('fx-tab-out', 'fx-tab-in'));
+                if (RM || !cur || !nx || cur === nx) return sw.apply(this, a);
+                cur.classList.add('fx-tab-out');
+                setTimeout(() => {
+                    if (my != tk) return; cur.classList.remove('fx-tab-out'); sw.apply(this, a);
+                    nx.classList.add('fx-tab-in'); setTimeout(() => nx.classList.remove('fx-tab-in'), 850)
+                }, 260);
+            };
+
+            new MutationObserver(ms => ms.forEach(m => m.addedNodes.forEach(x => x.nodeType == 1 && prep(x)))).observe(document.body, { childList: true, subtree: true });
+            prep(); onScroll();
+            requestAnimationFrame(() => requestAnimationFrame(() => root.classList.remove('fx-wait')));
+        })();
+    </script>
+</body>
+
+</html>
