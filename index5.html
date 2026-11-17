@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>Aditya-L1 Solar Observatory</title>
+    <style>
+        html,
+        body {
+            margin: 0;
+            background: #02030a
+        }
+
+        body {
+            padding-top: env(safe-area-inset-top, 0px);
+            padding-bottom: env(safe-area-inset-bottom, 0px)
+        }
+
+        /* Demo only: give the widget a size. On your site, put .vk inside any element that has a height. */
+        .demo {
+            height: calc(100vh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+            height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px))
+        }
+
+        /* ===== ADITYA-L1 WIDGET CSS (copy) ===== */
+        .vk {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            min-height: 320px;
+            background: #000;
+            overflow: hidden;
+            color: #f2efe6;
+            font-family: Georgia, "Times New Roman", serif;
+            touch-action: pan-y
+        }
+
+        .vk canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            touch-action: none
+        }
+
+        .vk [hidden] {
+            display: none !important
+        }
+
+        .vk .vk-t {
+            position: absolute;
+            top: 62px;
+            left: 18px;
+            right: 18px;
+            pointer-events: none;
+            text-shadow: 0 2px 12px #000;
+            background: linear-gradient(90deg, rgba(2, 5, 14, .72), rgba(2, 5, 14, 0));
+            padding: 12px 14px;
+            border-left: 2px solid #e3b84a;
+            border-radius: 0 12px 12px 0;
+            max-width: 560px;
+            box-sizing: border-box
+        }
+
+        .vk .vk-t b {
+            display: block;
+            font-weight: 400;
+            font-size: clamp(20px, 4.5vw, 30px)
+        }
+
+        .vk .vk-t span {
+            font-size: 14px;
+            color: #c9c5b8
+        }
+
+        .vk .vk-ui {
+            position: absolute;
+            left: 14px;
+            right: 14px;
+            bottom: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            pointer-events: none;
+            padding: 10px 12px;
+            border: 1px solid rgba(255, 255, 255, .13);
+            border-radius: 16px;
+            background: linear-gradient(120deg, rgba(5, 9, 18, .82), rgba(5, 9, 18, .35));
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px)
+        }
+
+        .vk .vk-s {
+            font-size: 15px;
+            color: #e3b84a;
+            text-shadow: 0 1px 6px #000;
+            max-width: 50%
+        }
+
+        .vk .vk-ui-btns {
+            display: flex;
+            gap: 8px;
+            pointer-events: auto
+        }
+
+        .vk button {
+            pointer-events: auto;
+            font: inherit;
+            font-size: 15px;
+            color: #f2efe6;
+            background: rgba(5, 6, 10, .6);
+            border: 1px solid rgba(242, 239, 230, .25);
+            border-radius: 999px;
+            padding: 9px 18px;
+            cursor: pointer
+        }
+
+        .vk button:hover {
+            border-color: #e3b84a
+        }
+
+        .vk button:focus-visible {
+            outline: 2px solid #e3b84a;
+            outline-offset: 2px
+        }
+
+        /* ===== CUSTOM VISIBLE SCROLLBARS FOR CHIPS & CARD SECTIONS ===== */
+        .vk .vk-chips {
+            position: absolute;
+            left: 14px;
+            right: 14px;
+            bottom: 78px;
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #e3b84a rgba(5, 9, 18, .6);
+            padding: 7px 2px
+        }
+
+        .vk .vk-chips::-webkit-scrollbar {
+            height: 6px;
+            display: block
+        }
+
+        .vk .vk-chips::-webkit-scrollbar-track {
+            background: rgba(5, 9, 18, .4);
+            border-radius: 3px
+        }
+
+        .vk .vk-chips::-webkit-scrollbar-thumb {
+            background: #e3b84a;
+            border-radius: 3px
+        }
+
+        .vk .vk-chip {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+            padding: 9px 14px;
+            font-size: 13px;
+            background: rgba(9, 16, 28, .62);
+            -webkit-backdrop-filter: blur(16px) saturate(130%);
+            backdrop-filter: blur(16px) saturate(130%);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, .18)
+        }
+
+        .vk .vk-chip i {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            box-shadow: 0 0 8px currentColor
+        }
+
+        .vk .vk-chip.on {
+            background: rgba(255, 255, 255, .14);
+            border-color: var(--c)
+        }
+
+        .vk .vk-card {
+            position: absolute;
+            left: 14px;
+            right: 14px;
+            bottom: 138px;
+            max-height: 56%;
+            overflow-y: auto;
+            padding: 20px 20px 16px;
+            border-radius: 20px;
+            overflow-x: hidden;
+            scrollbar-width: thin;
+            scrollbar-color: #e3b84a rgba(13, 22, 36, .6);
+            background: linear-gradient(145deg, rgba(13, 22, 36, .68), rgba(4, 8, 17, .48));
+            -webkit-backdrop-filter: blur(22px) saturate(135%);
+            backdrop-filter: blur(22px) saturate(135%);
+            border: 1px solid rgba(220, 235, 255, .20);
+            box-shadow: 0 12px 34px rgba(0, 0, 0, .28), inset 0 1px 0 rgba(255, 255, 255, .07)
+        }
+
+        .vk .vk-card::-webkit-scrollbar {
+            width: 6px
+        }
+
+        .vk .vk-card::-webkit-scrollbar-track {
+            background: rgba(13, 22, 36, .4);
+            border-radius: 3px
+        }
+
+        .vk .vk-card::-webkit-scrollbar-thumb {
+            background: #e3b84a;
+            border-radius: 3px
+        }
+
+        .vk .vk-card::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 3px;
+            width: 100%;
+            background: linear-gradient(90deg, var(--c), transparent);
+            transform-origin: left
+        }
+
+        .vk .vk-card.on {
+            animation: vkIn .55s cubic-bezier(.2, .9, .2, 1) both
+        }
+
+        .vk .vk-card.on::before {
+            animation: vkLine .9s .1s cubic-bezier(.2, .9, .2, 1) both
+        }
+
+        .vk .vk-x {
+            position: absolute;
+            top: 10px;
+            right: 12px;
+            width: 30px;
+            height: 30px;
+            padding: 0;
+            border-radius: 50%;
+            font-size: 18px;
+            line-height: 1
+        }
+
+        .vk .vk-k {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+            color: var(--c)
+        }
+
+        .vk .vk-k i {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--c);
+            box-shadow: 0 0 10px var(--c)
+        }
+
+        .vk .vk-card.on .vk-k {
+            animation: vkUp .5s .08s both
+        }
+
+        .vk .vk-n {
+            margin: 6px 0 8px;
+            font-weight: 400;
+            font-size: 25px;
+            letter-spacing: .01em;
+            padding-right: 30px
+        }
+
+        .vk .vk-n span {
+            display: inline-block;
+            animation: vkLetter .5s calc(.12s + var(--i)*.03s) both
+        }
+
+        .vk .vk-d {
+            margin: 0;
+            font-size: 15px;
+            line-height: 1.55;
+            color: rgba(235, 240, 248, .88);
+            min-height: 4.6em
+        }
+
+        .vk .vk-d.typing::after {
+            content: "";
+            display: inline-block;
+            width: 2px;
+            height: 1em;
+            margin-left: 2px;
+            vertical-align: -2px;
+            background: var(--c);
+            animation: vkBlink .7s steps(2) infinite
+        }
+
+        .vk .vk-st {
+            display: flex;
+            gap: 10px;
+            margin-top: 14px
+        }
+
+        .vk .vk-st div {
+            flex: 1;
+            padding: 8px 10px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, .06);
+            border: 1px solid rgba(255, 255, 255, .09);
+            animation: vkUp .5s calc(.45s + var(--i)*.1s) both
+        }
+
+        .vk .vk-st small {
+            display: block;
+            font-size: 11px;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            color: #a9a69c
+        }
+
+        .vk .vk-st b {
+            font-weight: 400;
+            font-size: 15px;
+            color: var(--c)
+        }
+
+        @media(min-width:760px) {
+            .vk .vk-card {
+                left: auto;
+                right: 24px;
+                top: 110px;
+                bottom: auto;
+                width: 340px;
+                max-height: calc(100% - 230px)
+            }
+
+            .vk .vk-chips {
+                bottom: 78px
+            }
+        }
+
+        @media(max-width:520px) {
+            .vk .vk-n {
+                font-size: 22px
+            }
+
+            .vk .vk-d {
+                font-size: 14px;
+                min-height: 0
+            }
+
+            .vk .vk-card {
+                bottom: 136px;
+                max-height: 48%;
+                padding: 16px
+            }
+
+            .vk .vk-st {
+                gap: 6px
+            }
+
+            .vk .vk-st b {
+                font-size: 13px
+            }
+
+            .vk .vk-t span {
+                font-size: 12px
+            }
+
+            .vk .vk-ui button {
+                padding: 8px 12px;
+                font-size: 13px
+            }
+
+            .vk .vk-s {
+                font-size: 12px
+            }
+        }
+
+        .vk .vk-m {
+            margin: 12px 0 0;
+            font-size: 14px;
+            line-height: 1.5;
+            color: rgba(235, 240, 248, .82)
+        }
+
+        .vk .vk-m b {
+            display: block;
+            font-weight: 400;
+            font-size: 11px;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            color: #a9a69c;
+            margin-bottom: 2px
+        }
+
+        .vk .vk-src {
+            margin: 10px 0 0;
+            font-size: 11px;
+            line-height: 1.4;
+            color: #8f8c82
+        }
+
+        @keyframes vkIn {
+            from {
+                opacity: 0;
+                transform: translateY(18px) scale(.96);
+                filter: blur(6px)
+            }
+
+            to {
+                opacity: 1;
+                transform: none;
+                filter: none
+            }
+        }
+
+        @keyframes vkUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px)
+            }
+
+            to {
+                opacity: 1;
+                transform: none
+            }
+        }
+
+        @keyframes vkLine {
+            from {
+                transform: scaleX(0)
+            }
+
+            to {
+                transform: scaleX(1)
+            }
+        }
+
+        @keyframes vkLetter {
+            from {
+                opacity: 0;
+                transform: translateY(.5em);
+                filter: blur(4px)
+            }
+
+            to {
+                opacity: 1;
+                transform: none;
+                filter: none
+            }
+        }
+
+        @keyframes vkBlink {
+            50% {
+                opacity: 0
+            }
+        }
+
+        @media(prefers-reduced-motion:reduce) {
+            .vk * {
+                animation: none !important
+            }
+        }
+    </style>
+    <script src="script2.js"></script>
+    <script src="script1.js"></script>
+    <style>
+        /* ===== Go Back button ===== */
+        .back-btn {
+            --back-accent: #e3b84a;
+            position: fixed;
+            top: calc(env(safe-area-inset-top, 0px) + 12px);
+            left: max(14px, env(safe-area-inset-left, 0px));
+            z-index: 1000;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            height: 36px;
+            padding: 0 15px 0 11px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, .18);
+            background: rgba(8, 14, 26, .55);
+            -webkit-backdrop-filter: blur(12px) saturate(140%);
+            backdrop-filter: blur(12px) saturate(140%);
+            color: #eef2fb;
+            font: 600 13px/1 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+            letter-spacing: .04em;
+            text-decoration: none;
+            white-space: nowrap;
+            box-shadow: 0 4px 18px rgba(0, 0, 0, .4);
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+            transition: background .2s, border-color .2s, color .2s, transform .2s
+        }
+
+        .back-btn svg {
+            width: 16px;
+            height: 16px;
+            flex: none;
+            transition: transform .2s
+        }
+
+        .back-btn:hover {
+            background: rgba(8, 14, 26, .82);
+            border-color: var(--back-accent);
+            color: #fff
+        }
+
+        .back-btn:hover svg {
+            transform: translateX(-3px)
+        }
+
+        .back-btn:focus-visible {
+            outline: 2px solid var(--back-accent);
+            outline-offset: 3px
+        }
+
+        .back-btn:active {
+            transform: scale(.96)
+        }
+
+        @media (prefers-reduced-motion:reduce) {
+
+            .back-btn,
+            .back-btn svg {
+                transition: none
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <a class="back-btn" href="index2.html" aria-label="Go back to the home page"><svg viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M15 6l-6 6 6 6" />
+        </svg><span>Go Back</span></a>
+
+    <div class="demo">
+        <!-- ===== ADITYA-L1 WIDGET HTML (copy) ===== -->
+        <div class="vk" id="aditya">
+            <div class="vk-t"><b>Aditya-L1: India’s solar observatory</b><span>Halo orbit at the Sun–Earth L1
+                    point</span></div>
+            <div class="vk-ui">
+                <span class="vk-s">Loading…</span>
+                <div class="vk-ui-btns">
+                    <button type="button" class="vk-pause">Pause Orbit</button>
+                    <button type="button" class="vk-r">Highlight parts</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ADITYA-L1 WIDGET JS (copy) ===== -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        function AdityaL1(root) {
+            const sEl = root.querySelector('.vk-s'), setS = t => { if (sEl) sEl.textContent = t; };
+            const canvas = document.createElement('canvas'); root.insertBefore(canvas, root.firstChild);
+            const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5)); renderer.shadowMap.enabled = true; renderer.outputColorSpace = THREE.SRGBColorSpace || renderer.outputColorSpace;
+            const scene = new THREE.Scene(), camera = new THREE.PerspectiveCamera(42, 1, .1, 4000);
+            const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+            let isPaused = false;
+            const TAU = Math.PI * 2, rnd = Math.random, gs = () => rnd() + rnd() + rnd() - 1.5, clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+            const cv = (w, h) => { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; };
+
+            // ================= SPACE: galaxy sky, stars, distant planet =================
+            function skyTex() {
+                const W = 2048, H = 1024, c = cv(W, H), x = c.getContext('2d');
+                x.fillStyle = '#01020a'; x.fillRect(0, 0, W, H); x.globalCompositeOperation = 'lighter';
+                const blob = (px, py, r, rgb, a) => { const g = x.createRadialGradient(px, py, 0, px, py, r); g.addColorStop(0, 'rgba(' + rgb + ',' + a + ')'); g.addColorStop(1, 'rgba(' + rgb + ',0)'); x.fillStyle = g; x.fillRect(px - r, py - r, 2 * r, 2 * r); };
+                const pal = ['150,175,255', '255,228,190', '190,160,255', '255,255,255', '255,160,130'];
+                const mid = u => H / 2 + 130 * Math.sin(u / W * TAU + .6);
+                for (let i = 0; i < 3200; i++) { const u = rnd() * W; blob(u, mid(u) + gs() * 85, 12 + rnd() * 46, pal[(rnd() * 5) | 0], .012 + rnd() * .035); }
+                for (let i = 0; i < 160; i++) { const u = W * (.25 + rnd() * .18); blob(u, mid(u) + gs() * 40, 50 + rnd() * 90, '255,205,150', .02 + rnd() * .03); }
+                x.globalCompositeOperation = 'source-over';
+                for (let i = 0; i < 500; i++) { const u = rnd() * W; blob(u, mid(u) + gs() * 34, 10 + rnd() * 40, '0,0,6', .08 + rnd() * .16); }
+                x.globalCompositeOperation = 'lighter';
+                for (let i = 0; i < 5000; i++) { x.fillStyle = 'rgba(' + pal[(rnd() * 5) | 0] + ',' + (.25 + rnd() * .75) + ')'; const s = rnd() < .06 ? 2 : 1; x.fillRect(rnd() * W, rnd() * H, s, s); }
+                for (let g = 0; g < 7; g++) {
+                    const gr = 14 + rnd() * 22; x.save(); x.translate(rnd() * W, H * .12 + rnd() * H * .76); x.rotate(rnd() * Math.PI); x.scale(1, .38);
+                    blob(0, 0, gr * 1.6, '170,185,255', .35); blob(0, 0, gr * .5, '255,240,210', .7);
+                    for (let t = .5; t < 12; t += .25)for (const o of [0, Math.PI]) { const a = t + o, r = 1.2 * t * gr / 6; blob(Math.cos(a) * r, Math.sin(a) * r, gr * .18, '190,205,255', .22); }
+                    x.restore();
+                }
+                return new THREE.CanvasTexture(c);
+            }
+            const sky = new THREE.Mesh(new THREE.SphereGeometry(3000, 48, 32), new THREE.MeshBasicMaterial({ map: skyTex(), side: THREE.BackSide, depthWrite: false, fog: false }));
+            sky.rotation.set(.6, .4, .15); scene.add(sky);
+            function stars(n, size, op) {
+                const p = new Float32Array(n * 3), col = new Float32Array(n * 3), c = new THREE.Color();
+                for (let i = 0; i < n; i++) {
+                    const u = rnd() * 2 - 1, t = rnd() * TAU, r = Math.sqrt(1 - u * u); p[i * 3] = 2800 * r * Math.cos(t); p[i * 3 + 1] = 2800 * u; p[i * 3 + 2] = 2800 * r * Math.sin(t);
+                    c.setHSL(rnd() < .5 ? .6 : .08, .5 * rnd(), .7 + .3 * rnd()); col[i * 3] = c.r; col[i * 3 + 1] = c.g; col[i * 3 + 2] = c.b;
+                }
+                const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(p, 3)); g.setAttribute('color', new THREE.BufferAttribute(col, 3));
+                scene.add(new THREE.Points(g, new THREE.PointsMaterial({ size, sizeAttenuation: false, vertexColors: true, transparent: true, opacity: op, depthWrite: false, fog: false })));
+            }
+            stars(5000, 1.3, .8); stars(350, 2.6, 1);
+            {
+                const c = cv(8, 64), x = c.getContext('2d');['#cdb27f', '#e3cfa0', '#b99c68', '#dcc592', '#a88b5c', '#cfb784', '#e6d3a6', '#bda06c'].forEach((col, i) => { x.fillStyle = col; x.fillRect(0, i * 8, 8, 8); });
+                const pg = new THREE.Group(); pg.position.set(-900, 260, -1300);
+                pg.add(new THREE.Mesh(new THREE.SphereGeometry(38, 32, 24), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(c) })));
+                const r = new THREE.Mesh(new THREE.RingGeometry(55, 92, 64), new THREE.MeshBasicMaterial({ color: 0xcbb68c, side: THREE.DoubleSide, transparent: true, opacity: .6 })); r.rotation.x = 1.2; pg.add(r); scene.add(pg);
+            }
+
+            // ================= THE SUN: animated plasma shader, corona, rays, prominences =================
+            const RS = 45, RO = 82, INC = .12, OMEGA = .03;
+            const sg2 = new THREE.Group(); sg2.rotation.z = .35; scene.add(sg2);
+            const sunMat = new THREE.ShaderMaterial({
+                uniforms: { uT: { value: 0 } },
+                vertexShader: `varying vec3 vP;varying vec3 vN;varying vec3 vV;
+void main(){vP=position;vN=normalize(normalMatrix*normal);vec4 mv=modelViewMatrix*vec4(position,1.);vV=normalize(-mv.xyz);gl_Position=projectionMatrix*mv;}`,
+                fragmentShader: `varying vec3 vP;varying vec3 vN;varying vec3 vV;uniform float uT;
+float hs(vec3 p){p=fract(p*.3183099+.1);p*=17.;return fract(p.x*p.y*p.z*(p.x+p.y+p.z));}
+float vn(vec3 x){vec3 i=floor(x),f=fract(x);f=f*f*(3.-2.*f);
+ return mix(mix(mix(hs(i),hs(i+vec3(1,0,0)),f.x),mix(hs(i+vec3(0,1,0)),hs(i+vec3(1,1,0)),f.x),f.y),
+  mix(mix(hs(i+vec3(0,0,1)),hs(i+vec3(1,0,1)),f.x),mix(hs(i+vec3(0,1,1)),hs(i+vec3(1,1,1)),f.x),f.y),f.z);}
+float fbm(vec3 p){float a=.5,s=0.;for(int i=0;i<4;i++){s+=a*vn(p);p=p*2.03+vec3(1.7,9.2,3.1);a*=.5;}return s;}
+void main(){
+ vec3 p=normalize(vP);float t=uT*.05;
+ float cells=fbm(p*3.+vec3(0.,t,0.));
+ float gran=fbm(p*16.+vec3(t*2.,-t,t*1.5)+cells);
+ float flow=fbm(p*7.+cells*2.+vec3(t*3.,0.,-t));
+ float spot=smoothstep(.64,.76,fbm(p*2.4+vec3(4.,t*.4,1.)));
+ float heat=clamp(-.02+1.1*flow+.8*(gran-.5)-.6*spot,0.,1.3);
+ vec3 c0=vec3(.5,.06,0.),c1=vec3(1.,.36,.02),c2=vec3(1.,.7,.14),c3=vec3(1.,.95,.72);
+ vec3 col=mix(c0,c1,smoothstep(0.,.4,heat));col=mix(col,c2,smoothstep(.35,.75,heat));col=mix(col,c3,smoothstep(.75,1.2,heat));
+ col*=1.-.8*spot;
+ float mu=clamp(dot(normalize(vN),normalize(vV)),0.,1.);
+ col*=mix(.3,1.,pow(mu,.4));
+ col+=vec3(1.,.4,.08)*pow(1.-mu,3.)*.3;
+ gl_FragColor=vec4(col*.82,1.);}`});
+            sg2.add(new THREE.Mesh(new THREE.SphereGeometry(RS, 96, 64), sunMat));
+            function glowTex(stops) { const s = 256, c = cv(s, s), x = c.getContext('2d'), g = x.createRadialGradient(s / 2, s / 2, 0, s / 2, s / 2, s / 2); stops.forEach(a => g.addColorStop(a[0], a[1])); x.fillStyle = g; x.fillRect(0, 0, s, s); return new THREE.CanvasTexture(c); }
+            function raysTex() {
+                const s = 512, c = cv(s, s), x = c.getContext('2d'); x.translate(s / 2, s / 2); x.globalCompositeOperation = 'lighter';
+                for (let i = 0; i < 260; i++) {
+                    const l = s * (.2 + rnd() * .3), w = .004 + rnd() * .012, g = x.createLinearGradient(0, 0, l, 0);
+                    g.addColorStop(0, 'rgba(255,200,120,' + (.08 + rnd() * .14) + ')'); g.addColorStop(1, 'rgba(255,120,30,0)');
+                    x.save(); x.rotate(rnd() * TAU); x.fillStyle = g; x.beginPath(); x.moveTo(s * .08, -l * w); x.lineTo(l, 0); x.lineTo(s * .08, l * w); x.fill(); x.restore();
+                }
+                return new THREE.CanvasTexture(c);
+            }
+            function spr(tex, size, op) { const m = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, blending: THREE.AdditiveBlending, transparent: true, depthWrite: false, opacity: op, fog: false })); m.scale.set(size, size, 1); scene.add(m); return m; }
+            spr(glowTex([[0, 'rgba(255,245,215,.58)'], [.18, 'rgba(255,200,110,.42)'], [.38, 'rgba(255,130,40,.16)'], [.7, 'rgba(255,80,10,.035)'], [1, 'rgba(255,60,0,0)']]), RS * 2 * 2.35, .72);
+            spr(glowTex([[0, 'rgba(255,170,80,.22)'], [.5, 'rgba(255,90,20,.06)'], [1, 'rgba(255,60,0,0)']]), RS * 2 * 4.4, .48);
+            const rays = spr(raysTex(), RS * 2 * 3.4, .38);
+            const loops = [];
+            for (let i = 0; i < 7; i++) {
+                const a = new THREE.Vector3(rnd() - .5, rnd() - .5, rnd() - .5).normalize(), t = new THREE.Vector3().crossVectors(a, new THREE.Vector3(0, 1, 0)).normalize();
+                if (t.lengthSq() < .1) t.set(1, 0, 0);
+                const w = 3 + rnd() * 5, h = RS * (.12 + rnd() * .18), on = a.clone().multiplyScalar(RS);
+                const p0 = on.clone().addScaledVector(t, -w).normalize().multiplyScalar(RS * .995), p2 = on.clone().addScaledVector(t, w).normalize().multiplyScalar(RS * .995), p1 = a.clone().multiplyScalar(RS + h * 2);
+                const m = new THREE.Mesh(new THREE.TubeGeometry(new THREE.QuadraticBezierCurve3(p0, p1, p2), 24, .4 + rnd() * .4, 6, false), new THREE.MeshBasicMaterial({ color: 0xff7a22, transparent: true, opacity: .22, blending: THREE.AdditiveBlending, depthWrite: false }));
+                sg2.add(m); loops.push(m);
+            }
+
+            // ================= ADITYA-L1 SATELLITE (local +z = toward the Sun) =================
+            function foilTex() {
+                const c = cv(256, 256), x = c.getContext('2d'); x.fillStyle = '#cfa81c'; x.fillRect(0, 0, 256, 256);
+                for (let i = 0; i < 450; i++) {
+                    x.strokeStyle = 'hsla(' + (44 + rnd() * 10) + ',' + (70 + rnd() * 30) + '%,' + (34 + rnd() * 50) + '%,.55)'; x.lineWidth = 1 + rnd() * 5;
+                    const a = rnd() * 256, b = rnd() * 256; x.beginPath(); x.moveTo(a, b); x.lineTo(a + (rnd() - .5) * 70, b + (rnd() - .5) * 70); x.stroke();
+                }
+                const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; return t;
+            }
+            function panelTex() {
+                const c = cv(256, 256), x = c.getContext('2d'); x.fillStyle = '#1b1c21'; x.fillRect(0, 0, 256, 256);
+                for (let i = 0; i < 2500; i++) { x.fillStyle = 'rgba(255,255,255,' + rnd() * .05 + ')'; x.fillRect(rnd() * 256, rnd() * 256, 1, 1); }
+                x.strokeStyle = '#3a3d46'; x.lineWidth = 2; for (let i = 0; i <= 256; i += 64) { x.beginPath(); x.moveTo(i, 0); x.lineTo(i, 256); x.moveTo(0, i); x.lineTo(256, i); x.stroke(); }
+                x.fillStyle = '#4a4d57'; for (let i = 16; i < 256; i += 64)for (let j = 16; j < 256; j += 64) { x.beginPath(); x.arc(i, j, 2.4, 0, TAU); x.fill(); }
+                return new THREE.CanvasTexture(c);
+            }
+            function cellTex() {
+                const W = 640, H = 420, c = cv(W, H), x = c.getContext('2d');
+                const g = x.createLinearGradient(0, 0, W, H); g.addColorStop(0, '#09265f'); g.addColorStop(.45, '#174b9a'); g.addColorStop(1, '#071a42'); x.fillStyle = g; x.fillRect(0, 0, W, H);
+                const cols = 20, rows = 12, cw = W / cols, ch = H / rows;
+                for (let r = 0; r < rows; r++)for (let q = 0; q < cols; q++) {
+                    const px = q * cw + 2, py = r * ch + 2, ww = cw - 4, hh = ch - 4;
+                    const shade = 7 + ((q * 7 + r * 11) % 12); x.fillStyle = 'rgb(' + shade + ',' + (28 + shade) + ',' + (67 + shade * 2) + ')'; x.fillRect(px, py, ww, hh);
+                    const cg = x.createLinearGradient(px, py, px + ww, py + hh); cg.addColorStop(0, 'rgba(76,145,255,.28)'); cg.addColorStop(.5, 'rgba(20,72,160,.08)'); cg.addColorStop(1, 'rgba(2,12,38,.35)'); x.fillStyle = cg; x.fillRect(px, py, ww, hh);
+                    x.strokeStyle = 'rgba(165,204,255,.58)'; x.lineWidth = 1; x.strokeRect(px + .5, py + .5, ww - 1, hh - 1);
+                    x.strokeStyle = 'rgba(210,225,245,.72)'; x.lineWidth = 1.1;
+                    for (let k = 1; k < 7; k++) { const xx = px + ww * k / 7; x.beginPath(); x.moveTo(xx, py + 2); x.lineTo(xx, py + hh - 2); x.stroke(); }
+                    x.fillStyle = 'rgba(226,174,82,.9)'; x.fillRect(px + ww * .48, py + hh * .42, 2, 3);
+                    x.fillStyle = 'rgba(190,215,255,.72)'; x.fillRect(px + ww * .12, py + hh * .12, 1, hh * .76); x.fillRect(px + ww * .88, py + hh * .12, 1, hh * .76);
+                }
+                x.strokeStyle = '#aab6c9'; x.lineWidth = 7; x.strokeRect(2, 2, W - 4, H - 4);
+                x.strokeStyle = 'rgba(255,255,255,.45)'; x.lineWidth = 1; x.strokeRect(7, 7, W - 14, H - 14);
+                const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 4; return tex;
+            }
+            const ft = foilTex();
+            const gold = new THREE.MeshStandardMaterial({ map: ft, bumpMap: ft, bumpScale: 1.5, metalness: .5, roughness: .4, emissive: 0x2b1e00 });
+            const blk = new THREE.MeshStandardMaterial({ map: panelTex(), roughness: .7, metalness: .2, emissive: 0x050507 });
+            const silver = new THREE.MeshStandardMaterial({ color: 0xcfd3d9, metalness: .55, roughness: .35, emissive: 0x16171a });
+            const whiteM = new THREE.MeshStandardMaterial({ color: 0xf3f1ea, roughness: .55, metalness: .1, emissive: 0x1d1d1b, side: THREE.DoubleSide });
+            const dark = new THREE.MeshStandardMaterial({ color: 0x17181c, roughness: .6, metalness: .3 });
+            const dark2 = new THREE.MeshStandardMaterial({ color: 0x2a2c33, roughness: .6, metalness: .3 });
+            const lens = new THREE.MeshStandardMaterial({ color: 0x0a1030, metalness: .9, roughness: .15, emissive: 0x060c2a });
+            const bellM = new THREE.MeshStandardMaterial({ color: 0x4a4d54, metalness: .6, roughness: .45, side: THREE.DoubleSide });
+            const solarTex = cellTex();
+            const solar = new THREE.MeshStandardMaterial({ map: solarTex, color: 0xd8e7ff, roughness: .42, metalness: .22, emissive: 0x07152b, emissiveMap: solarTex, emissiveIntensity: .16, side: THREE.DoubleSide });
+            const solarB = new THREE.MeshStandardMaterial({ map: solarTex, color: 0xc8d9ff, roughness: .46, metalness: .18, emissive: 0x061126, emissiveMap: solarTex, emissiveIntensity: .12, side: THREE.DoubleSide });
+
+            const sat = new THREE.Group(); scene.add(sat);
+            const UPV = new THREE.Vector3(0, 1, 0);
+            function put(g, m, x, y, z, p) { const o = new THREE.Mesh(g, m); o.position.set(x, y, z); (p || sat).add(o); return o; }
+            function tag(o, n) { o.traverse(c => { c.userData.part = n; }); return o; }
+            const B = (w, h, d) => new THREE.BoxGeometry(w, h, d), Cy = (a, b, h, s) => new THREE.CylinderGeometry(a, b, h, s || 16), Z = o => { o.rotation.x = Math.PI / 2; return o; };
+            function strut(a, b, r, mt, p) {
+                const A = new THREE.Vector3(a[0], a[1], a[2]), E = new THREE.Vector3(b[0], b[1], b[2]), d = E.clone().sub(A),
+                    o = new THREE.Mesh(Cy(r, r, d.length(), 8), mt || silver); o.position.copy(A).add(E).multiplyScalar(.5); o.quaternion.setFromUnitVectors(UPV, d.normalize()); (p || sat).add(o); return o;
+            }
+
+            const bodyM = new THREE.MeshStandardMaterial({ color: 0xaab0bd, bumpMap: ft, bumpScale: .25, metalness: .5, roughness: .5, emissive: 0x14161a });
+            const copper = new THREE.MeshStandardMaterial({ map: ft, color: 0xd9733a, bumpMap: ft, bumpScale: 1, metalness: .55, roughness: .4, emissive: 0x2a0e02 });
+            tag(put(B(1, 2, 1.1), bodyM, 0, 0, 0), 'bus');
+            tag(put(B(.03, 1.9, 1.04), gold, .515, 0, 0), 'mli'); tag(put(B(.98, 1.96, .03), gold, 0, 0, .565), 'mli');
+            tag(put(new THREE.LatheGeometry([[.05, 0], [.08, -.1], [.14, -.26], [.26, -.46]].map(p => new THREE.Vector2(p[0], p[1])), 20), bellM, 0, -1, 0), 'prop');
+            for (const sx of [-1, 1]) for (const sz of [-1, 1]) tag(put(Cy(.03, .04, .14, 10), dark, sx * .4, -1.07, sz * .35), 'prop');
+            tag(put(B(.8, .3, .5), dark2, 0, 1.15, -.2), 'bus');
+            for (let i = 0; i < 5; i++)tag(put(B(.22, .025, .025), silver, -.38 + i * .19, 1.0, .52), 'bus');
+            for (const q of [-.38, .38]) { tag(put(B(.08, .12, .08), dark2, q, 1.06, .46), 'bus'); tag(put(Cy(.035, .035, .045, 12), gold, q, 1.13, .46), 'bus'); }
+            for (let i = 0; i < 4; i++)tag(put(B(.12, .018, .025), silver, -.3 + i * .2, -1.01, .2), 'bus');
+            tag(put(Cy(.012, .012, .9, 8), whiteM, .57, -.2, -.35), 'bus'); for (const y of [-.55, .1]) tag(strut([.53, y, -.35], [.57, y, -.35], .012, whiteM), 'bus');
+            for (const y of [.45, .72]) tag(put(B(.26, .2, .1), silver, .28, y, -.6), 'bus');
+            tag(put(new THREE.SphereGeometry(.27, 32, 20), copper, -.15, .7, -.78), 'tank');
+            tag(put(new THREE.TorusGeometry(.272, .012, 8, 40), silver, -.15, .7, -.78), 'tank').rotation.x = Math.PI / 2;
+            tag(put(Cy(.035, .035, .08, 12), silver, -.15, .99, -.78), 'tank');
+            for (const dx of [-.14, .14]) tag(strut([-.15 + dx, .62, -.5], [-.15 + dx * 1.4, .62, -.62], .014, silver), 'tank');
+
+            // RME Payload Box
+            tag(put(B(.22, .1, .22), dark, 0, .95, -.35), 'rme');
+            tag(put(B(.18, .02, .18), gold, 0, 1.01, -.35), 'rme');
+
+            // VELC coronagraph tube
+            const velc = new THREE.Group(); velc.position.set(-.28, .55, .83); sat.add(velc);
+            Z(put(Cy(.24, .24, .55, 28), whiteM, 0, 0, 0, velc));
+            for (const z of [-.12, .02, .16]) Z(put(Cy(.255, .255, .025, 28), silver, 0, 0, z, velc));
+            Z(put(Cy(.245, .245, .04, 28), dark, 0, 0, .29, velc)); Z(put(Cy(.19, .19, .02, 28), lens, 0, 0, .31, velc)); tag(velc, 'velc');
+            // SUIT ultraviolet telescope
+            const suit = new THREE.Group(); suit.position.set(.3, .58, .76); sat.add(suit);
+            Z(put(Cy(.19, .19, .42, 28), silver, 0, 0, 0, suit)); Z(put(Cy(.2, .2, .03, 28), dark, 0, 0, .21, suit)); Z(put(Cy(.15, .15, .02, 28), lens, 0, 0, .225, suit));
+            put(B(.34, .06, .3), dark, 0, -.2, -.05, suit); tag(suit, 'suit');
+            // SoLEXS + HEL1OS X-ray spectrometers
+            const xr = new THREE.Group(); xr.position.set(0, -.3, .64); sat.add(xr);
+            put(B(.24, .17, .15), dark, -.28, 0, 0, xr); put(B(.24, .03, .15), gold, -.28, .1, 0, xr); put(B(.3, .22, .17), silver, .22, 0, 0, xr);
+            for (const a of [[-.08, .05], [.08, .05], [-.08, -.05], [.08, -.05]]) Z(put(Cy(.035, .035, .03, 14), lens, .22 + a[0], a[1], .095, xr));
+            xr.children.forEach((c, i) => tag(c, i < 2 ? 'solexs' : 'hel1os'));
+            // ASPEX + PAPA particle and plasma analysers
+            const pl = new THREE.Group(); pl.position.set(0, 1.07, .25); sat.add(pl);
+            put(B(.3, .14, .24), silver, -.3, 0, 0, pl); put(new THREE.SphereGeometry(.08, 16, 10, 0, TAU, 0, 1.57), lens, -.3, .07, 0, pl);
+            put(Cy(.12, .14, .16, 20), gold, .25, .02, 0, pl); put(new THREE.SphereGeometry(.1, 16, 10, 0, TAU, 0, 1.57), whiteM, .25, .1, 0, pl); pl.children.forEach((c, i) => tag(c, i < 2 ? 'aspex' : 'papa'));
+            // magnetometer boom
+            {
+                const P0 = [-.4, .98, -.3], P1 = [-1.9, 1.72, -.6];
+                tag(strut(P0, P1, .018, silver), 'mag'); tag(put(Cy(.06, .06, .08, 12), dark, P0[0], P0[1] + .03, P0[2]), 'mag');
+                for (const t of [.5, 1]) { const q = P0.map((v, i) => v + (P1[i] - v) * t); tag(put(B(.1, .1, .1), t < 1 ? gold : silver, q[0], q[1], q[2]), 'mag'); }
+            }
+
+            // Two solar-array wings
+            const solarFaceMat = new THREE.MeshStandardMaterial({
+                map: solarTex, color: 0xffffff, roughness: .34, metalness: .12,
+                emissive: 0x102b60, emissiveMap: solarTex, emissiveIntensity: .22,
+                side: THREE.DoubleSide
+            });
+            const solarEdge = new THREE.MeshStandardMaterial({ color: 0x202a3b, metalness: .72, roughness: .32 });
+            const solarCellPlane = new THREE.PlaneGeometry(1.35, .95); const sn0 = sat.children.length;
+            for (const s of [-1, 1]) {
+                for (const dy of [-.3, .3]) tag(strut([s * .5, 0, -.55], [s * 1.12, dy, -.55], .03, silver), 'solar');
+                for (let k = 0; k < 2; k++) {
+                    const cx = s * (1.815 + k * 1.39);
+                    tag(put(B(1.41, 1.01, .025), solarEdge, cx, 0, -.57), 'solar');
+                    const front = put(solarCellPlane, solarFaceMat, cx, 0, -.535);
+                    front.renderOrder = 3; front.material.polygonOffset = true; front.material.polygonOffsetFactor = -1; front.material.polygonOffsetUnits = -1; tag(front, 'solar');
+                    const back = put(solarCellPlane, solarFaceMat, cx, 0, -.605);
+                    back.rotation.y = Math.PI; back.renderOrder = 3; back.material.polygonOffset = true; back.material.polygonOffsetFactor = -1; back.material.polygonOffsetUnits = -1; tag(back, 'solar');
+                    for (const yy of [-.49, .49]) tag(put(B(1.40, .025, .06), silver, cx, yy, -.57), 'solar');
+                    for (const xx of [-.69, .69]) tag(put(B(.025, .98, .06), silver, cx + xx, 0, -.57), 'solar');
+                    for (let q = 1; q < 6; q++)tag(put(B(.008, .91, .004), new THREE.MeshStandardMaterial({ color: 0x7894c9, metalness: .5, roughness: .35 }), cx - .63 + q * .21, 0, -.539), 'solar');
+                    tag(put(Cy(.055, .055, .11, 12), dark, cx - s * .72, 0, -.57), 'solar');
+                }
+                for (const y of [-.3, .3]) tag(strut([s * 2.49, y, -.55], [s * 2.53, y, -.55], .02, silver), 'solar');
+            }
+            for (const c of sat.children.slice(sn0)) { c.position.y += .35; c.position.z += .57; }
+
+            const dishM = new THREE.MeshStandardMaterial({ color: 0x101216, metalness: .85, roughness: .22, side: THREE.DoubleSide });
+            const DC = new THREE.Vector3(-.15, -.35, -.7), DA = new THREE.Vector3(-.18, .12, -1).normalize();
+            {
+                const dg = new THREE.Group(); dg.position.copy(DC); dg.quaternion.setFromUnitVectors(UPV, DA); sat.add(dg);
+                const prof = []; for (let i = 0; i <= 14; i++) { const r = .62 * i / 14; prof.push(new THREE.Vector2(r + .0001, .2 * (r / .62) * (r / .62))); }
+                put(new THREE.LatheGeometry(prof, 48), dishM, 0, 0, 0, dg); put(new THREE.TorusGeometry(.62, .014, 8, 48), silver, 0, .2, 0, dg).rotation.x = Math.PI / 2;
+                for (let k = 0; k < 3; k++) { const a = k * TAU / 3; strut([.62 * Math.cos(a), .2, .62 * Math.sin(a)], [0, .48, 0], .008, silver, dg); }
+                put(Cy(.035, .05, .1, 12), silver, 0, .5, 0, dg); put(Cy(.06, .04, .14, 12), silver, 0, -.1, 0, dg); tag(dg, 'dish');
+                tag(put(B(.26, .26, .05), silver, -.15, -.35, -.58), 'dish');
+                const e = put(new THREE.SphereGeometry(.12, 20, 10), whiteM, .3, .93, -.58); e.scale.set(1, 1, .45); tag(e, 'dish');
+            }
+
+            const leds = [];
+            tag(put(B(.04, .22, .1), dark, -.52, -.3, .2), 'status');
+            [[.075, 0x33ff77, t => (t % 3.2) < .18 ? 1 : .08], [.025, 0xffb020, t => { const u = t % 2.4; return (u < .1 || (u > .25 && u < .35)) ? 1 : .08; }], [-.025, 0x38bdf8, t => (t % .9) < .07 ? 1 : .1], [-.075, 0x33ff77, t => .55 + .1 * Math.sin(t * 1.3)]].forEach(([dy, col, fn]) => {
+                const m = new THREE.MeshBasicMaterial({ color: col }), b = new THREE.Color(col);
+                tag(put(new THREE.SphereGeometry(.017, 10, 8), m, -.545, -.3 + dy, .2), 'status');
+                leds.push(t => m.color.copy(b).multiplyScalar(reduce ? .7 : .15 + .85 * fn(t)));
+            });
+            put(new THREE.TubeGeometry(new THREE.CatmullRomCurve3([[.54, -.1, .3], [.62, -.1, .15], [.62, .2, .1], [.5, .35, .02]].map(p => new THREE.Vector3(p[0], p[1], p[2]))), 28, .011, 6), dark2, 0, 0, 0);
+            sat.traverse(o => { if (o.isMesh) { o.castShadow = o.receiveShadow = true; if (!o.userData.part) o.userData.part = 'bus'; } });
+
+            // ================= Orbit around the Sun, lights =================
+            const S = new THREE.Vector3(), U = new THREE.Vector3(), N = new THREE.Vector3(), X = new THREE.Vector3(), M4 = new THREE.Matrix4();
+            function orbit(th) {
+                const s = Math.sin(th), c = Math.cos(th); S.set(RO * c, -RO * s * Math.sin(INC), RO * s * Math.cos(INC));
+                U.copy(S).negate().normalize(); N.set(0, Math.cos(INC), Math.sin(INC)); X.crossVectors(N, U).normalize();
+                M4.makeBasis(X, N, U); sat.quaternion.setFromRotationMatrix(M4); sat.position.copy(S);
+            }
+            scene.add(new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(Array.from({ length: 360 }, (_, i) => { const th = i / 360 * TAU, s = Math.sin(th), c = Math.cos(th); return new THREE.Vector3(RO * c, -RO * s * Math.sin(INC), RO * s * Math.cos(INC)); })), new THREE.LineBasicMaterial({ color: 0xffcf94, transparent: true, opacity: .16 })));
+            const sunL = new THREE.DirectionalLight(0xffd28a, 3.0); sunL.castShadow = true; sunL.shadow.mapSize.set(1024, 1024);
+            Object.assign(sunL.shadow.camera, { left: -6, right: 6, top: 6, bottom: -6, near: 1, far: 60 }); sunL.shadow.camera.updateProjectionMatrix(); sunL.shadow.bias = -.0006;
+            const fill = new THREE.DirectionalLight(0x8fa4e6, .62);
+            const solarRim = new THREE.PointLight(0xffa943, 1.65, 180, 1.8);
+            scene.add(sunL, sunL.target, fill, fill.target, new THREE.HemisphereLight(0x9bb0ff, 0x2a1a14, .68), solarRim);
+
+            // ================= Parts: data, glow overlays, UI =================
+            const PARTS = [
+                {
+                    id: 'solar', n: 'Solar arrays', k: 'Solar', tag: 'Power', c: '#22d3ee', f: [2.5, .35, .02], az: 2.3, el: .18, dist: 7.5,
+                    d: 'Wings of solar cells face the Sun and turn sunlight into electricity. The power runs every instrument and computer and charges the batteries. At the L1 point the Sun is never hidden by Earth or the Moon, so the panels stay in steady light.', s: [['Role', 'Power supply'], ['Sunlight', 'Uninterrupted']]
+                },
+                {
+                    id: 'dish', n: 'High-gain antenna', k: 'Antenna', tag: 'Communication', c: '#f472b6', f: [-.15, -.35, -.75], az: 2.8, el: .15, dist: 3.8,
+                    d: 'The large dish sends solar images and measurements home to ISRO’s ground stations across about 1.5 million km, and receives commands from Earth. Without it, none of the science would reach the scientists.', s: [['Distance', '~1.5 million km'], ['Link', 'ISRO stations']]
+                },
+                {
+                    id: 'velc', n: 'VELC coronagraph', k: 'VELC', tag: 'Coronagraph', c: '#fb923c', f: [-.28, .55, .95], az: .4, el: .2, dist: 2.6,
+                    d: 'The Visible Emission Line Coronagraph blocks the Sun’s bright disc, like an artificial eclipse, so it can image the faint corona around it. It studies the corona and the coronal mass ejections that hurl plasma into space. Built by the Indian Institute of Astrophysics, Bengaluru.', s: [['Sees', 'Solar corona'], ['Built by', 'IIA, Bengaluru']]
+                },
+                {
+                    id: 'suit', n: 'SUIT telescope', k: 'SUIT', tag: 'Ultraviolet imaging', c: '#a78bfa', f: [.3, .58, .86], az: -.4, el: .2, dist: 2.4,
+                    d: 'The Solar Ultraviolet Imaging Telescope photographs the Sun in near-ultraviolet light through many filters, revealing the layers just above the surface. It also tracks how the Sun’s ultraviolet output changes. Built by IUCAA, Pune.', s: [['Band', 'Near-ultraviolet'], ['Built by', 'IUCAA, Pune']]
+                },
+                {
+                    id: 'solexs', n: 'SoLEXS', k: 'SoLEXS', tag: 'Soft X-rays', c: '#ef4444', f: [-.28, -.3, .7], az: .3, el: -.1, dist: 1.9,
+                    d: 'The Solar Low Energy X-ray Spectrometer measures soft X-rays, the lower-energy light that solar flares give off as they heat plasma.', m: 'Tracks how strong and how hot solar flares are, an important input for space-weather study.', src: 'ISRO Aditya-L1 payload overview', ill: 'box shape and position on the model.', s: [['Detects', 'Soft X-rays'], ['Studies', 'Solar flares']]
+                },
+                {
+                    id: 'hel1os', n: 'HEL1OS', k: 'HEL1OS', tag: 'Hard X-rays', c: '#fb7185', f: [.22, -.3, .7], az: -.3, el: -.1, dist: 1.9,
+                    d: 'The High Energy L1 Orbiting X-ray Spectrometer detects hard, high-energy X-rays, which flares emit when particles are accelerated.', m: 'Together with SoLEXS it covers flares from soft to hard X-rays, showing how a flare releases its energy.', src: 'ISRO Aditya-L1 payload overview', ill: 'box shape, detector count and position on the model.', s: [['Detects', 'Hard X-rays'], ['Studies', 'Flare particles']]
+                },
+                {
+                    id: 'aspex', n: 'ASPEX', k: 'ASPEX', tag: 'Solar wind particles', c: '#4ade80', f: [-.3, 1.07, .25], az: .3, el: .45, dist: 1.9,
+                    d: 'The Aditya Solar wind Particle EXperiment measures ions and energetic particles in the solar wind. It has two units, SWIS and STEPS.', m: 'Gives the speed, direction and energy of particles streaming past L1 on their way to Earth.', src: 'ISRO Aditya-L1 payload overview', ill: 'unit shapes and which side each instrument sits on.', s: [['Units', 'SWIS + STEPS'], ['Measures', 'Solar-wind ions']]
+                },
+                {
+                    id: 'papa', n: 'PAPA', k: 'PAPA', tag: 'Plasma analyser', c: '#2dd4bf', f: [.25, 1.07, .25], az: -.3, el: .45, dist: 1.9,
+                    d: 'The Plasma Analyser Package for Aditya measures the electrons and ions of the solar wind and their directions.', m: 'Adds the plasma makeup that, with ASPEX, shows what the solar wind is made of.', src: 'ISRO Aditya-L1 payload overview', ill: 'shape and position on the model.', s: [['Measures', 'Electrons + ions'], ['Studies', 'Solar wind']]
+                },
+                {
+                    id: 'rme', n: 'RME Payload', k: 'RME', tag: 'High-energy particles', c: '#38bdf8', f: [0, .5, -.35], az: 1.8, el: .3, dist: 2.1,
+                    d: 'The Radiation Monitor Experiment measures high-energy charged particles in orbit and the interplanetary radiation environment at the L1 point.', m: 'Assesses radiation dose and particle hazards affecting onboard electronics and spacecraft systems.', src: 'ISRO Aditya-L1 payload overview', ill: 'box shape and top deck position.', s: [['Detects', 'Charged particles'], ['Environment', 'Interplanetary']]
+                },
+                {
+                    id: 'mag', n: 'Magnetometer boom', k: 'Magnetometer', tag: 'Magnetic field', c: '#facc15', f: [-1.15, 1.35, -.45], az: -1.9, el: .3, dist: 4.6,
+                    d: 'Magnetic sensors sit on a long boom, about 6 m, so they stay far from the spacecraft’s own electronics. They measure the magnetic field carried by the solar wind at L1, which helps predict how it will affect Earth.', s: [['Boom', 'About 6 m'], ['Measures', 'Magnetic field']]
+                },
+                {
+                    id: 'mli', n: 'Thermal blankets', k: 'Thermal', tag: 'Thermal control', c: '#e3b84a', f: [.5, 0, 0], az: 1.5, el: .2, dist: 4.2,
+                    d: 'Gold-coloured multilayer insulation wraps parts of the body. It reflects sunlight and slows heat loss so electronics and instruments stay in a steady temperature range.', m: 'Keeps the payloads stable while one side faces the Sun and the other faces deep space.', src: 'Standard spacecraft thermal-control practice', ill: 'which surfaces are covered, and the foil texture.', s: [['Role', 'Thermal control'], ['Look', 'Gold foil']]
+                },
+                {
+                    id: 'prop', n: 'Propulsion hardware', k: 'Propulsion', tag: 'Orbit manoeuvres', c: '#94a3b8', f: [0, -1.15, 0], az: 2.6, el: -.3, dist: 3.2,
+                    d: 'A main engine nozzle and small thrusters at the rear change the spacecraft’s orbit.', m: 'Onboard propulsion was used for orbit-raising and the burn into the halo orbit at L1.', src: 'ISRO Aditya-L1 mission updates', ill: 'nozzle shape and layout.', s: [['Role', 'Orbit changes'], ['Where', 'Rear of body']]
+                },
+                {
+                    id: 'status', n: 'Status lights', k: 'Status LEDs', tag: 'Visualisation', c: '#a3e635', f: [-.52, -.3, .2], az: -1.3, el: .15, dist: 2,
+                    d: 'Four small lights on an indicator housing blink in different, restrained patterns to suggest that systems are alive.', m: 'A visual cue only.', src: 'Model visualisation', ill: 'housing, lights and blink patterns.', s: [['Type', 'Visualisation'], ['Pattern', 'Mixed blinks']]
+                },
+                {
+                    id: 'tank', n: 'Propellant tank', k: 'Tank', tag: 'Propulsion', c: '#ff8a65', f: [-.15, .7, -.78], az: 2.8, el: .2, dist: 2.4,
+                    d: 'A spherical tank wrapped in copper-coloured insulation, as seen in published renders of the spacecraft. It stores the propellant that the main engine and thrusters burn.', m: 'Holds fuel used to reach and keep the halo orbit at L1.', src: 'Published Aditya-L1 spacecraft renders', ill: 'tank size, exact position, straps and standoffs.', s: [['Shape', 'Sphere'], ['Fuel amount', 'Not stated']]
+                },
+                {
+                    id: 'bus', n: 'Satellite bus', k: 'Body', tag: 'Spacecraft body', c: '#e2e8f0', f: [0, 0, 0], az: 2.2, el: .25, dist: 5.5,
+                    d: 'The body holds the computers, batteries, propulsion and thermal control that serve all instruments. Launched on 2 September 2023, it reached its halo orbit at the Sun–Earth L1 point on 6 January 2024.', s: [['Launched', '2 Sep 2023'], ['Orbit', 'Halo at L1']]
+                }
+            ];
+
+            const byId = {};
+            PARTS.forEach(p => { byId[p.id] = p; p.mat = new THREE.MeshBasicMaterial({ color: p.c, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2, side: THREE.DoubleSide, fog: false }); p.hl = []; p.cur = 0; });
+            {
+                const list = []; sat.traverse(o => { if (o.isMesh) list.push(o); });
+                for (const o of list) {
+                    const p = byId[o.userData.part], gp = o.geometry.parameters || {}, h = new THREE.Mesh(o.geometry, p.mat); let a = 1.05, b = 1.05, c = 1.05;
+                    if (o.geometry.type === 'CylinderGeometry') { const r = Math.max(gp.radiusTop, gp.radiusBottom); a = c = Math.min(4, 1 + .035 / r); b = 1 + .03 / (gp.height / 2); }
+                    else if (o.geometry.type === 'BoxGeometry') { a = Math.min(4, 1 + .035 / (gp.width / 2)); b = Math.min(4, 1 + .035 / (gp.height / 2)); c = Math.min(4, 1 + .035 / (gp.depth / 2)); }
+                    h.scale.set(a, b, c); h.visible = false; h.renderOrder = 2; h.userData.part = o.userData.part; o.add(h); p.hl.push(h);
+                }
+            }
+
+            root.insertAdjacentHTML('beforeend', '<div class="vk-chips"></div><div class="vk-card" hidden><button type="button" class="vk-x" aria-label="Close">×</button><div class="vk-k"><i></i><span class="vk-tag"></span></div><h2 class="vk-n"></h2><p class="vk-d"></p><div class="vk-st"></div><p class="vk-m" hidden></p><p class="vk-src"></p></div>');
+            const chips = root.querySelector('.vk-chips'), card = root.querySelector('.vk-card'), $c = q => card.querySelector(q);
+            PARTS.forEach(p => { const b = document.createElement('button'); b.type = 'button'; b.className = 'vk-chip'; b.style.setProperty('--c', p.c); b.innerHTML = '<i style="background:' + p.c + ';color:' + p.c + '"></i>' + p.k; b.onclick = () => select(p.id); p.chip = b; chips.appendChild(b); });
+            chips.classList.add('in');
+
+            // ================= State, camera, interaction =================
+            let T = 0, theta = .8, hiT = 5, sel = null, lastMsg = '', tw = 0, down = false, lx = 0, ly = 0, sx0 = 0, sy0 = 0, idle = 0, visible = true, pf = 1, pfp = 1, sm = 0;
+            let az = 3.0, el = .45, dist = 26, azT = 2.7, elT = .2, fx = 0, fy = 0, fz = 0, zm = 1, hold = false;
+            const tmp = new THREE.Vector3(), tg = new THREE.Vector3(), clock = new THREE.Clock();
+            const wrap = a => { a %= TAU; if (a > Math.PI) a -= TAU; if (a < -Math.PI) a += TAU; return a; };
+            function type(el2, text) {
+                clearInterval(tw); el2.textContent = ''; el2.classList.remove('typing'); if (reduce) { el2.textContent = text; return; } el2.classList.add('typing'); let i = 0;
+                tw = setInterval(() => { i += 2; el2.textContent = text.slice(0, i); if (i >= text.length) { clearInterval(tw); el2.classList.remove('typing'); } }, 18);
+            }
+            function select(id) {
+                const p = byId[id]; if (!p) return; sel = id; hold = false; azT = p.az; elT = p.el; idle = 0;
+                PARTS.forEach(q => q.chip.classList.toggle('on', q === p));
+                card.style.setProperty('--c', p.c); card.hidden = false; card.classList.remove('on'); void card.offsetWidth; card.classList.add('on');
+                $c('.vk-tag').textContent = 'Part ' + String(PARTS.indexOf(p) + 1).padStart(2, '0') + ' · ' + p.tag;
+                $c('.vk-n').innerHTML = [...p.n].map((ch, i) => '<span style="--i:' + i + '">' + (ch === ' ' ? '&nbsp;' : ch === '&' ? '&amp;' : ch) + '</span>').join('');
+                $c('.vk-st').innerHTML = p.s.map((s, i) => '<div style="--i:' + i + '"><small>' + s[0] + '</small><b>' + s[1] + '</b></div>').join('');
+                type($c('.vk-d'), p.d); const mm = $c('.vk-m'); mm.hidden = !p.m; mm.innerHTML = p.m ? '<b>Role in the mission</b>' + p.m : ''; $c('.vk-src').textContent = 'Source: ' + (p.src || 'ISRO Aditya-L1 mission information') + (p.ill ? ' · Illustrative: ' + p.ill : ''); setS('Camera locked on: ' + p.n);
+            }
+            function closeCard() { sel = null; idle = 3.1; lastMsg = ''; clearInterval(tw); card.hidden = true; card.classList.remove('on'); PARTS.forEach(q => q.chip.classList.remove('on')); }
+            $c('.vk-x').onclick = closeCard;
+            const rb = root.querySelector('.vk-r'); if (rb) rb.onclick = () => { closeCard(); hiT = 5; };
+
+            // Pause / Resume Orbit button logic
+            const pauseBtn = root.querySelector('.vk-pause');
+            if (pauseBtn) { pauseBtn.onclick = () => { isPaused = !isPaused; pauseBtn.textContent = isPaused ? 'Resume Orbit' : 'Pause Orbit'; }; }
+
+            const ray = new THREE.Raycaster(), mv = new THREE.Vector2();
+            const shown = o => { for (; o; o = o.parent)if (!o.visible) return false; return true; };
+            function pick(e) {
+                const r = canvas.getBoundingClientRect(); mv.set((e.clientX - r.left) / r.width * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1); ray.setFromCamera(mv, camera);
+                for (const h of ray.intersectObjects(sat.children, true)) { if (!shown(h.object)) continue; const id = h.object.userData.part; if (id) select(id); return; } if (sel) closeCard();
+            }
+            canvas.style.cursor = 'grab';
+            const ptrs = new Map(); let pd0 = 0, pinched = false;
+            const pdist = () => { const v = [...ptrs.values()]; return Math.hypot(v[0].x - v[1].x, v[0].y - v[1].y); };
+            canvas.addEventListener('pointerdown', e => {
+                ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY }); down = true; idle = 0; canvas.setPointerCapture(e.pointerId); canvas.style.cursor = 'grabbing';
+                if (ptrs.size === 1) { lx = sx0 = e.clientX; ly = sy0 = e.clientY; pinched = false; } else if (ptrs.size === 2) { pinched = true; pd0 = pdist(); }
+            });
+            canvas.addEventListener('pointermove', e => {
+                const q = ptrs.get(e.pointerId); if (!q) return; q.x = e.clientX; q.y = e.clientY; idle = 0;
+                if (ptrs.size >= 2) { const d = pdist(); if (d > 0 && pd0 > 0) zm = clamp(zm * pd0 / d, .45, 2.2); pd0 = d; return; }
+                const dx = e.clientX - lx, dy = e.clientY - ly; lx = e.clientX; ly = e.clientY; az -= dx * .008; azT = az; el = clamp(el + dy * .006, -1.45, 1.45); elT = el;
+            });
+            const endP = (e, tap) => {
+                if (!ptrs.delete(e.pointerId)) return;
+                if (ptrs.size === 0) { down = false; canvas.style.cursor = 'grab'; idle = 0; if (tap && !pinched && Math.hypot(e.clientX - sx0, e.clientY - sy0) < 8) pick(e); }
+                else { const r = [...ptrs.values()][0]; lx = r.x; ly = r.y; }
+            };
+            canvas.addEventListener('pointerup', e => endP(e, true)); canvas.addEventListener('pointercancel', e => endP(e, false));
+            canvas.addEventListener('wheel', e => { e.preventDefault(); zm = clamp(zm * Math.exp(e.deltaY * .0011), .45, 2.2); idle = 0; }, { passive: false });
+
+            const VIEWS = [['Front', 0, .1], ['Right', 1.571, .1], ['Rear', 3.14, .1], ['Left', -1.571, .1], ['Top', 0, 1.4], ['Bottom', 0, -1.4]]; let vi = -1;
+            const mk = (t, fn) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'vk-chip'; b.textContent = t; b.onclick = fn; chips.insertBefore(b, chips.firstChild); return b; };
+            const vb = mk('Next view', () => { vi = (vi + 1) % 6; const v = VIEWS[vi]; closeCard(); hold = true; azT = v[1]; elT = v[2]; idle = 0; vb.textContent = 'View: ' + v[0]; });
+            mk('Reset view', () => { closeCard(); hold = false; zm = 1; vi = -1; vb.textContent = 'Next view'; azT = 2.7; elT = .2; idle = 0; });
+
+            function resize() { const w = root.clientWidth || 300, h = root.clientHeight || 300; renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); pf = w / h < 1 ? Math.min(2.4, 1.15 / (w / h)) : 1; pfp = 1 + (pf - 1) * .55; }
+            new ResizeObserver(resize).observe(root); resize();
+            new IntersectionObserver(e => { visible = e[0].isIntersecting; }).observe(root);
+
+            // ================= Main loop =================
+            function frame() {
+                requestAnimationFrame(frame);
+                const dt = Math.min(clock.getDelta(), .05); if (!visible) return;
+                T += dt;
+                if (!isPaused) { theta += OMEGA * dt * (reduce ? .3 : 1); }
+                hiT = Math.max(0, hiT - dt);
+                orbit(theta);
+                sunMat.uniforms.uT.value = T; sg2.rotation.y += dt * .012; rays.material.rotation = T * .012;
+                loops.forEach((m, i) => { m.material.opacity = .16 + .09 * Math.sin(T * .6 + i * 1.7); }); leds.forEach(u => u(T));
+                sunL.position.copy(S).addScaledVector(U, 25); sunL.target.position.copy(S); solarRim.position.copy(S).addScaledVector(U, -5);
+                fill.position.copy(S).addScaledVector(U, -20).addScaledVector(N, 8); fill.target.position.copy(S);
+
+                if (!down) idle += dt;
+                if (sel === null && idle > 3 && !hold) { azT = 2.7 + .4 * Math.sin(T * .12); elT = .2 + .1 * Math.sin(T * .09); }
+                const P = sel ? byId[sel] : null, k = Math.min(1, dt * 2.4), ff = P ? P.f : [0, 0, 0];
+                az += wrap(azT - az) * k; el += (elT - el) * k; dist += ((P ? P.dist * pfp : 9.5 * pf) * zm - dist) * k; sm += ((P && pf > 1.01 ? 1 : 0) - sm) * k; fx += (ff[0] - fx) * k; fy += (ff[1] - fy) * k; fz += (ff[2] - fz) * k;
+                tmp.set(fx, fy, fz); tg.copy(tmp).applyQuaternion(sat.quaternion).add(S);
+                tmp.x += Math.cos(el) * Math.sin(az) * dist; tmp.y += Math.sin(el) * dist; tmp.z += Math.cos(el) * Math.cos(az) * dist;
+                camera.position.copy(tmp).applyQuaternion(sat.quaternion).add(S); camera.up.copy(N); tg.addScaledVector(N, -dist * .17 * sm); camera.lookAt(tg);
+
+                const fade = Math.min(1, hiT / 2), blink = .5 + .5 * Math.sin(T * 4.2);
+                for (const p of PARTS) {
+                    const tgt = sel !== null ? (sel === p.id ? 1 : 0) : fade; p.cur += (tgt - p.cur) * Math.min(1, dt * 6);
+                    const o = p.cur * (sel !== null ? (sel === p.id ? .55 + .08 * Math.sin(T * 2) : .3) : .14 + .36 * blink); p.mat.opacity = o;
+                    const v = o > .004; for (const h of p.hl) if (h.visible !== v) h.visible = v;
+                }
+                if (sel === null) { const sc = Math.ceil(hiT), m = sc > 0 ? 'All parts are glowing · tap one to explore (' + sc + 's)' : 'Tap any part of the satellite to explore it.'; if (m !== lastMsg) { lastMsg = m; setS(m); } }
+                renderer.render(scene, camera);
+            }
+            frame();
+            return { highlight: () => { closeCard(); hiT = 5; } };
+        }
+        // Start it: pass any element that has a size.
+        AdityaL1(document.getElementById('aditya'));
+    </script>
+    <script src="script3.js" defer></script>
+</body>
+
+</html>

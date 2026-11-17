@@ -1,0 +1,1557 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset=utf8>
+  <meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <style>
+    :root {
+      color-scheme: light;
+      box-sizing: border-box;
+      padding-top: env(safe-area-inset-top, 0px);
+      padding-bottom: env(safe-area-inset-bottom, 0px)
+    }
+
+    html {
+      scroll-padding-top: env(safe-area-inset-top, 0px)
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font: 14px -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #fff;
+      color: #000
+    }
+
+    img {
+      max-width: 100%
+    }
+
+    [hidden]:not([hidden=until-found i]) {
+      display: none !important
+    }
+  </style>
+  <script src="script2.js"></script>
+  <script src="script1.js"></script>
+  <style>
+    /* ===== Go Back button ===== */
+    .back-btn {
+      --back-accent: #ffb35c;
+      position: fixed;
+      top: calc(env(safe-area-inset-top, 0px) + 12px);
+      left: max(14px, env(safe-area-inset-left, 0px));
+      z-index: 1000;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      height: 36px;
+      padding: 0 15px 0 11px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, .18);
+      background: rgba(8, 14, 26, .55);
+      -webkit-backdrop-filter: blur(12px) saturate(140%);
+      backdrop-filter: blur(12px) saturate(140%);
+      color: #eef2fb;
+      font: 600 13px/1 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      letter-spacing: .04em;
+      text-decoration: none;
+      white-space: nowrap;
+      box-shadow: 0 4px 18px rgba(0, 0, 0, .4);
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+      transition: background .2s, border-color .2s, color .2s, transform .2s
+    }
+
+    .back-btn svg {
+      width: 16px;
+      height: 16px;
+      flex: none;
+      transition: transform .2s
+    }
+
+    .back-btn:hover {
+      background: rgba(8, 14, 26, .82);
+      border-color: var(--back-accent);
+      color: #fff
+    }
+
+    .back-btn:hover svg {
+      transform: translateX(-3px)
+    }
+
+    .back-btn:focus-visible {
+      outline: 2px solid var(--back-accent);
+      outline-offset: 3px
+    }
+
+    .back-btn:active {
+      transform: scale(.96)
+    }
+
+    @media (prefers-reduced-motion:reduce) {
+
+      .back-btn,
+      .back-btn svg {
+        transition: none
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <a class="back-btn" href="index2.html" aria-label="Go back to the home page"><svg viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M15 6l-6 6 6 6" />
+    </svg><span>Go Back</span></a>
+  <title>Spacewalk Rescue</title>
+  <meta name="claude:viewport-fit-sides" content="cover">
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Unbounded:wght@500;600&display=swap">
+  <style>
+    /* Layout: full-bleed WebGL stage; title and buttons top, live stats bottom, a centered glass card for lessons and quizzes. Single dark look by choice. */
+    :root {
+      --bg: #02030a;
+      --fg: #eef1ff;
+      --dim: #8d97c4;
+      --line: rgba(160, 172, 220, 0.3);
+      --accent: #ffb35c;
+      --good: #5fe0a8;
+      --bad: #ff6a5c;
+      --card: rgba(5, 8, 22, 0.86);
+      --display: 'Unbounded', 'Arial Black', system-ui, sans-serif;
+      --mono: 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace;
+      color-scheme: dark;
+    }
+
+    html,
+    body {
+      height: 100%;
+    }
+
+    body {
+      margin: 0;
+      box-sizing: border-box;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: var(--mono);
+      overflow: hidden;
+      padding-left: max(16px, env(safe-area-inset-left, 0px));
+      padding-right: max(16px, env(safe-area-inset-right, 0px));
+    }
+
+    #stage {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      touch-action: none;
+      cursor: crosshair;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    .vig {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background: radial-gradient(ellipse at 50% 50%, rgba(0, 0, 0, 0) 58%, rgba(0, 0, 6, 0.55) 100%);
+    }
+
+    .hud {
+      position: fixed;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px 16px;
+      flex-wrap: wrap;
+      padding-left: max(16px, env(safe-area-inset-left, 0px));
+      padding-right: max(16px, env(safe-area-inset-right, 0px));
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--dim);
+      pointer-events: none;
+    }
+
+    .hud.top {
+      top: env(safe-area-inset-top, 0px);
+      padding-top: 18px;
+    }
+
+    .hud.top>div:first-child {
+      margin-top: 46px;
+    }
+
+    .hud.bottom {
+      bottom: env(safe-area-inset-bottom, 0px);
+      padding-bottom: 18px;
+      align-items: flex-end;
+    }
+
+    h1 {
+      margin: 0 0 6px;
+      font-family: var(--display);
+      font-weight: 600;
+      font-size: clamp(18px, 3.6vw, 28px);
+      letter-spacing: 0.03em;
+      text-transform: none;
+      color: var(--fg);
+      text-wrap: balance;
+    }
+
+    .btns {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .stats {
+      display: flex;
+      gap: 10px 22px;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      margin: 0;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .stats div {
+      min-width: 0;
+    }
+
+    .stats dt {
+      font-size: 10px;
+      margin-bottom: 5px;
+    }
+
+    .stats dd {
+      margin: 0;
+      color: var(--fg);
+      font-size: 14px;
+      letter-spacing: 0.06em;
+    }
+
+    .stats dd i {
+      font-style: normal;
+      color: var(--dim);
+      font-size: 10px;
+      margin-left: 3px;
+    }
+
+    .bar {
+      width: 150px;
+      height: 8px;
+      border: 1px solid var(--line);
+      border-radius: 99px;
+      overflow: hidden;
+      margin-top: 3px;
+    }
+
+    .bar i {
+      display: block;
+      height: 100%;
+      width: 100%;
+      background: var(--good);
+      transition: background 0.3s;
+    }
+
+    .bar.low i {
+      background: var(--bad);
+    }
+
+    #how {
+      margin-top: 10px;
+      max-width: 46ch;
+      line-height: 1.6;
+      text-transform: none;
+      letter-spacing: 0.04em;
+    }
+
+    #load {
+      margin-top: 6px;
+      transition: opacity 0.8s ease;
+    }
+
+    #load.gone {
+      opacity: 0;
+    }
+
+    #toast {
+      position: fixed;
+      left: 50%;
+      top: calc(env(safe-area-inset-top, 0px) + 142px);
+      transform: translateX(-50%);
+      max-width: min(92vw, 520px);
+      padding: 10px 16px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--card);
+      color: var(--fg);
+      font-size: 13px;
+      line-height: 1.5;
+      text-align: center;
+      opacity: 0;
+      transition: opacity 0.35s ease;
+      pointer-events: none;
+    }
+
+    #toast.on {
+      opacity: 1;
+    }
+
+    button {
+      pointer-events: auto;
+      font: inherit;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--fg);
+      background: rgba(2, 3, 10, 0.5);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 8px 16px;
+      cursor: pointer;
+    }
+
+    button:hover:not(:disabled) {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    button[aria-pressed="true"] {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    button:disabled {
+      opacity: 0.45;
+      cursor: default;
+    }
+
+    button:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 3px;
+    }
+
+    .panel {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px max(16px, env(safe-area-inset-right, 0px)) 24px max(16px, env(safe-area-inset-left, 0px));
+      background: rgba(1, 2, 8, 0.45);
+      overflow-y: auto;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 460px;
+      box-sizing: border-box;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 24px;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      font-size: 14px;
+      line-height: 1.65;
+      letter-spacing: 0.02em;
+    }
+
+    .card h2 {
+      margin: 6px 0 12px;
+      font-family: var(--display);
+      font-weight: 600;
+      font-size: 22px;
+      line-height: 1.25;
+      text-wrap: balance;
+    }
+
+    .card p {
+      margin: 0 0 12px;
+    }
+
+    .card .kicker {
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--dim);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .card .how {
+      color: var(--dim);
+      font-size: 13px;
+    }
+
+    .card .primary {
+      background: var(--accent);
+      color: #1a1205;
+      border-color: var(--accent);
+      font-weight: 500;
+      margin-top: 6px;
+    }
+
+    .card .primary:hover:not(:disabled) {
+      color: #1a1205;
+      filter: brightness(1.08);
+    }
+
+    .opts {
+      display: grid;
+      gap: 8px;
+      margin: 14px 0;
+    }
+
+    .opts button {
+      text-align: left;
+      text-transform: none;
+      letter-spacing: 0.02em;
+      border-radius: 10px;
+      padding: 10px 14px;
+      line-height: 1.5;
+    }
+
+    .opts button.right {
+      border-color: var(--good);
+      color: var(--good);
+      opacity: 1;
+    }
+
+    .opts button.wrong {
+      border-color: var(--bad);
+      color: var(--bad);
+      opacity: 0.8;
+    }
+
+    .ok {
+      color: var(--good);
+    }
+
+    .no {
+      color: var(--bad);
+    }
+
+    .flag {
+      display: inline-block;
+      width: 26px;
+      height: 18px;
+      border-radius: 2px;
+      background: linear-gradient(#ff9933 0 33.3%, #fff 33.3% 66.6%, #138808 66.6% 100%);
+      position: relative;
+      flex: none;
+    }
+
+    .flag::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 6px;
+      height: 6px;
+      margin: -3px 0 0 -3px;
+      border: 1px solid #000080;
+      border-radius: 50%;
+      box-sizing: border-box;
+    }
+
+    .stars {
+      letter-spacing: 0.2em;
+      color: var(--accent);
+    }
+
+    #msg {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      text-align: center;
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--dim);
+    }
+  </style>
+
+  <canvas id="stage" tabindex="0" role="img"
+    aria-label="Spacewalk Rescue: a 3D astronaut with an Indian flag on his chest floats in zero gravity above Earth. Collect the drifting tools before oxygen runs out. Hold the pointer or use the arrow keys."></canvas>
+  <div class="vig"></div>
+
+  <header class="hud top">
+    <div>
+      <h1>Spacewalk Rescue</h1>
+      <div id="lvl">Recover the toolkit</div>
+    </div>
+    <div class="btns">
+      <button id="stab" type="button" aria-pressed="false" hidden>Stabilize: off</button>
+      <button id="boost" type="button" hidden>Boost</button><button id="mag" type="button" hidden>Magnet</button><button
+        id="restart" type="button">Restart</button>
+      <button id="snd" type="button" aria-pressed="true">Sound: on</button>
+    </div>
+  </header>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+
+  <footer class="hud bottom">
+    <div>
+      <dl class="stats">
+        <div>
+          <dt>Oxygen</dt>
+          <dd><span id="o2t">100</span><i>%</i>
+            <div class="bar" id="o2b"><i id="o2f"></i></div>
+          </dd>
+        </div>
+        <div>
+          <dt>Tools</dt>
+          <dd id="tt">0/3</dd>
+        </div>
+        <div>
+          <dt>Speed</dt>
+          <dd id="tv">0.00<i>m/s</i></dd>
+        </div>
+        <div>
+          <dt>Magnet</dt>
+          <dd id="mg">–</dd>
+        </div>
+        <div>
+          <dt id="xl">Mass</dt>
+          <dd id="xv">1.0<i>×</i></dd>
+        </div>
+      </dl>
+      <div id="how"></div>
+      <div id="load">Rendering Earth and stars…</div>
+    </div>
+  </footer>
+
+  <div id="panel" class="panel" hidden>
+    <div id="card" class="card"></div>
+  </div>
+  <div id="msg" role="alert">This game needs WebGL, which isn't available in this browser.</div>
+
+  <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
+  <script>
+    (function () {
+      'use strict';
+      var stage = document.getElementById('stage');
+      var msg = document.getElementById('msg');
+      function fail() { msg.style.display = 'flex'; stage.style.display = 'none'; }
+      if (!window.THREE) { fail(); return; }
+      var THREE = window.THREE;
+      var renderer;
+      try {
+        renderer = new THREE.WebGLRenderer({ canvas: stage, antialias: true, powerPreference: 'high-performance' });
+      } catch (e) { fail(); return; }
+
+      var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      renderer.outputColorSpace = THREE.SRGBColorSpace;
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.05;
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      renderer.setClearColor(0x000000, 1);
+
+      var scene = new THREE.Scene();
+      var camera = new THREE.PerspectiveCamera(36, 1, 0.1, 1500);
+      var sunDir = new THREE.Vector3(-0.55, 0.62, 0.56).normalize();
+
+      /* ---------- noise (3D value noise, seamless on a sphere) ---------- */
+      function hash(i, j, k) {
+        var h = Math.imul(i, 374761393) + Math.imul(j, 668265263) + Math.imul(k, 1274126177) | 0;
+        h = Math.imul(h ^ (h >>> 13), 1103515245);
+        h ^= h >>> 16;
+        return (h >>> 0) / 4294967296;
+      }
+      function sm(t) { return t * t * (3 - 2 * t); }
+      function vnoise(x, y, z) {
+        var xi = Math.floor(x), yi = Math.floor(y), zi = Math.floor(z);
+        var fx = sm(x - xi), fy = sm(y - yi), fz = sm(z - zi);
+        var a = hash(xi, yi, zi), b = hash(xi + 1, yi, zi), c = hash(xi, yi + 1, zi), d = hash(xi + 1, yi + 1, zi);
+        var e = hash(xi, yi, zi + 1), f = hash(xi + 1, yi, zi + 1), g = hash(xi, yi + 1, zi + 1), h = hash(xi + 1, yi + 1, zi + 1);
+        var x1 = a + (b - a) * fx, x2 = c + (d - c) * fx, x3 = e + (f - e) * fx, x4 = g + (h - g) * fx;
+        var y1 = x1 + (x2 - x1) * fy, y2 = x3 + (x4 - x3) * fy;
+        return y1 + (y2 - y1) * fz;
+      }
+      function fbm(x, y, z, o) {
+        var s = 0, a = 0.5, n = 0;
+        for (var i = 0; i < o; i++) { s += a * vnoise(x, y, z); n += a; x *= 2.03; y *= 2.03; z *= 2.03; a *= 0.5; }
+        return s / n;
+      }
+      function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
+      function smooth(a, b, v) { var t = clamp((v - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); }
+      function mix(a, b, t) { return a + (b - a) * t; }
+
+      /* ---------- time-sliced texture jobs so the page stays responsive ---------- */
+      var jobs = [];
+      function addJob(w, h, fn, cb) {
+        var c = document.createElement('canvas'); c.width = w; c.height = h;
+        var cx = c.getContext('2d');
+        jobs.push({ w: w, h: h, fn: fn, cb: cb, c: c, cx: cx, img: cx.createImageData(w, h), row: 0 });
+      }
+      var px = [0, 0, 0, 255];
+      function runJobs() {
+        var j = jobs[0];
+        if (!j) { document.getElementById('load').classList.add('gone'); return; }
+        var t0 = performance.now();
+        while (j.row < j.h && performance.now() - t0 < 5) {
+          var y = j.row;
+          for (var x = 0; x < j.w; x++) {
+            j.fn(x / j.w, (y + 0.5) / j.h, px);
+            var o = (y * j.w + x) * 4;
+            j.img.data[o] = px[0]; j.img.data[o + 1] = px[1]; j.img.data[o + 2] = px[2]; j.img.data[o + 3] = px[3];
+          }
+          j.row++;
+        }
+        if (j.row >= j.h) { j.cx.putImageData(j.img, 0, 0); jobs.shift(); j.cb(j.c); }
+      }
+      function dirOf(u, v, out) {
+        var lon = (u * 2 - 1) * Math.PI, lat = (0.5 - v) * Math.PI, cl = Math.cos(lat);
+        out[0] = cl * Math.cos(lon); out[1] = Math.sin(lat); out[2] = cl * Math.sin(lon); out[3] = lat;
+      }
+
+      /* ---------- image-based light: dark sky, hot sun, bright Earth below ---------- */
+      var pm = new THREE.PMREMGenerator(renderer);
+      var es = new THREE.Scene();
+      es.add(new THREE.Mesh(new THREE.SphereGeometry(50, 32, 16), new THREE.MeshBasicMaterial({ color: 0x010206, side: THREE.BackSide })));
+      var envSun = new THREE.Mesh(new THREE.SphereGeometry(4, 16, 8), new THREE.MeshBasicMaterial({ color: new THREE.Color(1, 0.97, 0.9).multiplyScalar(90) }));
+      envSun.position.copy(sunDir).multiplyScalar(40); es.add(envSun);
+      var envEarth = new THREE.Mesh(new THREE.SphereGeometry(60, 32, 16), new THREE.MeshBasicMaterial({ color: new THREE.Color(0.42, 0.62, 1.0).multiplyScalar(1.6) }));
+      envEarth.position.set(0, -64, -14); es.add(envEarth);
+      scene.environment = pm.fromScene(es, 0.02).texture;
+      es.traverse(function (o) { if (o.geometry) o.geometry.dispose(); if (o.material) o.material.dispose(); });
+      pm.dispose();
+
+      /* ---------- lights ---------- */
+      var sun = new THREE.DirectionalLight(0xfff4e6, 2.3);
+      sun.position.copy(sunDir).multiplyScalar(14);
+      sun.castShadow = true;
+      sun.shadow.mapSize.set(2048, 2048);
+      sun.shadow.camera.left = -3.4; sun.shadow.camera.right = 3.4; sun.shadow.camera.top = 3.4; sun.shadow.camera.bottom = -3.4;
+      sun.shadow.camera.near = 4; sun.shadow.camera.far = 30;
+      sun.shadow.bias = -0.0004; sun.shadow.normalBias = 0.02;
+      scene.add(sun);
+      var earthshine = new THREE.DirectionalLight(0x78a4ff, 0.42);
+      earthshine.position.set(0.2, -1, 0.4);
+      scene.add(earthshine);
+
+      /* ---------- starfield + Milky Way ---------- */
+      var skyTex = new THREE.CanvasTexture(function () { var c = document.createElement('canvas'); c.width = 4; c.height = 2; c.getContext('2d').fillStyle = '#02030a'; c.getContext('2d').fillRect(0, 0, 4, 2); return c; }());
+      skyTex.colorSpace = THREE.SRGBColorSpace;
+      var skyMat = new THREE.MeshBasicMaterial({ map: skyTex, side: THREE.BackSide, depthWrite: false, toneMapped: false });
+      var sky = new THREE.Mesh(new THREE.SphereGeometry(600, 64, 32), skyMat);
+      sky.rotation.y = 1.1;
+      scene.add(sky);
+      var galN = new THREE.Vector3(0.28, 0.9, 0.33).normalize();
+      addJob(1024, 512, function (u, v, o) {
+        dirOf(u, v, o);
+        var x = o[0], y = o[1], z = o[2];
+        var coord = x * galN.x + y * galN.y + z * galN.z;
+        var band = Math.exp(-(coord * coord) / (2 * 0.17 * 0.17));
+        var dens = fbm(x * 3 + 5, y * 3, z * 3, 5);
+        var dust = fbm(x * 6.5 + 9, y * 6.5, z * 6.5, 4);
+        var core = Math.max(0, x * 0.5 + z * 0.8 + y * 0.1); core = Math.pow(core, 6);
+        var I = band * (0.28 + dens * 1.05 + core * 1.1);
+        var lane = smooth(0.46, 0.64, dust) * band * 0.75;
+        I = Math.max(0, I - lane * 0.7);
+        var fine = fbm(x * 40, y * 40, z * 40, 2);
+        I *= 0.7 + fine * 0.6;
+        var r = 0.006 + 0.42 * I + 0.38 * I * I;
+        var g = 0.008 + 0.45 * I + 0.22 * I * I;
+        var b = 0.016 + 0.62 * I + 0.1 * I * I;
+        o[0] = clamp(r, 0, 1) * 255; o[1] = clamp(g, 0, 1) * 255; o[2] = clamp(b, 0, 1) * 255; o[3] = 255;
+      }, function (c) { var t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; skyMat.map = t; skyMat.needsUpdate = true; skyTex.dispose(); });
+
+      var pointVS = 'attribute float size; attribute vec3 color; varying vec3 vC; uniform float pr; void main(){ vC=color; vec4 mv=modelViewMatrix*vec4(position,1.0); gl_PointSize=size*pr; gl_Position=projectionMatrix*mv; }';
+      (function stars() {
+        var N = 9000, pos = new Float32Array(N * 3), col = new Float32Array(N * 3), size = new Float32Array(N);
+        var i = 0, tries = 0;
+        while (i < N && tries < N * 20) {
+          tries++;
+          var a = Math.random() * 6.2832, zz = Math.random() * 2 - 1, rr = Math.sqrt(1 - zz * zz);
+          var dx = rr * Math.cos(a), dy = zz, dz = rr * Math.sin(a);
+          var c = dx * galN.x + dy * galN.y + dz * galN.z;
+          var p = 0.18 + 0.82 * Math.exp(-(c * c) / (2 * 0.2 * 0.2));
+          if (Math.random() > p) continue;
+          pos[i * 3] = dx * 500; pos[i * 3 + 1] = dy * 500; pos[i * 3 + 2] = dz * 500;
+          var m = Math.pow(Math.random(), 4);
+          var t = Math.random();
+          var br = 0.35 + m * 0.9;
+          var cr = t < 0.25 ? 0.75 : t > 0.8 ? 1.0 : 0.95;
+          var cg = t < 0.25 ? 0.85 : t > 0.8 ? 0.82 : 0.96;
+          var cb = t < 0.25 ? 1.0 : t > 0.8 ? 0.65 : 1.0;
+          col[i * 3] = cr * br; col[i * 3 + 1] = cg * br; col[i * 3 + 2] = cb * br;
+          size[i] = 1.1 + m * 3.6;
+          i++;
+        }
+        var g = new THREE.BufferGeometry();
+        g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+        g.setAttribute('color', new THREE.BufferAttribute(col, 3));
+        g.setAttribute('size', new THREE.BufferAttribute(size, 1));
+        var m = new THREE.ShaderMaterial({
+          uniforms: { pr: { value: renderer.getPixelRatio() } },
+          vertexShader: pointVS,
+          fragmentShader: 'varying vec3 vC; void main(){ float d=length(gl_PointCoord-0.5); float a=smoothstep(0.5,0.0,d); a=a*a*1.6; gl_FragColor=vec4(vC*a,a); }',
+          transparent: true, depthWrite: false, blending: THREE.AdditiveBlending
+        });
+        var pts = new THREE.Points(g, m); pts.frustumCulled = false; pts.rotation.y = 1.1;
+        scene.add(pts);
+      })();
+
+      /* ---------- Earth ---------- */
+      var R = 70;
+      var earthGroup = new THREE.Group();
+      scene.add(earthGroup);
+      function flat(hex) { var c = document.createElement('canvas'); c.width = 4; c.height = 2; var x = c.getContext('2d'); x.fillStyle = hex; x.fillRect(0, 0, 4, 2); var t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t; }
+      var earthMat = new THREE.MeshStandardMaterial({ map: flat('#1d4a86'), roughness: 0.78, metalness: 0, envMapIntensity: 0.0 });
+      var earth = new THREE.Mesh(new THREE.SphereGeometry(R, 192, 96), earthMat);
+      earthGroup.add(earth);
+      var cloudMat = new THREE.MeshStandardMaterial({ transparent: true, depthWrite: false, roughness: 1, metalness: 0, opacity: 0, envMapIntensity: 0.0 });
+      var clouds = new THREE.Mesh(new THREE.SphereGeometry(R * 1.004, 192, 96), cloudMat);
+      earthGroup.add(clouds);
+      function atmo(back) {
+        return new THREE.ShaderMaterial({
+          uniforms: { sun: { value: sunDir.clone() } },
+          vertexShader: 'varying vec3 vN; varying vec3 vV; varying vec3 vW; void main(){ vec4 mv=modelViewMatrix*vec4(position,1.0); vN=normalize(normalMatrix*normal); vV=normalize(-mv.xyz); vW=normalize(mat3(modelMatrix)*normal); gl_Position=projectionMatrix*mv; }',
+          fragmentShader: back
+            ? 'uniform vec3 sun; varying vec3 vN; varying vec3 vV; varying vec3 vW; void main(){ float d=dot(normalize(vN),normalize(vV)); float t=clamp(-d/0.26,0.0,1.0); float I=pow(1.0-t,2.4); float lit=smoothstep(-0.35,0.45,dot(normalize(vW),sun)); vec3 col=mix(vec3(0.16,0.34,0.9),vec3(0.5,0.75,1.0),lit); gl_FragColor=vec4(col*I*(0.18+1.9*lit),1.0); }'
+            : 'uniform vec3 sun; varying vec3 vN; varying vec3 vV; varying vec3 vW; void main(){ float d=clamp(dot(normalize(vN),normalize(vV)),0.0,1.0); float rim=pow(1.0-d,3.2); float lit=smoothstep(-0.35,0.45,dot(normalize(vW),sun)); gl_FragColor=vec4(vec3(0.36,0.64,1.0)*rim*(0.1+1.5*lit),1.0); }',
+          side: back ? THREE.BackSide : THREE.FrontSide, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false
+        });
+      }
+      var atmoBack = new THREE.Mesh(new THREE.SphereGeometry(R * 1.035, 128, 64), atmo(true));
+      var atmoFront = new THREE.Mesh(new THREE.SphereGeometry(R * 1.007, 128, 64), atmo(false));
+      scene.add(atmoBack); scene.add(atmoFront);
+      var earthPos = new THREE.Vector3(0, -77, -33);
+      earthGroup.position.copy(earthPos); atmoBack.position.copy(earthPos); atmoFront.position.copy(earthPos);
+      earthGroup.rotation.set(0.35, 2.2, 0.28);
+
+      addJob(1536, 768, function (u, v, o) {
+        dirOf(u, v, o);
+        var x = o[0], y = o[1], z = o[2], lat = o[3], al = Math.abs(lat);
+        var h = fbm(x * 2.3 + 3, y * 2.3, z * 2.3, 6), e = h - 0.5;
+        var r, g, b, jitter = (hash((u * 4096) | 0, (v * 4096) | 0, 7) - 0.5) * 0.035;
+        if (e > 0) {
+          var m = fbm(x * 3 + 11, y * 3, z * 3, 4);
+          var dry = clamp((m - 0.47) * 5 + (al > 0.25 && al < 0.62 ? 0.35 : 0), 0, 1);
+          r = mix(0.12, 0.6, dry); g = mix(0.27, 0.48, dry); b = mix(0.1, 0.29, dry);
+          var mt = clamp((e - 0.09) * 9, 0, 1);
+          r = mix(r, 0.42, mt); g = mix(g, 0.39, mt); b = mix(b, 0.35, mt);
+          var ice = smooth(1.12, 1.3, al) + smooth(0.88, 1.2, al) * smooth(0.02, 0.1, e) * 0.9;
+          ice = clamp(ice, 0, 1);
+          r = mix(r, 0.93, ice); g = mix(g, 0.95, ice); b = mix(b, 0.98, ice);
+        } else {
+          var sh = Math.pow(clamp(1 + e * 9, 0, 1), 2);
+          r = mix(0.01, 0.05, sh); g = mix(0.05, 0.3, sh); b = mix(0.17, 0.45, sh);
+          var ice2 = smooth(1.28, 1.4, al); r = mix(r, 0.9, ice2); g = mix(g, 0.94, ice2); b = mix(b, 0.98, ice2);
+        }
+        o[0] = clamp(r + jitter, 0, 1) * 255; o[1] = clamp(g + jitter, 0, 1) * 255; o[2] = clamp(b + jitter, 0, 1) * 255; o[3] = 255;
+      }, function (c) { var t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; earthMat.map = t; earthMat.needsUpdate = true; });
+      addJob(1024, 512, function (u, v, o) {
+        dirOf(u, v, o);
+        var x = o[0], y = o[1], z = o[2];
+        var c = fbm(x * 3.4 + 20, y * 4.2, z * 3.4, 6);
+        var a = smooth(0.5, 0.7, c);
+        o[0] = 255; o[1] = 255; o[2] = 255; o[3] = a * 235;
+      }, function (c) { var t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; cloudMat.map = t; cloudMat.opacity = 1; cloudMat.needsUpdate = true; });
+
+      /* ---------- astronaut ---------- */
+      function noiseTex(size, fn, repeat) {
+        var c = document.createElement('canvas'); c.width = c.height = size;
+        var x = c.getContext('2d'); fn(x, size);
+        var t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(repeat, repeat); t.anisotropy = 4; return t;
+      }
+      var fabric = noiseTex(256, function (x, s) {
+        x.fillStyle = '#808080'; x.fillRect(0, 0, s, s);
+        for (var i = 0; i < 6000; i++) { var v = 105 + Math.random() * 50; x.fillStyle = 'rgb(' + v + ',' + v + ',' + v + ')'; x.fillRect(Math.random() * s, Math.random() * s, 1 + Math.random() * 3, 1); }
+        for (var j = 0; j < 4000; j++) { var w = 105 + Math.random() * 50; x.fillStyle = 'rgb(' + w + ',' + w + ',' + w + ')'; x.fillRect(Math.random() * s, Math.random() * s, 1, 1 + Math.random() * 3); }
+        x.strokeStyle = 'rgba(30,30,30,0.6)'; x.lineWidth = 2;
+        for (var k = 0; k <= s; k += 64) { x.beginPath(); x.moveTo(k, 0); x.lineTo(k, s); x.stroke(); x.beginPath(); x.moveTo(0, k); x.lineTo(s, k); x.stroke(); }
+      }, 3);
+      var foil = noiseTex(256, function (x, s) {
+        x.fillStyle = '#808080'; x.fillRect(0, 0, s, s);
+        for (var i = 0; i < 900; i++) { var v = Math.random() > 0.5 ? 200 : 60; x.fillStyle = 'rgba(' + v + ',' + v + ',' + v + ',0.35)'; x.beginPath(); x.ellipse(Math.random() * s, Math.random() * s, 3 + Math.random() * 16, 2 + Math.random() * 10, Math.random() * 3, 0, 6.28); x.fill(); }
+      }, 2);
+
+      function fab(hex, rough) { return new THREE.MeshPhysicalMaterial({ color: hex, roughness: rough, metalness: 0, bumpMap: fabric, bumpScale: 1.5, sheen: 0.5, sheenRoughness: 0.6, sheenColor: new THREE.Color(0xffffff) }); }
+      var mWhite = fab(0xeeeeef, 0.8);
+      var mWhite2 = fab(0xe3e3e5, 0.84);
+      var mGray = new THREE.MeshStandardMaterial({ color: 0x9a9da4, roughness: 0.5, metalness: 0.45 });
+      var mCuff = new THREE.MeshStandardMaterial({ color: 0x7e8794, roughness: 0.38, metalness: 0.75 });
+      var mDark = new THREE.MeshStandardMaterial({ color: 0x1b1d24, roughness: 0.55, metalness: 0.25 });
+      var mRubber = new THREE.MeshStandardMaterial({ color: 0x15161b, roughness: 0.9, metalness: 0 });
+      var mFrame = new THREE.MeshStandardMaterial({ color: 0xcfd1d6, roughness: 0.5, metalness: 0.5, bumpMap: fabric, bumpScale: 0.5 });
+      var mGold = new THREE.MeshStandardMaterial({ color: 0xcf9a38, roughness: 0.3, metalness: 1, bumpMap: foil, bumpScale: 2.5 });
+      var mVisor = new THREE.MeshPhysicalMaterial({ color: 0xe6a93a, roughness: 0.04, metalness: 1, envMapIntensity: 1.5, clearcoat: 1, clearcoatRoughness: 0.03 });
+      var mRed = new THREE.MeshStandardMaterial({ color: 0xc72b2b, roughness: 0.7, metalness: 0 });
+
+      var astro = new THREE.Group();
+      var body = new THREE.Group();
+      astro.add(body);
+      scene.add(astro);
+      var ASTRO_SCALE = 0.35, TOOL_SCALE = 0.6; astro.scale.setScalar(ASTRO_SCALE); /* smaller astronaut */
+      function M(geo, mat, x, y, z, parent) { var m = new THREE.Mesh(geo, mat); m.position.set(x || 0, y || 0, z || 0); if (parent) parent.add(m); return m; }
+      function cap(r, l, mat) { return new THREE.Mesh(new THREE.CapsuleGeometry(r, l, 10, 24), mat); }
+      function box(w, h, d, mat, x, y, z, parent) { return M(new THREE.BoxGeometry(w, h, d), mat, x, y, z, parent); }
+      function cyl(rt, rb, h, mat, x, y, z, parent, seg) { return M(new THREE.CylinderGeometry(rt, rb, h, seg || 24), mat, x, y, z, parent); }
+      function ball(r, mat, x, y, z, parent) { return M(new THREE.SphereGeometry(r, 32, 20), mat, x, y, z, parent); }
+      function ring(R0, tube, mat, x, y, z, parent) { var t = M(new THREE.TorusGeometry(R0, tube, 12, 40), mat, x, y, z, parent); t.rotation.x = Math.PI / 2; return t; }
+      function pleats(parent, r, n, gap, y0, mat) { for (var i = 0; i < n; i++) ring(r, 0.012, mat, 0, y0 + i * gap, 0, parent); }
+      function hose(pts, rad, mat) { var c = new THREE.CatmullRomCurve3(pts.map(function (p) { return new THREE.Vector3(p[0], p[1], p[2]); })); return M(new THREE.TubeGeometry(c, 48, rad, 10, false), mat, 0, 0, 0, body); }
+
+      // torso (hard upper torso) and pelvis
+      var torso = M(new THREE.CapsuleGeometry(0.25, 0.28, 14, 36), mWhite, 0, 0.03, 0, body); torso.scale.set(1.22, 1, 0.92);
+      var pelvis = ball(0.24, mWhite2, 0, -0.34, 0.01, body); pelvis.scale.set(1.2, 0.78, 0.96);
+      cyl(0.255, 0.255, 0.06, mCuff, 0, -0.25, 0, body, 40).scale.set(1.15, 1, 0.9);
+      cyl(0.26, 0.26, 0.02, mGray, 0, -0.215, 0, body, 40).scale.set(1.15, 1, 0.9);
+      // chest controller
+      box(0.3, 0.17, 0.09, mGray, 0, 0.1, 0.235, body);
+      box(0.2, 0.07, 0.01, mDark, 0, 0.12, 0.285, body);
+      [[-0.1, 0.05, 0xff5a3c], [-0.04, 0.05, 0x6ee0c0], [0.02, 0.05, 0xffffff], [0.08, 0.05, 0xffd25c]].forEach(function (b) {
+        var btn = cyl(0.016, 0.016, 0.014, new THREE.MeshStandardMaterial({ color: b[2], roughness: 0.5, emissive: b[2], emissiveIntensity: 0.25 }), b[0], b[1], 0.285, body, 12); btn.rotation.x = Math.PI / 2;
+      });
+      [-0.12, 0.12].forEach(function (x) { var cn = cyl(0.025, 0.025, 0.05, mCuff, x, -0.01, 0.255, body, 16); cn.rotation.x = Math.PI / 2; });
+
+      // NASA name patch (left of chest on screen) and Indian flag patch (right)
+      var patchTex = (function () {
+        var c = document.createElement('canvas'); c.width = 256; c.height = 96; var x = c.getContext('2d');
+        x.fillStyle = '#f2f2f4'; x.fillRect(0, 0, 256, 96);
+        x.fillStyle = '#c4242b'; x.font = 'italic 800 64px Helvetica, Arial, sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText('NASA', 128, 50);
+        var t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; return t;
+      })();
+      var patch = M(new THREE.PlaneGeometry(0.15, 0.056), new THREE.MeshStandardMaterial({ map: patchTex, roughness: 0.85 }), -0.2, 0.2, 0.182, body); patch.rotation.y = -0.55;
+      var flagTex = (function () {
+        var W = 384, H = 256, c = document.createElement('canvas'); c.width = W; c.height = H; var x = c.getContext('2d');
+        x.fillStyle = '#ff9933'; x.fillRect(0, 0, W, H / 3);
+        x.fillStyle = '#ffffff'; x.fillRect(0, H / 3, W, H / 3);
+        x.fillStyle = '#138808'; x.fillRect(0, 2 * H / 3, W, H / 3 + 1);
+        var cx = W / 2, cy = H / 2, r = H / 6 - 3;
+        x.strokeStyle = '#000080'; x.lineWidth = 4; x.beginPath(); x.arc(cx, cy, r, 0, 6.2832); x.stroke();
+        x.lineWidth = 2;
+        for (var i = 0; i < 24; i++) { var a = i * Math.PI / 12; x.beginPath(); x.moveTo(cx, cy); x.lineTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r); x.stroke(); }
+        x.fillStyle = '#000080'; x.beginPath(); x.arc(cx, cy, 5, 0, 6.2832); x.fill();
+        for (var k = 0; k < 24; k++) { var b = k * Math.PI / 12 + Math.PI / 24; x.beginPath(); x.arc(cx + Math.cos(b) * (r - 4), cy + Math.sin(b) * (r - 4), 2.2, 0, 6.2832); x.fill(); }
+        x.strokeStyle = 'rgba(0,0,0,0.35)'; x.lineWidth = 6; x.strokeRect(0, 0, W, H);
+        var t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; return t;
+      })();
+      var flag = M(new THREE.PlaneGeometry(0.135, 0.09), new THREE.MeshStandardMaterial({ map: flagTex, roughness: 0.8 }), 0.2, 0.2, 0.182, body); flag.rotation.y = 0.55;
+
+      // neck ring and helmet
+      var neck = M(new THREE.TorusGeometry(0.19, 0.035, 14, 44), mCuff, 0, 0.37, 0.03, body); neck.rotation.x = Math.PI / 2;
+      var helmet = new THREE.Group(); helmet.position.set(0, 0.57, 0.04); body.add(helmet);
+      ball(0.26, mWhite, 0, 0, 0, helmet);
+      ball(0.235, mDark, 0, 0, 0.012, helmet);
+      var visor = M(new THREE.SphereGeometry(0.268, 64, 40, Math.PI * 0.14, Math.PI * 0.72, Math.PI * 0.26, Math.PI * 0.44), mVisor, 0, 0, 0, helmet);
+      visor.scale.set(1, 1, 1.02);
+      M(new THREE.SphereGeometry(0.275, 48, 20, Math.PI * 0.08, Math.PI * 0.84, Math.PI * 0.1, Math.PI * 0.2), mWhite, 0, 0, 0, helmet);
+      var chin = M(new THREE.TorusGeometry(0.16, 0.022, 10, 36, Math.PI), mCuff, 0, -0.11, 0.15, helmet); chin.rotation.set(Math.PI * 0.62, 0, Math.PI);
+      var bumper = M(new THREE.TorusGeometry(0.255, 0.018, 10, 48), mGray, 0, 0.05, 0, helmet); bumper.rotation.x = Math.PI / 2;
+      var stalk = cyl(0.012, 0.012, 0.3, mGray, 0.2, 0.36, -0.03, helmet, 10); stalk.rotation.z = -0.25;
+      var cam = new THREE.Group(); cam.position.set(0.26, 0.5, -0.02); helmet.add(cam);
+      box(0.1, 0.085, 0.15, mDark, 0, 0, 0, cam);
+      var lens = cyl(0.032, 0.036, 0.07, mCuff, 0, 0, 0.1, cam, 20); lens.rotation.x = Math.PI / 2;
+      var lens2 = cyl(0.022, 0.022, 0.01, new THREE.MeshStandardMaterial({ color: 0x101830, roughness: 0.05, metalness: 1 }), 0, 0, 0.138, cam, 20); lens2.rotation.x = Math.PI / 2;
+      box(0.045, 0.06, 0.07, mGray, -0.27, 0.04, 0.07, helmet);
+      box(0.045, 0.06, 0.07, mGray, 0.27, 0.04, 0.07, helmet);
+
+      // arms
+      function makeArm(s) {
+        var sh = new THREE.Group(); sh.position.set(s * 0.37, 0.22, 0); body.add(sh);
+        ball(0.13, mWhite, 0, 0, 0, sh);
+        ring(0.115, 0.014, mCuff, 0, -0.04, 0, sh);
+        var up = new THREE.Group(); sh.add(up);
+        var ua = cap(0.088, 0.2, mWhite2); ua.position.y = -0.2; up.add(ua);
+        var el = new THREE.Group(); el.position.y = -0.385; up.add(el);
+        ball(0.098, mWhite2, 0, 0, 0, el);
+        pleats(el, 0.094, 3, 0.04, -0.06, mWhite2);
+        var fa = cap(0.078, 0.18, mWhite2); fa.position.y = -0.18; el.add(fa);
+        var wr = new THREE.Group(); wr.position.y = -0.35; el.add(wr);
+        cyl(0.09, 0.09, 0.055, mCuff, 0, 0, 0, wr, 32);
+        ring(0.088, 0.012, mGray, 0, -0.03, 0, wr);
+        var glove = cap(0.066, 0.06, mWhite); glove.position.y = -0.1; glove.scale.set(1.12, 1, 0.78); wr.add(glove);
+        var thumb = new THREE.Group(); thumb.position.set(-s * 0.06, -0.09, 0.02); thumb.rotation.z = s * 0.8; wr.add(thumb);
+        var t1 = cap(0.022, 0.03, mWhite); t1.position.y = -0.03; thumb.add(t1);
+        for (var f = 0; f < 4; f++) {
+          var fg = new THREE.Group(); fg.position.set(-0.04 + f * 0.027, -0.155, 0); fg.rotation.x = -0.35; wr.add(fg);
+          var f1 = cap(0.0185, 0.03, mWhite); f1.position.y = -0.03; fg.add(f1);
+          var f2g = new THREE.Group(); f2g.position.y = -0.065; f2g.rotation.x = -0.5; fg.add(f2g);
+          var f2 = cap(0.0165, 0.025, mWhite); f2.position.y = -0.025; f2g.add(f2);
+        }
+        return { sh: sh, up: up, el: el, wr: wr, s: s };
+      }
+      var armR = makeArm(1), armL = makeArm(-1);
+
+      // legs
+      function makeLeg(s) {
+        var hip = new THREE.Group(); hip.position.set(s * 0.15, -0.37, 0); body.add(hip);
+        ball(0.15, mWhite2, 0, 0, 0, hip);
+        var th = cap(0.128, 0.26, mWhite2); th.position.y = -0.24; hip.add(th);
+        var kn = new THREE.Group(); kn.position.y = -0.5; hip.add(kn);
+        ball(0.117, mWhite2, 0, 0, 0, kn);
+        pleats(kn, 0.114, 3, 0.045, -0.07, mWhite2);
+        var sn = cap(0.108, 0.26, mWhite2); sn.position.y = -0.24; kn.add(sn);
+        [-0.2, -0.31].forEach(function (y) { ring(0.131, 0.011, mRed, 0, y, 0, hip); });
+        [-0.14, -0.25].forEach(function (y) { ring(0.113, 0.011, mRed, 0, y, 0, kn); });
+        var an = new THREE.Group(); an.position.y = -0.5; kn.add(an);
+        ball(0.088, mCuff, 0, 0, 0, an);
+        pleats(an, 0.095, 2, 0.035, -0.05, mWhite2);
+        var boot = cap(0.098, 0.08, mWhite); boot.rotation.x = Math.PI / 2; boot.position.set(0, -0.12, 0.09); boot.scale.set(1, 1.1, 0.85); an.add(boot);
+        box(0.17, 0.04, 0.3, mRubber, 0, -0.195, 0.1, an);
+        box(0.17, 0.02, 0.08, mGray, 0, -0.165, -0.06, an);
+        return { hip: hip, kn: kn, an: an, s: s };
+      }
+      var legL = makeLeg(-1), legR = makeLeg(1);
+
+      // umbilical hoses from the chest controller around to the backpack
+      var mHose = new THREE.MeshStandardMaterial({ color: 0xb8bbc2, roughness: 0.6, metalness: 0.3 });
+      [-1, 1].forEach(function (s) {
+        hose([[s * 0.12, -0.01, 0.27], [s * 0.26, -0.08, 0.24], [s * 0.34, -0.1, 0.1], [s * 0.34, -0.06, -0.1], [s * 0.28, -0.02, -0.25]], 0.017, mHose);
+      });
+
+      // manned maneuvering unit backpack
+      var mmu = new THREE.Group(); mmu.position.set(0, 0.04, -0.41); body.add(mmu);
+      box(0.62, 0.78, 0.34, mFrame, 0, 0, 0, mmu);
+      box(0.58, 0.28, 0.025, mGray, 0, 0.18, -0.18, mmu);
+      box(0.56, 0.3, 0.026, mGold, 0, -0.2, -0.18, mmu);
+      box(0.03, 0.74, 0.3, mGold, -0.325, 0, 0, mmu);
+      box(0.03, 0.74, 0.3, mGold, 0.325, 0, 0, mmu);
+      [-0.17, 0.17].forEach(function (x) { cyl(0.085, 0.085, 0.5, mCuff, x, -0.05, -0.27, mmu, 28); cyl(0.03, 0.03, 0.05, mDark, x, 0.23, -0.27, mmu, 14); });
+      [-0.2, 0, 0.2].forEach(function (x) { box(0.012, 0.74, 0.012, mGray, x, 0, 0.176, mmu); });
+      var handle = M(new THREE.TorusGeometry(0.1, 0.012, 8, 24, Math.PI), mCuff, 0, 0.39, -0.1, mmu); handle.rotation.set(0, 0, 0);
+      function nz(parent, x, y, z, rx, rz) { var n = cyl(0.03, 0.013, 0.07, mDark, x, y, z, parent, 14); n.rotation.x = rx; n.rotation.z = rz; }
+      [[-1, 1], [1, 1], [-1, -1], [1, -1]].forEach(function (c) {
+        nz(mmu, c[0] * 0.34, c[1] * 0.3, -0.05, 0, -c[0] * Math.PI / 2);
+        nz(mmu, c[0] * 0.2, c[1] * 0.4, -0.05, 0, c[1] > 0 ? 0 : Math.PI);
+        nz(mmu, c[0] * 0.2, c[1] * 0.28, -0.18, -Math.PI / 2, 0);
+      });
+      [-1, 1].forEach(function (s) {
+        var arm = new THREE.Group(); arm.position.set(s * 0.54, 0.0, 0.08); mmu.add(arm);
+        box(0.1, 0.1, 0.78, mFrame, 0, 0, 0.12, arm);
+        box(0.12, 0.012, 0.3, mGold, 0, 0.056, 0.0, arm);
+        box(0.09, 0.07, 0.12, mDark, 0, 0, 0.55, arm);
+        cyl(0.012, 0.012, 0.09, mCuff, 0, 0.06, 0.55, arm, 10);
+        box(0.08, 0.06, 0.06, mFrame, s * -0.2, 0, -0.18, arm);
+        box(0.34, 0.07, 0.06, mFrame, s * -0.17, 0, -0.26, arm);
+      });
+      body.traverse(function (o) { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
+      patch.castShadow = false; flag.castShadow = false;
+
+      /* ---------- rigid-body physics: free tumbling in zero gravity ---------- */
+      // Principal moments of inertia in body axes (x side-to-side, y head-to-toe, z front-to-back), unit mass.
+      // y is the smallest, x the largest, z in between: spin about z is the unstable axis, so tumbles flip like a real body.
+      var INERTIA = new THREE.Vector3(0.32, 0.10, 0.24);
+      var Q0 = new THREE.Quaternion().setFromEuler(new THREE.Euler(0.08, 0.5, 0, 'YXZ'));
+      var S = { pos: new THREE.Vector3(), vel: new THREE.Vector3(0.06, 0.025, 0), q: Q0.clone(), L: new THREE.Vector3() };
+      function setSpinBody(wx, wy, wz) {
+        S.L.set(wx * INERTIA.x, wy * INERTIA.y, wz * INERTIA.z).applyQuaternion(S.q);
+      }
+      setSpinBody(0, 0, 0);
+      astro.quaternion.copy(S.q);
+
+      var tq = new THREE.Quaternion(), W = new THREE.Vector3(), tv = new THREE.Vector3(), tv2 = new THREE.Vector3(), dq = new THREE.Quaternion(), axis = new THREE.Vector3();
+      function omegaWorld(out) {
+        tq.copy(S.q).invert();
+        out.copy(S.L).applyQuaternion(tq);
+        out.set(out.x / INERTIA.x, out.y / INERTIA.y, out.z / INERTIA.z);
+        return out.applyQuaternion(S.q);
+      }
+
+      /* ---------- viewport ---------- */
+      var camYaw = 0, camPitch = 0, camYawT = 0, camPitchT = 0, camDist = 4.2, hw = 1.8, hh = 1.2;
+      var puffScale = { value: 600 };
+      function resize() {
+        var w = window.innerWidth, h = window.innerHeight;
+        renderer.setSize(w, h, false);
+        camera.aspect = w / h; camera.updateProjectionMatrix();
+        var t = Math.tan(camera.fov * Math.PI / 360);
+        camDist = Math.max(4.4, 3.5 / (2 * t * camera.aspect));
+        hh = t * camDist; hw = hh * camera.aspect;
+        puffScale.value = h * renderer.getPixelRatio() / (2 * t);
+      }
+      window.addEventListener('resize', resize);
+      resize();
+
+      /* ---------- thruster gas puffs ---------- */
+      var NP = 200, pPos = new Float32Array(NP * 3), pAlpha = new Float32Array(NP), pSize = new Float32Array(NP);
+      var pVel = new Float32Array(NP * 3), pAge = new Float32Array(NP), pLife = new Float32Array(NP), pi = 0;
+      for (var q = 0; q < NP; q++) { pAge[q] = 9; pLife[q] = 1; pPos[q * 3 + 1] = 1000; }
+      var pGeo = new THREE.BufferGeometry();
+      pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
+      pGeo.setAttribute('aAlpha', new THREE.BufferAttribute(pAlpha, 1));
+      pGeo.setAttribute('aSize', new THREE.BufferAttribute(pSize, 1));
+      var pMat = new THREE.ShaderMaterial({
+        uniforms: { uScale: puffScale },
+        vertexShader: 'attribute float aAlpha; attribute float aSize; varying float vA; uniform float uScale; void main(){ vA=aAlpha; vec4 mv=modelViewMatrix*vec4(position,1.0); gl_PointSize=aSize*uScale/max(-mv.z,0.1); gl_Position=projectionMatrix*mv; }',
+        fragmentShader: 'varying float vA; void main(){ float d=length(gl_PointCoord-0.5); float a=smoothstep(0.5,0.0,d)*vA; gl_FragColor=vec4(vec3(0.85,0.92,1.0)*a,a); }',
+        transparent: true, depthWrite: false, blending: THREE.AdditiveBlending
+      });
+      var puffs = new THREE.Points(pGeo, pMat); puffs.frustumCulled = false; scene.add(puffs);
+      function emit(x, y, z, vx, vy, vz) {
+        var i = pi++ % NP;
+        pPos[i * 3] = x; pPos[i * 3 + 1] = y; pPos[i * 3 + 2] = z;
+        pVel[i * 3] = vx; pVel[i * 3 + 1] = vy; pVel[i * 3 + 2] = vz;
+        pAge[i] = 0; pLife[i] = 0.5 + Math.random() * 0.5;
+      }
+      function updatePuffs(dt) {
+        for (var i = 0; i < NP; i++) {
+          if (pAge[i] >= pLife[i]) { pAlpha[i] = 0; continue; }
+          pAge[i] += dt;
+          pPos[i * 3] += pVel[i * 3] * dt; pPos[i * 3 + 1] += pVel[i * 3 + 1] * dt; pPos[i * 3 + 2] += pVel[i * 3 + 2] * dt;
+          var k = clamp(pAge[i] / pLife[i], 0, 1);
+          pAlpha[i] = (1 - k) * (1 - k) * 0.6;
+          pSize[i] = 0.05 + k * 0.22;
+        }
+        pGeo.attributes.position.needsUpdate = true; pGeo.attributes.aAlpha.needsUpdate = true; pGeo.attributes.aSize.needsUpdate = true;
+      }
+
+      /* ================= GAME ================= */
+      var $ = function (id) { return document.getElementById(id); };
+      var ray = new THREE.Raycaster(), ndc = new THREE.Vector2(), zPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0), wp = new THREE.Vector3(), tmpV = new THREE.Vector3();
+      var thrustVec = new THREE.Vector3();
+      var THRUST = 3.6, BOLT_M = 0.25, THROW_U = 4.5;
+
+      var LEVELS = [
+        {
+          name: 'Keep moving', mode: 'thrust', drain: 0.9, bolts: 0, stab: true,
+          intro: 'Your toolkit floated away from the station. Space has no air, so nothing slows you down. Once you start moving, you keep moving at the same speed until something pushes you the other way.',
+          how: 'Hold your finger or mouse where you want to go, or use the arrow keys. Thrusters use oxygen. To stop, push the opposite way.',
+          tools: [
+            { t: 'wrench', x: -0.7, y: 0.5, vx: 0.12, vy: -0.05, m: 0.15 },
+            { t: 'driver', x: 0.7, y: 0.35, vx: -0.1, vy: 0.08, m: 0.1 },
+            { t: 'wrench', x: 0.2, y: -0.6, vx: 0.06, vy: 0.1, m: 0.15 }
+          ],
+          quiz: {
+            q: 'You fired your thruster once and then stopped firing. What happens next?',
+            opts: ['You slowly come to a stop.', 'You keep moving at the same speed.', 'You fall back toward Earth.'],
+            ans: 1,
+            why: 'There is no air or friction in space, so nothing slows you down. This is Newton’s first law: an object keeps its motion until a force changes it.'
+          }
+        },
+        {
+          name: 'Push and push back', mode: 'throw', drain: 0.8, bolts: 8, stab: false,
+          intro: 'Your thrusters are offline. All you have is a bag of spare bolts. Throw one and it flies off one way while you recoil the other way.',
+          how: 'Tap or click where you want to throw a bolt, or press an arrow key to throw that way. You fly the opposite way. Each tool you catch gives you 2 more bolts.',
+          tools: [
+            { t: 'driver', x: 0.65, y: 0.55, vx: -0.18, vy: -0.08, m: 0.1 },
+            { t: 'wrench', x: -0.6, y: 0.2, vx: 0.2, vy: 0.05, m: 0.15 },
+            { t: 'driver', x: -0.2, y: -0.62, vx: 0.1, vy: 0.2, m: 0.1 }
+          ],
+          quiz: {
+            q: 'You threw a bolt to the left. Which way did you move?',
+            opts: ['To the left, with the bolt.', 'To the right, the opposite way.', 'You did not move at all.'],
+            ans: 1,
+            why: 'Every action has an equal and opposite reaction. The bolt pushes away from you, and you are pushed away from the bolt. This is Newton’s third law, and it is how rockets work.'
+          }
+        },
+        {
+          name: 'Heavy lifting', mode: 'thrust', drain: 0.7, bolts: 0, stab: true,
+          intro: 'The red toolbox is heavy. When you catch something, its mass adds to yours, and catching it also changes your speed. The same thruster push now moves you less.',
+          how: 'Hold where you want to go, or use the arrow keys. Watch your mass in the corner. Catch the light tools first and the toolbox last.',
+          tools: [
+            { t: 'wrench', x: -0.65, y: -0.3, vx: 0.12, vy: 0.1, m: 0.15 },
+            { t: 'driver', x: 0.6, y: 0.5, vx: -0.12, vy: -0.06, m: 0.1 },
+            { t: 'box', x: 0.45, y: -0.55, vx: -0.1, vy: 0.1, m: 2.5 }
+          ],
+          quiz: {
+            q: 'With the heavy toolbox on board, the same thruster push moved you less. Why?',
+            opts: ['The thrusters ran out of fuel.', 'A bigger mass accelerates less for the same force.', 'Space gets thicker near heavy things.'],
+            ans: 1,
+            why: 'Force equals mass times acceleration. With more mass and the same force, you accelerate less. This is Newton’s second law.'
+          }
+        }
+      ];
+      var KM = { wrench: .15, driver: .1, box: 2.5, hammer: .2, drill: .3, battery: .5, sat: 1.5, o2: 0 };
+      function Lv(name, intro, kinds, spd, o, q) {
+        var tl = kinds.split(' ').map(function (k, i) {
+          var a = i * 2.4 + (o.s || 0), r = 0.45 + 0.4 * ((i * 37 % 10) / 10);
+          return { t: k, x: Math.cos(a) * r, y: Math.sin(a) * r, vx: Math.cos(a + 2) * spd, vy: Math.sin(a + 2) * spd, m: KM[k] };
+        });
+        var l = { name: name, mode: 'thrust', drain: 0.8, bolts: 0, stab: true, intro: intro, how: 'Hold where you want to go, or use the arrow keys. Space brakes.', tools: tl, quiz: { q: q[0], opts: q[1], ans: q[2], why: q[3] } };
+        for (var k in o) l[k] = o[k];
+        LEVELS.push(l);
+      }
+      var TH = 'Tap or press an arrow key to throw a bolt. You fly the opposite way.';
+      Lv('Hammer time', 'New tools to chase: a hammer and a power drill. Loose tools never stop drifting, so real astronauts tether everything.', 'hammer drill wrench driver', 0.18, {}, ['Why do astronauts tie their tools to their suits?', ['Tools are magnetic.', 'Nothing slows a loose tool, so it drifts away forever.', 'Tools float up to the station.'], 1, 'There is no air to slow a tool down, so it keeps its speed and direction until something pushes it.']);
+      Lv('Boost!', 'Your suit now has a boost pack. Press Boost (or Shift) for a quick extra push the way you are heading. It costs oxygen.', 'wrench hammer driver drill battery', 0.22, { boost: true, s: 1 }, ['A thruster fires for twice as long. Your speed change is...', ['Twice as big.', 'The same.', 'Zero.'], 0, 'A longer push gives a bigger change in motion (impulse = force × time).']);
+      Lv('Space junk', 'Rocks and old satellite pieces drift here. A hit knocks you back and costs 8% oxygen.', 'hammer wrench battery driver', 0.2, { deb: 2, boost: true, s: 2 }, ['Why is even a tiny piece of space junk dangerous?', ['It is very hot.', 'It moves at huge speed, so it hits very hard.', 'It is magnetic.'], 1, 'Orbiting objects travel several kilometres per second. At that speed even a paint fleck hits like a bullet.']);
+      Lv('Magnet grip', 'Press Magnet (or M) to pull nearby tools toward you for 4 seconds. It needs time to recharge.', 'drill hammer wrench battery driver', 0.3, { mag: true, boost: true, s: 3 }, ['Magnets work through empty space. Which of these cannot?', ['Light', 'Sound', 'Gravity'], 1, 'Sound needs air or another material to travel through. Space is a vacuum, so it is silent.']);
+      Lv('Thrusters offline II', 'Back to throwing bolts. Throw opposite to where you want to go.', 'wrench hammer driver battery', 0.15, { mode: 'throw', bolts: 10, stab: false, drain: 0.7, how: TH, s: 4 }, ['To move up, which way should you throw a bolt?', ['Up', 'Down', 'It makes no difference'], 1, 'The bolt goes down and you go up: equal and opposite reaction.']);
+      Lv('Oxygen run', 'Oxygen drains fast here. Blue canisters give +30% oxygen and do not count as tools.', 'o2 wrench drill hammer o2 battery', 0.22, { drain: 1.3, deb: 1, s: 5 }, ['Why do astronauts wear pressurised suits?', ['To stay warm only.', 'Space has no air pressure, so the suit supplies it.', 'To block the wind.'], 1, 'Without outside pressure the body cannot work normally, so the suit holds pressure and supplies oxygen.']);
+      Lv('Falling around Earth', 'The station is not outside gravity. It falls around the Earth so fast that it keeps missing it.', 'hammer wrench drill battery driver', 0.4, { boost: true, mag: true, deb: 1, s: 6 }, ['Why do astronauts float inside the space station?', ['There is no gravity there.', 'They are in free fall around Earth.', 'The air pushes them up.'], 1, 'Gravity at that height is still about 90% of ground level. Everything falls together, so it feels weightless.']);
+      Lv('Satellite catch', 'A dead satellite drifts nearby. It is heavy, so catching it changes your speed a lot.', 'sat o2 wrench battery drill', 0.15, { boost: true, mag: true, deb: 2, s: 7 }, ['You catch a heavy object. Your total momentum before and after is...', ['Lost.', 'Conserved (the same).', 'Doubled.'], 1, 'Momentum is conserved, so a bigger total mass means a different speed.']);
+      Lv('Spin cycle', 'Tools zip around fast. Stay calm: your suit gyros keep you level.', 'hammer driver wrench drill battery drill', 0.45, { boost: true, mag: true, deb: 3, s: 8 }, ['A spinning astronaut pulls their arms in. The spin gets...', ['Faster', 'Slower', 'Unchanged'], 0, 'Angular momentum is conserved. A smaller radius means a faster spin, like a skater.']);
+      Lv('Debris storm', 'Five rocks and lots of tools. Boost to dodge and use the magnet to save oxygen.', 'hammer wrench drill battery driver o2', 0.3, { boost: true, mag: true, deb: 5, drain: 1, s: 9 }, ['India’s Gaganyaan programme aims to...', ['Land on Mars.', 'Fly Indian astronauts to orbit on an Indian rocket.', 'Build a space elevator.'], 1, 'Gaganyaan is ISRO’s human spaceflight programme to carry a crew to low Earth orbit.']);
+      Lv('Thrusters offline III', 'Throw bolts through a field of debris. Plan your recoil.', 'hammer wrench driver battery drill', 0.25, { mode: 'throw', bolts: 12, stab: false, deb: 2, how: TH, s: 10 }, ['A heavier astronaut throws the same bolt at the same speed. Their recoil is...', ['Bigger', 'Smaller', 'Equal'], 1, 'Same push, more mass: the heavier person gains less speed.']);
+      Lv('Rakesh Sharma', 'In 1984 Rakesh Sharma became the first Indian to fly in space. Catch the toolkit in his honour.', 'hammer wrench drill battery driver o2 sat', 0.3, { boost: true, mag: true, deb: 3, s: 11 }, ['Who was the first Indian to travel to space?', ['Kalpana Chawla', 'Rakesh Sharma', 'Sunita Williams'], 1, 'Rakesh Sharma flew on Soyuz T-11 in 1984. Kalpana Chawla was the first Indian-born woman in space.']);
+      Lv('Final rescue', 'Everything at once. Bring the whole toolkit home.', 'sat hammer drill battery wrench driver o2 o2', 0.4, { boost: true, mag: true, deb: 5, drain: 1.1, s: 12 }, ['A rocket moves forward by pushing gas backward. Which law is this?', ['Newton’s third law', 'Newton’s first law only', 'The law of gravity only'], 0, 'Every action has an equal and opposite reaction.']);
+      /* ---- denser levels: double the tools, spread them far from the astronaut, faster oxygen drain ---- */
+      (function () {
+        var DUP = { wrench: 1, driver: 1, hammer: 1, drill: 1, battery: 1 };
+        LEVELS.forEach(function (l, li) {
+          var base = l.tools.slice(), extra = [], haveO2 = 0, n = 0;
+          base.forEach(function (t, i) {
+            if (t.t === 'o2') { haveO2++; return; }
+            n++;
+            if (!DUP[t.t]) return;
+            var a = li * 1.7 + i * 2.39 + 0.9, r = 0.75 + 0.3 * ((i * 53 % 10) / 10), sp = Math.max(0.12, Math.sqrt(t.vx * t.vx + t.vy * t.vy)), b = a + 2 + i;
+            extra.push({ t: t.t, x: Math.cos(a) * r, y: Math.sin(a) * r, vx: Math.cos(b) * sp, vy: Math.sin(b) * sp, m: t.m });
+            n++;
+          });
+          var o2n = Math.max(0, Math.floor(n / 4) - haveO2);
+          for (var k = 0; k < o2n; k++) {
+            var a2 = li * 1.3 + k * 3.1 + 2.2;
+            extra.push({ t: 'o2', x: Math.cos(a2) * 0.9, y: Math.sin(a2) * 0.9, vx: Math.cos(a2 + 2) * 0.15, vy: Math.sin(a2 + 2) * 0.15, m: 0 });
+          }
+          l.tools = base.concat(extra);
+          l.tools.forEach(function (t, ti) {
+            var r = Math.sqrt(t.x * t.x + t.y * t.y) || 1;
+            var want = 1.0 + 0.1 * ((ti * 7 % 5) / 4); if (r < want) { t.x *= want / r; t.y *= want / r; }
+            t.x = Math.max(-1.12, Math.min(1.12, t.x)); t.y = Math.max(-1.12, Math.min(1.12, t.y));
+          });
+          l.drain = (l.drain || 0.8) * 1.8;
+        });
+      })();
+      LEVELS.forEach(function (l) { l.need = l.tools.filter(function (t) { return t.t !== 'o2'; }).length; });
+
+      /* ---- tool models ---- */
+      var mTool = new THREE.MeshStandardMaterial({ color: 0xffb020, roughness: 0.3, metalness: 0.6 });
+      var mToolRed = new THREE.MeshStandardMaterial({ color: 0xd8372c, roughness: 0.45, metalness: 0.3 });
+      var glowTex = (function () {
+        var c = document.createElement('canvas'); c.width = c.height = 64; var x = c.getContext('2d');
+        var g = x.createRadialGradient(32, 32, 0, 32, 32, 32);
+        g.addColorStop(0, 'rgba(255,255,255,1)'); g.addColorStop(0.35, 'rgba(255,255,255,0.35)'); g.addColorStop(1, 'rgba(255,255,255,0)');
+        x.fillStyle = g; x.fillRect(0, 0, 64, 64);
+        var t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
+      })();
+      function glowSprite(color, size) {
+        var s = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: color, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, opacity: 0.55 }));
+        s.scale.set(size, size, 1); s.userData.isGlow = true; return s;
+      }
+      function makeTool(type) {
+        var g = new THREE.Group(), gc = 0xffc05a, gs = 0.85;
+        if (type === 'wrench') {
+          box(0.38, 0.05, 0.03, mTool, 0, 0, 0, g);
+          M(new THREE.TorusGeometry(0.055, 0.018, 8, 20), mTool, -0.21, 0, 0, g);
+          box(0.07, 0.1, 0.03, mTool, 0.2, 0, 0, g);
+          box(0.04, 0.05, 0.034, mDark, 0.235, 0, 0, g);
+        } else if (type === 'driver') {
+          cyl(0.04, 0.04, 0.17, mToolRed, -0.1, 0, 0, g, 14).rotation.z = Math.PI / 2;
+          cyl(0.011, 0.011, 0.24, mCuff, 0.1, 0, 0, g, 8).rotation.z = Math.PI / 2;
+          cyl(0.016, 0.016, 0.03, mCuff, 0.23, 0, 0, g, 8).rotation.z = Math.PI / 2;
+        } else if (type === 'hammer') {
+          box(0.3, 0.035, 0.035, mDark, 0, 0, 0, g); box(0.07, 0.12, 0.05, mCuff, 0.14, 0, 0, g); gc = 0xbfe0ff;
+        } else if (type === 'drill') {
+          box(0.2, 0.1, 0.07, mTool, 0, 0, 0, g); box(0.06, 0.14, 0.06, mDark, -0.03, -0.11, 0, g); cyl(0.02, 0.02, 0.14, mCuff, 0.17, 0, 0, g, 8).rotation.z = Math.PI / 2;
+        } else if (type === 'battery') {
+          box(0.3, 0.16, 0.16, new THREE.MeshStandardMaterial({ color: 0x2ecc71, emissive: 0x1a7a44, roughness: 0.4, metalness: 0.4 }), 0, 0, 0, g); box(0.04, 0.05, 0.05, mCuff, 0.17, 0, 0, g); gc = 0x6dffb0;
+        } else if (type === 'sat') {
+          var mB = new THREE.MeshStandardMaterial({ color: 0x2b5fc4, roughness: 0.3, metalness: 0.7 });
+          box(0.3, 0.3, 0.3, mGold, 0, 0, 0, g); box(0.4, 0.26, 0.01, mB, -0.36, 0, 0, g); box(0.4, 0.26, 0.01, mB, 0.36, 0, 0, g); gc = 0x9ad0ff; gs = 1.5;
+        } else if (type === 'o2') {
+          cyl(0.07, 0.07, 0.28, new THREE.MeshStandardMaterial({ color: 0x2b8cff, roughness: 0.3, metalness: 0.5, emissive: 0x0a3a80 }), 0, 0, 0, g, 16); cyl(0.03, 0.03, 0.05, mCuff, 0, 0.16, 0, g, 10); gc = 0x4de8ff; gs = 1.2;
+        } else {
+          box(0.44, 0.26, 0.24, mToolRed, 0, 0, 0, g);
+          M(new THREE.TorusGeometry(0.09, 0.012, 8, 20, Math.PI), mCuff, 0, 0.13, 0, g);
+          box(0.46, 0.03, 0.25, mDark, 0, 0.02, 0, g);
+          box(0.05, 0.06, 0.02, mCuff, 0, 0.04, 0.125, g);
+          gc = 0xff6a4a; gs = 1.15;
+        }
+        g.add(glowSprite(gc, gs));
+        g.traverse(function (o) { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
+        return g;
+      }
+      var boltGeo = new THREE.CylinderGeometry(0.03, 0.03, 0.05, 6);
+      var rockGeo = new THREE.IcosahedronGeometry(0.28, 1), mRock = new THREE.MeshStandardMaterial({ color: 0x6b625a, roughness: 1, flatShading: true });
+      (function () { var p = rockGeo.attributes.position; for (var i = 0; i < p.count; i++) { var k = 0.75 + 0.5 * vnoise(p.getX(i) * 6 + 9, p.getY(i) * 6, p.getZ(i) * 6); p.setXYZ(i, p.getX(i) * k, p.getY(i) * k, p.getZ(i) * k); } rockGeo.computeVertexNormals(); })();
+      function spawnDebris(n) {
+        for (var i = 0; i < n; i++) {
+          var a = i * 2.1 + 1, m = new THREE.Mesh(rockGeo, mRock); m.scale.setScalar(0.7); m.castShadow = true; m.position.set(Math.cos(a) * hw * 0.7, Math.sin(a) * hh * 0.6, 0); scene.add(m);
+          debris.push({ mesh: m, vel: new THREE.Vector3(Math.cos(a + 1.7) * 0.75, Math.sin(a + 1.7) * 0.6, 0), hit: 0 });
+        }
+      }
+      function updateDebris(dt) {
+        debris.forEach(function (d) {
+          var p = d.mesh.position; p.addScaledVector(d.vel, dt); d.mesh.rotation.x += dt * 0.7; d.mesh.rotation.y += dt * 0.5;
+          if (Math.abs(p.x) > hw * 0.88) { d.vel.x *= -1; p.x = Math.sign(p.x) * hw * 0.88; } if (Math.abs(p.y) > hh * 0.8) { d.vel.y *= -1; p.y = Math.sign(p.y) * hh * 0.8; }
+          d.hit -= dt;
+          if (d.hit <= 0 && p.distanceTo(S.pos) < 0.3) {
+            d.hit = 1; oxygen -= 8; var n = tmpV.copy(S.pos).sub(p); n.z = 0; if (n.lengthSq() < 1e-4) n.set(1, 0, 0); n.normalize();
+            S.vel.addScaledVector(n, 1.4); d.vel.addScaledVector(n, -0.8); burst(10, 1.6); tone(120, 0.25, 'square', 0.08, 60); toast('Debris hit! -8% oxygen', 1400);
+          }
+        });
+      }
+      function doBoost() {
+        if (state !== 'play' || !L.boost || boostCd > 0 || L.mode !== 'thrust') return;
+        var d = tmpV.copy(thrustVec); if (d.lengthSq() < 0.01 && !(pointerDown && aimDir(d))) d.copy(S.vel);
+        d.z = 0; if (d.lengthSq() < 1e-4) return; d.normalize();
+        S.vel.addScaledVector(d, 2.6 / Math.sqrt(mass)); oxygen -= 6; boostCd = 1.6;
+        for (var i = 0; i < 12; i++) emit(S.pos.x - d.x * 0.5 * ASTRO_SCALE, S.pos.y - d.y * 0.5 * ASTRO_SCALE, S.pos.z, -d.x * 3 + Math.random() - 0.5, -d.y * 3 + Math.random() - 0.5, Math.random() - 0.5);
+        tone(140, 0.3, 'sawtooth', 0.07, 400);
+      }
+      function doMag() { if (state !== 'play' || !L.mag || magCd > 0) return; magT = 4; magCd = 9; tone(500, 0.3, 'sine', 0.08, 900); toast('Magnet on! Tools drift toward you.', 1400); }
+
+      /* ---- state ---- */
+      var state = 'menu', level = 0, L = LEVELS[0];
+      var oxygen = 100, collected = 0, mass = 1, bolts = 0, stabilize = false, cooldown = 0, doneTimer = 0, shownRecoil = false, quizWrong = 0;
+      var firstTry = [], stars = [], tools = [], thrown = [], carried = [];
+      var pointerDown = false, pointerX = 0, pointerY = 0, boostT = 0, boostCd = 0, magT = 0, magCd = 0, debris = [];
+      var keys = { l: 0, r: 0, u: 0, d: 0, sp: 0 };
+      var SLOTS = [[-0.64, -0.12, -0.52], [0.64, -0.12, -0.52], [0, -0.62, -0.58], [-0.64, 0.3, -0.52], [0.64, 0.3, -0.52], [0, 0.55, -0.6],
+      [-0.9, -0.4, -0.5], [0.9, -0.4, -0.5], [-0.9, 0.1, -0.5], [0.9, 0.1, -0.5], [-0.35, -0.85, -0.55], [0.35, -0.85, -0.55], [-0.35, 0.85, -0.55], [0.35, 0.85, -0.55]];
+
+      /* ---- sound ---- */
+      var audio = null, muted = false;
+      function ensureAudio() {
+        if (!audio) { try { audio = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { audio = null; } }
+        if (audio && audio.state === 'suspended') { try { audio.resume(); } catch (e2) { } }
+      }
+      function tone(f, d, type, vol, slide, delay) {
+        if (muted || !audio) return;
+        try {
+          var t0 = audio.currentTime + (delay || 0), o = audio.createOscillator(), g = audio.createGain();
+          o.type = type || 'sine'; o.frequency.setValueAtTime(f, t0);
+          if (slide) o.frequency.exponentialRampToValueAtTime(slide, t0 + d);
+          g.gain.setValueAtTime(vol || 0.08, t0); g.gain.exponentialRampToValueAtTime(0.0001, t0 + d);
+          o.connect(g); g.connect(audio.destination); o.start(t0); o.stop(t0 + d + 0.02);
+        } catch (e) { }
+      }
+
+      /* ---- toast and HUD ---- */
+      var toastEl = $('toast'), toastTimer = 0;
+      function toast(text, ms) {
+        toastEl.textContent = text; toastEl.classList.add('on');
+        clearTimeout(toastTimer); toastTimer = setTimeout(function () { toastEl.classList.remove('on'); }, ms || 2600);
+      }
+      var hudT = 0;
+      function updateHud() {
+        var o = Math.max(0, oxygen);
+        $('o2t').textContent = Math.round(o);
+        $('o2f').style.width = o + '%';
+        $('o2b').classList.toggle('low', o < 25);
+        $('tt').textContent = collected + '/' + L.need; $('mg').textContent = !L.mag ? '–' : magT > 0 ? 'ON' : magCd > 0 ? Math.ceil(magCd) + 's' : 'ready';
+        $('tv').innerHTML = S.vel.length().toFixed(2) + '<i>m/s</i>';
+        if (L.mode === 'throw') { $('xl').textContent = 'Bolts'; $('xv').textContent = String(bolts); }
+        else { $('xl').textContent = 'Mass'; $('xv').innerHTML = mass.toFixed(1) + '<i>×</i>'; }
+      }
+
+      /* ---- level setup ---- */
+      function clearLevel() {
+        tools.forEach(function (t) { if (t.mesh.parent) t.mesh.parent.remove(t.mesh); });
+        thrown.forEach(function (b) { scene.remove(b.mesh); });
+        tools = []; thrown = []; carried = []; debris.forEach(function (d) { scene.remove(d.mesh); }); debris = [];
+      }
+      function prepareLevel(i) {
+        level = i; L = LEVELS[i];
+        clearLevel();
+        S.pos.set(0, 0, 0); S.vel.set(0, 0, 0); S.q.copy(Q0); setSpinBody(0, 0, 0);
+        lag.set(0, 0, 0); lagV.set(0, 0, 0);
+        oxygen = 100; collected = 0; mass = 1; bolts = L.bolts; cooldown = 0; doneTimer = 0; shownRecoil = false; quizWrong = 0;
+        stabilize = false; stabBtn.setAttribute('aria-pressed', 'false'); stabBtn.textContent = 'Stabilize: off'; stabBtn.hidden = !L.stab;
+        pointerDown = false; keys.l = keys.r = keys.u = keys.d = 0;
+        boostT = boostCd = magT = magCd = 0; $('boost').hidden = !L.boost; $('mag').hidden = !L.mag; spawnDebris(L.deb || 0);
+        L.tools.forEach(function (d) {
+          var m = makeTool(d.t); m.scale.setScalar(TOOL_SCALE); scene.add(m);
+          var tool = {
+            type: d.t, mesh: m, pos: new THREE.Vector3(d.x * hw * 0.78, d.y * hh * 0.7, 0), vel: new THREE.Vector3(d.vx, d.vy, 0), m: d.m, got: false,
+            spin: new THREE.Vector3(Math.random() * 1.2 - 0.6, Math.random() * 1.2 - 0.6, Math.random() * 1.6 - 0.8), ph: Math.random() * 6
+          };
+          m.position.copy(tool.pos); m.rotation.set(Math.random() * 3, Math.random() * 3, Math.random() * 3);
+          tools.push(tool);
+        });
+        $('lvl').textContent = 'Level ' + (i + 1) + ' of ' + LEVELS.length + ' · ' + L.name;
+        $('how').textContent = L.how;
+        updateHud();
+      }
+
+      /* ---- panels ---- */
+      var panel = $('panel'), card = $('card');
+      function showPanel(html) { card.innerHTML = html; panel.hidden = false; var b = card.querySelector('button'); if (b) { try { b.focus({ preventScroll: true }); } catch (e) { } } }
+      function hidePanel() { panel.hidden = true; }
+      function starStr(n) { return '★★★'.slice(0, n) + '☆☆☆'.slice(0, 3 - n); }
+      function showMenu() {
+        state = 'menu';
+        showPanel('<div class="kicker"><span class="flag"></span>Mission briefing</div><h2>Spacewalk Rescue</h2>' +
+          '<p>Your toolkit floated away from the station. Fly your suit, catch every tool before your oxygen runs out, and learn how things really move in space.</p>' +
+          '<p class="how">16 levels with new tools, boost, magnet and space debris. A quick question after each one.</p><button class="primary" data-act="start" type="button">Start mission</button>');
+      }
+      function showLesson(i) {
+        prepareLevel(i); state = 'lesson';
+        showPanel('<div class="kicker"><span class="flag"></span>Level ' + (i + 1) + ' of ' + LEVELS.length + '</div><h2>' + L.name + '</h2><p>' + L.intro + '</p>' +
+          '<p class="how">' + L.how + ' Catch all ' + L.need + ' tools.</p><button class="primary" data-act="go" type="button">Start level</button>');
+      }
+      function showQuiz() {
+        state = 'quiz'; quizWrong = 0;
+        var q = L.quiz, opts = q.opts.map(function (o, k) { return '<button type="button" data-act="opt" data-i="' + k + '">' + o + '</button>'; }).join('');
+        showPanel('<div class="kicker">Level ' + (level + 1) + ' complete <span class="stars">' + starStr(stars[level]) + '</span> · ' + Math.round(Math.max(0, oxygen)) + '% oxygen left</div>' +
+          '<h2>Quick question</h2><p>' + q.q + '</p><div class="opts">' + opts + '</div><div id="fb"></div>');
+      }
+      function showFail() {
+        state = 'fail'; tone(220, 0.6, 'sawtooth', 0.07, 55);
+        showPanel('<div class="kicker">Level ' + (level + 1) + '</div><h2>Out of oxygen</h2><p>You got ' + collected + ' of ' + L.need + ' tools. Save your oxygen by pushing in short bursts and letting yourself drift.</p>' +
+          '<button class="primary" data-act="retry" type="button">Try again</button>');
+      }
+      function showEnd() {
+        state = 'end';
+        var total = stars.reduce(function (a, b) { return a + b; }, 0), ft = firstTry.filter(Boolean).length;
+        showPanel('<div class="kicker"><span class="flag"></span>Mission complete</div><h2>Toolkit recovered</h2>' +
+          '<p><span class="stars">' + starStr(Math.round(total / LEVELS.length)) + '</span> · ' + total + ' of ' + (LEVELS.length * 3) + ' stars<br>' + ft + ' of ' + LEVELS.length + ' questions right the first time</p>' +
+          '<p class="how">You used three of Newton’s laws: motion continues until a force changes it, every action has an equal and opposite reaction, and force equals mass times acceleration.</p>' +
+          '<button class="primary" data-act="again" type="button">Play again</button>');
+      }
+      card.addEventListener('click', function (e) {
+        var b = e.target.closest ? e.target.closest('button[data-act]') : null; if (!b) return;
+        ensureAudio();
+        var act = b.getAttribute('data-act');
+        if (act === 'start') { stars = []; firstTry = []; showLesson(0); }
+        else if (act === 'go') { hidePanel(); state = 'play'; toast('Go! Oxygen is draining.', 1800); }
+        else if (act === 'retry') { prepareLevel(level); hidePanel(); state = 'play'; }
+        else if (act === 'again') { stars = []; firstTry = []; showLesson(0); }
+        else if (act === 'next') { if (level < LEVELS.length - 1) showLesson(level + 1); else showEnd(); }
+        else if (act === 'opt') {
+          var i = +b.getAttribute('data-i'), q = L.quiz, fb = $('fb'), btns = card.querySelectorAll('.opts button');
+          if (i === q.ans) {
+            firstTry[level] = quizWrong === 0;
+            btns.forEach(function (x) { x.disabled = true; });
+            b.classList.add('right');
+            fb.innerHTML = '<p class="ok">Correct. ' + q.why + '</p><button class="primary" data-act="next" type="button">' + (level < LEVELS.length - 1 ? 'Next level' : 'Finish') + '</button>';
+            tone(660, 0.12, 'triangle', 0.09, 990); tone(990, 0.16, 'triangle', 0.09, 1320, 0.1);
+          } else {
+            quizWrong++; b.classList.add('wrong'); b.disabled = true;
+            fb.innerHTML = '<p class="no">Not quite. Think about how things move in space and try again.</p>';
+            tone(180, 0.2, 'square', 0.05, 120);
+          }
+        }
+      });
+
+      /* ---- collecting, throwing ---- */
+      function burst(n, speed) {
+        for (var i = 0; i < n; i++) {
+          var a = Math.random() * 6.283, v = speed * (0.4 + Math.random() * 0.8);
+          emit(S.pos.x, S.pos.y, S.pos.z, Math.cos(a) * v, Math.sin(a) * v, (Math.random() - 0.5) * v);
+        }
+      }
+      function collect(t) {
+        t.got = true;
+        scene.remove(t.mesh); body.add(t.mesh);
+        var s = SLOTS[carried.length % SLOTS.length];
+        t.mesh.position.set(s[0], s[1], s[2]); t.mesh.rotation.set(0, 0, 0.3 * carried.length); t.mesh.scale.setScalar(1.0);
+        t.mesh.children.forEach(function (c) { if (c.userData && c.userData.isGlow) c.visible = false; });
+        carried.push(t);
+        var old = mass; mass += t.m;
+        S.vel.multiplyScalar(old).addScaledVector(t.vel, t.m).multiplyScalar(1 / mass);
+        if (t.type === 'o2') oxygen = Math.min(100, oxygen + 30); else { collected++; oxygen = Math.min(100, oxygen + 6); }
+        if (L.mode === 'throw') bolts += 2;
+        burst(14, 1.4);
+        tone(660, 0.12, 'triangle', 0.1, 990); tone(990, 0.16, 'triangle', 0.1, 1320, 0.09);
+        if (t.type === 'box') toast('Toolbox caught! Your mass is now ' + mass.toFixed(1) + '× and your speed changed.', 3200);
+        else toast(({ wrench: 'Wrench', driver: 'Screwdriver', hammer: 'Hammer', drill: 'Drill', battery: 'Battery', sat: 'Satellite', o2: 'Oxygen canister' })[t.type] + (t.type === 'o2' ? ' +30% oxygen' : ' recovered, +6% oxygen'), 1800);
+        if (collected >= L.need) finishLevel();
+      }
+      function finishLevel() {
+        state = 'done'; doneTimer = 1.4;
+        stars[level] = oxygen >= 50 ? 3 : oxygen >= 25 ? 2 : 1;
+        tone(523, 0.14, 'triangle', 0.1); tone(659, 0.14, 'triangle', 0.1, 0, 0.12); tone(784, 0.24, 'triangle', 0.1, 0, 0.24);
+        toast('All tools recovered!', 1600);
+      }
+      function aimDir(out) {
+        ndc.set((pointerX / window.innerWidth) * 2 - 1, -(pointerY / window.innerHeight) * 2 + 1);
+        ray.setFromCamera(ndc, camera);
+        if (!ray.ray.intersectPlane(zPlane, wp)) return false;
+        out.copy(wp).sub(S.pos); out.z = 0;
+        return true;
+      }
+      function throwBolt(dx, dy) {
+        if (bolts <= 0 || cooldown > 0 || state !== 'play') return;
+        var d = tmpV.set(dx, dy, 0); if (d.lengthSq() < 1e-6) d.set(1, 0, 0); d.normalize();
+        bolts--; cooldown = 0.22;
+        // momentum conservation: bolt leaves at THROW_U relative to you, you recoil the other way
+        S.vel.addScaledVector(d, -(BOLT_M / (mass + BOLT_M)) * THROW_U);
+        var m = new THREE.Mesh(boltGeo, mCuff); m.castShadow = true; m.position.copy(S.pos).addScaledVector(d, 0.5 * ASTRO_SCALE); scene.add(m);
+        thrown.push({ mesh: m, pos: m.position.clone(), vel: S.vel.clone().addScaledVector(d, THROW_U), life: 4 });
+        for (var i = 0; i < 3; i++) emit(S.pos.x + d.x * 0.5 * ASTRO_SCALE, S.pos.y + d.y * 0.5 * ASTRO_SCALE, S.pos.z, d.x * 1.8 + (Math.random() - 0.5) * 0.6, d.y * 1.8 + (Math.random() - 0.5) * 0.6, (Math.random() - 0.5) * 0.4);
+        tone(240, 0.16, 'sawtooth', 0.05, 70);
+        if (!shownRecoil) { shownRecoil = true; toast('Recoil! You move the opposite way from the bolt.', 3000); }
+      }
+
+      /* ---- input ---- */
+      stage.addEventListener('pointerdown', function (e) {
+        ensureAudio();
+        if (state !== 'play') return;
+        pointerDown = true; pointerX = e.clientX; pointerY = e.clientY;
+        try { stage.setPointerCapture(e.pointerId); } catch (err) { }
+        if (L.mode === 'throw' && aimDir(tmpV)) throwBolt(tmpV.x, tmpV.y);
+      });
+      stage.addEventListener('pointermove', function (e) { pointerX = e.clientX; pointerY = e.clientY; });
+      function pUp() { pointerDown = false; }
+      stage.addEventListener('pointerup', pUp);
+      stage.addEventListener('pointercancel', pUp);
+      var keyMap = { ArrowLeft: 'l', ArrowRight: 'r', ArrowUp: 'u', ArrowDown: 'd' };
+      window.addEventListener('keydown', function (e) {
+        var k = keyMap[e.key]; if (!k || state !== 'play') return;
+        e.preventDefault(); ensureAudio();
+        if (L.mode === 'throw') { if (!e.repeat) throwBolt(k === 'l' ? -1 : k === 'r' ? 1 : 0, k === 'u' ? 1 : k === 'd' ? -1 : 0); }
+        else keys[k] = 1;
+      });
+      window.addEventListener('keyup', function (e) { var k = keyMap[e.key]; if (k) keys[k] = 0; });
+      window.addEventListener('keydown', function (e) {
+        if (e.code === 'Space') { e.preventDefault(); keys.sp = 1; } else if (e.key === 'Shift' || e.key === 'b' || e.key === 'B') doBoost(); else if (e.key === 'm' || e.key === 'M') doMag();
+      });
+      window.addEventListener('keyup', function (e) { if (e.code === 'Space') keys.sp = 0; });
+      window.addEventListener('blur', function () { keys.sp = 0; keys.l = keys.r = keys.u = keys.d = 0; pointerDown = false; });
+      $('boost').addEventListener('click', function () { ensureAudio(); doBoost(); });
+      $('mag').addEventListener('click', function () { ensureAudio(); doMag(); });
+      var stabBtn = $('stab');
+      stabBtn.addEventListener('click', function () {
+        ensureAudio(); stabilize = !stabilize;
+        stabBtn.setAttribute('aria-pressed', stabilize ? 'true' : 'false');
+        stabBtn.textContent = 'Stabilize: ' + (stabilize ? 'on' : 'off');
+        if (stabilize) toast('Stabilize holds you still, but uses extra oxygen.', 2400);
+      });
+      $('restart').addEventListener('click', function () {
+        ensureAudio();
+        if (state === 'play' || state === 'done') { prepareLevel(level); state = 'play'; hidePanel(); }
+        else if (state === 'lesson') { prepareLevel(level); }
+      });
+      var sndBtn = $('snd');
+      sndBtn.addEventListener('click', function () {
+        ensureAudio(); muted = !muted;
+        sndBtn.setAttribute('aria-pressed', muted ? 'false' : 'true');
+        sndBtn.textContent = 'Sound: ' + (muted ? 'off' : 'on');
+      });
+
+      /* ---- physics ---- */
+      var WALL_E = 0.6, stabOn = false, qe = new THREE.Quaternion(), qi = new THREE.Quaternion(), qt = new THREE.Quaternion(), eu = new THREE.Euler();
+      function physicsStep(h) {
+        if (thrustVec.lengthSq() > 0) { var a = THRUST / mass; S.vel.x += thrustVec.x * a * h; S.vel.y += thrustVec.y * a * h; }
+        if (stabOn) S.vel.multiplyScalar(Math.exp(-2.4 * h));
+        eu.set(0.08, 0.5 + S.vel.x * 0.12, -S.vel.x * 0.14 + S.vel.y * 0.03, 'YXZ'); qt.setFromEuler(eu);
+        qe.copy(qt).multiply(qi.copy(S.q).invert()); if (qe.w < 0) { qe.x = -qe.x; qe.y = -qe.y; qe.z = -qe.z; qe.w = -qe.w; }
+        var sn = Math.sqrt(1 - qe.w * qe.w); if (sn > 1e-4) { axis.set(qe.x / sn, qe.y / sn, qe.z / sn); S.L.addScaledVector(axis, 3 * Math.acos(Math.min(1, qe.w)) * h); }
+        S.L.multiplyScalar(Math.exp(-5 * h));
+        if (S.vel.length() > 5) S.vel.setLength(5);
+        S.pos.addScaledVector(S.vel, h);
+        omegaWorld(W);
+        var wl = W.length();
+        if (wl > 2) { var kk = 2 / wl; S.L.multiplyScalar(kk); W.multiplyScalar(kk); wl = 2; }
+        if (wl > 1e-6) { axis.copy(W).multiplyScalar(1 / wl); dq.setFromAxisAngle(axis, wl * h); S.q.premultiply(dq).normalize(); }
+        var bx = hw * 0.78, by = hh * 0.72, lever = 0.25 * (Math.random() < 0.5 ? -1 : 1);
+        if (S.pos.x > bx && S.vel.x > 0) { S.pos.x = bx; tv.set(-(1 + WALL_E) * S.vel.x, 0, 0); S.vel.x *= -WALL_E; S.L.add(tv2.set(bx, lever, 0).cross(tv).multiplyScalar(0.03)); }
+        if (S.pos.x < -bx && S.vel.x < 0) { S.pos.x = -bx; tv.set(-(1 + WALL_E) * S.vel.x, 0, 0); S.vel.x *= -WALL_E; S.L.add(tv2.set(-bx, lever, 0).cross(tv).multiplyScalar(0.03)); }
+        if (S.pos.y > by && S.vel.y > 0) { S.pos.y = by; tv.set(0, -(1 + WALL_E) * S.vel.y, 0); S.vel.y *= -WALL_E; S.L.add(tv2.set(lever, by, 0).cross(tv).multiplyScalar(0.03)); }
+        if (S.pos.y < -by && S.vel.y < 0) { S.pos.y = -by; tv.set(0, -(1 + WALL_E) * S.vel.y, 0); S.vel.y *= -WALL_E; S.L.add(tv2.set(lever, -by, 0).cross(tv).multiplyScalar(0.03)); }
+        S.vel.z += -S.pos.z * 2 * h; S.vel.z *= Math.exp(-1.5 * h);
+      }
+      function computeThrust() {
+        thrustVec.set(0, 0, 0);
+        if (state !== 'play' || L.mode !== 'thrust') return 0;
+        thrustVec.x = keys.r - keys.l; thrustVec.y = keys.u - keys.d;
+        if (pointerDown && aimDir(tmpV)) { var l = tmpV.length(); if (l > 0.25) thrustVec.addScaledVector(tmpV, 1 / l); }
+        var n = thrustVec.length();
+        if (n > 1) { thrustVec.multiplyScalar(1 / n); n = 1; }
+        if (n < 0.01) { thrustVec.set(0, 0, 0); return 0; }
+        return n;
+      }
+      function updateTools(dt, t) {
+        var bx = hw * 0.88, by = hh * 0.8;
+        tools.forEach(function (o) {
+          if (o.got) return; if (magT > 0) { var dd = tmpV.copy(S.pos).sub(o.pos), dl = dd.length(); if (dl < 3 && dl > 0.01) o.vel.addScaledVector(dd, 7 * dt / dl); if (o.vel.length() > 2.2) o.vel.setLength(2.2); }
+          o.pos.x += o.vel.x * dt; o.pos.y += o.vel.y * dt;
+          if (o.pos.x > bx && o.vel.x > 0) o.vel.x *= -1; if (o.pos.x < -bx && o.vel.x < 0) o.vel.x *= -1;
+          if (o.pos.y > by && o.vel.y > 0) o.vel.y *= -1; if (o.pos.y < -by && o.vel.y < 0) o.vel.y *= -1;
+          o.mesh.position.copy(o.pos);
+          o.mesh.rotation.x += o.spin.x * dt; o.mesh.rotation.y += o.spin.y * dt; o.mesh.rotation.z += o.spin.z * dt;
+          var g = o.mesh.children[o.mesh.children.length - 1];
+          if (g && g.material) g.material.opacity = 0.45 + 0.2 * Math.sin(t * 3 + o.ph);
+        });
+        for (var i = thrown.length - 1; i >= 0; i--) {
+          var b = thrown[i];
+          b.pos.addScaledVector(b.vel, dt); b.life -= dt; b.mesh.position.copy(b.pos); b.mesh.rotation.x += 6 * dt; b.mesh.rotation.z += 4 * dt;
+          if (b.life <= 0 || Math.abs(b.pos.x) > hw * 1.6 || Math.abs(b.pos.y) > hh * 1.6) { scene.remove(b.mesh); thrown.splice(i, 1); }
+        }
+      }
+
+      /* ---- limb lag: loose joints respond to angular acceleration ---- */
+      var lag = new THREE.Vector3(), lagV = new THREE.Vector3(), wbPrev = new THREE.Vector3(), alpha = new THREE.Vector3(), wb = new THREE.Vector3();
+      function pose(t, dt) {
+        tq.copy(S.q).invert();
+        omegaWorld(W); wb.copy(W).applyQuaternion(tq);
+        alpha.copy(wb).sub(wbPrev).multiplyScalar(1 / Math.max(dt, 0.001)); wbPrev.copy(wb);
+        alpha.x = clamp(alpha.x, -8, 8); alpha.y = clamp(alpha.y, -8, 8); alpha.z = clamp(alpha.z, -8, 8);
+        lagV.addScaledVector(lag, -26 * dt).addScaledVector(lagV, -4.5 * dt).addScaledVector(alpha, -0.03 * dt * 60 * 0.6);
+        lag.addScaledVector(lagV, dt);
+        lag.x = clamp(lag.x, -0.5, 0.5); lag.y = clamp(lag.y, -0.5, 0.5); lag.z = clamp(lag.z, -0.5, 0.5);
+        var rm = reduce ? 0.35 : 1;
+        var a = Math.sin(t * 0.7) * 0.05 * rm, b = Math.sin(t * 0.55 + 1.3) * 0.06 * rm, c = Math.sin(t * 0.4 + 2.4) * 0.04 * rm;
+        armR.sh.rotation.z = 0.3 + a * 0.5 + lag.z * 0.9; armR.up.rotation.x = -0.95 + a + lag.x * 1.0; armR.el.rotation.x = -0.75 + b + lag.x * 0.5; armR.wr.rotation.x = -0.1;
+        armL.sh.rotation.z = -0.5 + b * 0.5 + lag.z * 0.9; armL.up.rotation.x = -1.35 + b + lag.x * 1.0; armL.el.rotation.x = -1.45 + a + lag.x * 0.5; armL.wr.rotation.x = -0.2;
+        legL.hip.rotation.x = -0.22 + c - lag.x * 0.8; legL.kn.rotation.x = 0.42 + b * 0.6 - lag.x * 0.5; legL.an.rotation.x = 0.28 + a * 0.4; legL.hip.rotation.z = -0.1 - lag.z * 0.6;
+        legR.hip.rotation.x = -0.05 - c - lag.x * 0.8; legR.kn.rotation.x = 0.2 - b * 0.6 - lag.x * 0.5; legR.an.rotation.x = 0.35 - a * 0.4; legR.hip.rotation.z = 0.1 - lag.z * 0.6;
+        helmet.rotation.x = lag.x * 0.25; helmet.rotation.z = lag.z * 0.25;
+      }
+
+      /* ---- loop ---- */
+      var T = 0, last = performance.now();
+      function emitThrust(dx, dy) {
+        for (var i = 0; i < 2; i++) {
+          emit(S.pos.x - dx * 0.5 * ASTRO_SCALE + (Math.random() - 0.5) * 0.16, S.pos.y - dy * 0.5 * ASTRO_SCALE + (Math.random() - 0.5) * 0.16, S.pos.z + (Math.random() - 0.5) * 0.16,
+            -dx * (1.4 + Math.random() * 0.8) + S.vel.x * 0.5, -dy * (1.4 + Math.random() * 0.8) + S.vel.y * 0.5, (Math.random() - 0.5) * 0.4);
+        }
+      }
+      function emitStabilize() {
+        var o = tv.set((Math.random() < 0.5 ? -1 : 1) * 0.36, (Math.random() < 0.5 ? -1 : 1) * 0.3, -0.3 - Math.random() * 0.1).multiplyScalar(ASTRO_SCALE).applyQuaternion(S.q);
+        var out = tv2.copy(o).normalize();
+        emit(S.pos.x + o.x, S.pos.y + o.y, S.pos.z + o.z, out.x * 1.3 + S.vel.x * 0.5, out.y * 1.3 + S.vel.y * 0.5, out.z * 1.3);
+      }
+      function frame(now) {
+        var dt = Math.min(0.05, (now - last) / 1000); last = now;
+        T += dt;
+        runJobs();
+        cooldown = Math.max(0, cooldown - dt); boostCd -= dt; magT -= dt; magCd -= dt;
+        var playing = state === 'play';
+        var thrustAmt = computeThrust();
+        stabOn = (stabilize || keys.sp) && L.stab && playing;
+        var steps = Math.max(1, Math.ceil(dt / 0.008));
+        for (var s = 0; s < steps; s++) physicsStep(dt / steps);
+
+        if (playing || state === 'done') updateTools(dt, T);
+        if (playing) updateDebris(dt);
+        if (playing) {
+          oxygen -= L.drain * dt;
+          if (thrustAmt > 0) { oxygen -= 5 * dt * thrustAmt; emitThrust(thrustVec.x, thrustVec.y); }
+          if (stabOn && (S.vel.length() > 0.05 || S.L.length() > 0.02)) { oxygen -= 7 * dt; if (Math.random() < 0.5) emitStabilize(); }
+          for (var i = 0; i < tools.length; i++) {
+            var o = tools[i];
+            if (!o.got && o.pos.distanceTo(S.pos) < 0.4) { collect(o); if (state !== 'play') break; }
+          }
+          if (state === 'play' && oxygen <= 0) { oxygen = 0; showFail(); }
+        }
+        if (state === 'done') { doneTimer -= dt; if (doneTimer <= 0) showQuiz(); }
+        updatePuffs(dt);
+
+        astro.position.copy(S.pos);
+        astro.quaternion.copy(S.q);
+        pose(T, dt);
+
+        camera.position.set(0, 0, camDist);
+        camera.lookAt(0, 0, 0);
+        earthGroup.rotation.y += dt * 0.004;
+        clouds.rotation.y += dt * 0.003;
+        hudT += dt; if (hudT > 0.08) { hudT = 0; updateHud(); }
+        renderer.render(scene, camera);
+        requestAnimationFrame(frame);
+      }
+      prepareLevel(0);
+      showMenu();
+      requestAnimationFrame(frame);
+    })();
+  </script>
+<script src="script3.js" defer></script>
+</body>
+
+</html>

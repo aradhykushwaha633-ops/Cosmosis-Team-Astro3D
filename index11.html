@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+    <title>Earth &amp; Neighbours · COSMOSIS</title>
+    <style>
+        :root {
+            --c: #5fd8ff;
+            --t: #e3edf8;
+            --m: #9fb3c8;
+            --b: rgba(120, 200, 255, .22);
+            --g: rgba(8, 16, 28, .64)
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        html,
+        body {
+            margin: 0;
+            height: 100%;
+            background: #000;
+            color: var(--t);
+            font: 13px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif;
+            overflow: hidden
+        }
+
+        #c {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            display: block;
+            touch-action: none
+        }
+
+        .glass {
+            background: var(--g);
+            -webkit-backdrop-filter: blur(14px);
+            backdrop-filter: blur(14px);
+            border: 1px solid var(--b);
+            border-radius: 14px
+        }
+
+        .back {
+            position: fixed;
+            z-index: 20;
+            top: calc(env(safe-area-inset-top, 0px) + 12px);
+            left: 14px;
+            height: 36px;
+            padding: 0 15px;
+            display: inline-flex;
+            align-items: center;
+            border-radius: 999px;
+            color: var(--t);
+            text-decoration: none;
+            font-weight: 600;
+            background: rgba(8, 16, 28, .65);
+            border: 1px solid var(--b)
+        }
+
+        .back:hover {
+            background: rgba(95, 216, 255, .2)
+        }
+
+        #title {
+            position: fixed;
+            z-index: 5;
+            left: 16px;
+            top: calc(60px + env(safe-area-inset-top, 0px));
+            padding: 8px 12px;
+            max-width: 260px
+        }
+
+        #title b {
+            letter-spacing: .2em;
+            color: var(--c);
+            font-size: 13px
+        }
+
+        #title span {
+            display: block;
+            color: var(--m);
+            font-size: 11px
+        }
+
+        #ui {
+            position: fixed;
+            z-index: 6;
+            right: 14px;
+            top: 14px;
+            bottom: 14px;
+            width: min(370px, calc(100vw - 28px));
+            overflow: auto;
+            padding: 14px
+        }
+
+        h2 {
+            margin: 0 0 2px;
+            font-size: 17px;
+            letter-spacing: .12em;
+            color: var(--c)
+        }
+
+        h3 {
+            margin: 15px 0 6px;
+            font-size: 11px;
+            letter-spacing: .14em;
+            color: var(--m);
+            text-transform: uppercase
+        }
+
+        p {
+            margin: 6px 0
+        }
+
+        button {
+            font: inherit;
+            color: var(--t);
+            background: rgba(255, 255, 255, .07);
+            border: 1px solid var(--b);
+            border-radius: 9px;
+            padding: 6px 10px;
+            cursor: pointer;
+            min-height: 32px
+        }
+
+        button:hover {
+            background: rgba(95, 216, 255, .18)
+        }
+
+        button.on {
+            background: rgba(95, 216, 255, .28);
+            border-color: var(--c)
+        }
+
+        button:focus-visible {
+            outline: 2px solid var(--c)
+        }
+
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px
+        }
+
+        td {
+            padding: 5px 6px;
+            border-top: 1px solid rgba(255, 255, 255, .09);
+            vertical-align: top
+        }
+
+        td:first-child {
+            color: var(--m);
+            width: 30%
+        }
+
+        .chk span {
+            padding: 3px 9px;
+            border-radius: 999px;
+            font-size: 11.5px;
+            border: 1px solid
+        }
+
+        .chk .ok {
+            color: #7dffb0;
+            border-color: rgba(125, 255, 176, .45);
+            background: rgba(125, 255, 176, .1)
+        }
+
+        .chk .no {
+            color: #ff9a9a;
+            border-color: rgba(255, 154, 154, .4);
+            background: rgba(255, 154, 154, .08)
+        }
+
+        .q button {
+            display: block;
+            width: 100%;
+            text-align: left;
+            margin-top: 6px
+        }
+
+        .q .good {
+            border-color: #7dffb0;
+            background: rgba(125, 255, 176, .18)
+        }
+
+        .q .bad {
+            border-color: #ff9a9a;
+            background: rgba(255, 154, 154, .18)
+        }
+
+
+        button.split {
+            background: var(--c);
+            color: #04111c;
+            border-color: var(--c);
+            font-weight: 600;
+            padding: 6px 14px
+        }
+
+        button.split:hover {
+            background: #8bd9ff
+        }
+
+        button.split.on {
+            background: rgba(255, 255, 255, .07);
+            color: var(--t);
+            border-color: var(--b)
+        }
+
+        .lcs {
+            display: grid;
+            gap: 6px
+        }
+
+        button.lc {
+            display: block;
+            width: 100%;
+            text-align: left;
+            padding: 9px 12px;
+            border-radius: 11px;
+            background: rgba(12, 17, 28, .7);
+            border: 1px solid var(--b);
+            border-left: 3px solid var(--lc)
+        }
+
+        button.lc b {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px
+        }
+
+        button.lc b i {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--lc)
+        }
+
+        button.lc em {
+            display: block;
+            font-style: normal;
+            font-size: 11px;
+            color: var(--lc);
+            margin-top: 1px
+        }
+
+        button.lc span {
+            display: block;
+            margin-top: 3px;
+            font-size: 11.5px;
+            line-height: 1.35;
+            color: var(--m)
+        }
+
+        button.lc.on {
+            background: rgba(255, 255, 255, .1);
+            border-color: var(--lc)
+        }
+
+        @media(max-width:760px) {
+            #ui {
+                top: auto;
+                left: 8px;
+                right: 8px;
+                bottom: 8px;
+                width: auto;
+                max-height: 47vh
+            }
+
+            #title {
+                display: none
+            }
+        }
+
+        @media(prefers-reduced-motion:reduce) {
+            * {
+                animation: none !important;
+                transition: none !important
+            }
+        }
+    </style>
+    <script src="script2.js"></script>
+    <script src="script1.js"></script>
+</head>
+
+<body>
+    <canvas id="c" aria-label="3D planet viewer"></canvas>
+    <a class="back" href="index.html">← Back</a>
+    <div id="title" class="glass"><b>EARTH &amp; NEIGHBOURS</b><span>Mercury to Pluto · drag to rotate · scroll or pinch
+            to zoom</span></div>
+    <div id="ui" class="glass"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="script6.js"></script>
+    <script>
+        (function () {
+            var E = window.CosmosEarth, $ = function (s) { return document.querySelector(s); }, ui = $('#ui');
+            if (!E || !window.THREE || !THREE.OrbitControls) { ui.innerHTML = '<h2>Could not load 3D</h2><p>Three.js loads from a CDN. Check your internet connection and reload.</p>'; return; }
+            var P = E.P, env = E.init($('#c'), { shift: 185, shiftY: .2 }), pl = {};
+            var ORD = ['earth', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto'], ICON = { earth: '🌍', moon: '🌙', mercury: '⚪', venus: '🟡', mars: '🔴', jupiter: '🟠', saturn: '🪐', uranus: '🔵', neptune: '🔷', pluto: '🤍' };
+            var SZ = { moon: .27, mercury: .38, mars: .53, venus: .95, jupiter: 2.4, saturn: 1.9, uranus: 1.4, neptune: 1.35, pluto: .19 };
+            var LB = ['Radius', 'Gravity', 'Temperature', 'Day length', 'Atmosphere', 'Liquid water', 'Magnetic field', 'Distance from Sun'];
+            var CK = ['💧 Liquid water', '🫁 Breathable air', '🌡️ Safe temperature', '🧲 Magnetic shield', '🪨 Solid ground'];
+            var QZ = [
+                ['Case: a compass needle in Gorakhpur points north. Which layer of Earth, through the motion of its liquid iron, creates the magnetic field behind this?', ['Crust', 'Mantle', 'Outer core', 'Inner core'], 2, 'Flowing molten iron in the outer core acts like a dynamo and produces Earth’s magnetic field.', 'NCERT Class 11 Geography (Interior of the Earth) · Class 12 Physics (Magnetism)'],
+                ['The Aryabhatiya (499 CE) said Earth spins on its own axis. Whose work was it, and whose name did India’s first satellite (1975) carry?', ['Varahamihira', 'Aryabhata', 'Brahmagupta', 'Bhaskara II'], 1, 'Aryabhata. ISRO named its first satellite after him, a link between Indian Knowledge Systems and modern space science.', 'NEP 2020 Indian Knowledge Systems · ISRO'],
+                ['Assertion (A): Venus is hotter than Mercury, although Mercury is closer to the Sun. Reason (R): Venus has a very thick carbon dioxide atmosphere that traps heat.', ['Both A and R are true, and R explains A', 'Both A and R are true, but R does not explain A', 'A is true, but R is false', 'A is false, but R is true'], 0, 'Both are true and R explains A. Venus has a runaway greenhouse effect, with a surface near 464 °C. Mercury has almost no air to hold its heat.', 'NCERT Science (Solar System) · Assertion–Reason format'],
+                ['India’s Mangalyaan reached Mars orbit on its first attempt in September 2014. Mars’s air is only about 0.6% as dense as Earth’s. What does this mean for water on its surface?', ['Water floods the whole planet', 'Water turns into oxygen', 'Liquid water cannot stay stable: it freezes or boils away', 'Water becomes heavier and sinks'], 2, 'With such thin air and low temperatures, liquid water cannot stay stable on the surface. Mars has ice caps instead.', 'ISRO Mars Orbiter Mission · NCERT Class 8 Science'],
+                ['Mercury’s temperature swings from about −180 °C at night to 430 °C in sunlight. What is the main reason?', ['It spins very fast', 'It is made of ice', 'It has strong winds', 'It has almost no atmosphere to trap and spread heat'], 3, 'Without air, the sunlit side overheats and heat escapes quickly at night. Mercury has only a thin exosphere.', 'NCERT Class 6–8 Science and Geography (Solar System)'],
+                ['Saturn’s average density (about 0.7 g/cm³) is less than that of water (1 g/cm³). What does this tell us about Saturn?', ['It is a solid rocky planet', 'It is mostly light hydrogen and helium gas', 'It is made of pure ice', 'It is hollow inside'], 1, 'Saturn is a gas giant made mostly of hydrogen and helium, so its average density is below water’s.', 'NCERT Class 9 Science (Density) · Solar System'],
+                ['Chandrayaan-3’s Vikram lander touched down near the Moon’s south pole on 23 August 2023. Why did it slow down with rocket thrusters and not parachutes?', ['Parachutes are too heavy', 'The Moon has no air for parachutes to push against', 'The Moon has no gravity', 'Thrusters are cheaper'], 1, 'Parachutes need air. The Moon has almost none, so thrusters (Newton’s third law) did the braking.', 'ISRO Chandrayaan-3 · NCERT Class 9 Science (Force and Laws of Motion)'],
+                ['In June it is summer in India, yet Earth is near its farthest point from the Sun in early July. What really causes seasons?', ['Distance from the Sun', 'The tilt of Earth’s axis (about 23.5°) as it orbits the Sun', 'The Moon’s pull', 'Earth’s spinning speed'], 1, 'The tilt changes how directly sunlight strikes each hemisphere and how long the days are, so seasons come from tilt and revolution, not distance.', 'NCERT Class 6–7 Geography (Motions of the Earth)'],
+                ['Uranus is tilted about 98°, so it rolls around the Sun almost on its side. What is one result?', ['It has no seasons at all', 'It has no poles', 'Each pole gets about 42 years of sunlight, then 42 years of darkness', 'It always shows the same face to the Sun'], 2, 'Because of the extreme tilt, each pole faces the Sun for roughly half of Uranus’s 84-year orbit.', 'NCERT Class 8 Science (Solar System extension)'],
+                ['Venus shows how excess carbon dioxide can overheat a world. Which natural process helps remove CO₂ from Earth’s air?', ['Burning of fuels', 'Photosynthesis by plants and algae', 'Volcanic eruptions', 'Evaporation of oceans'], 1, 'Plants and algae absorb CO₂ in photosynthesis. Protecting forests and cutting emissions keeps Earth away from the Venus path.', 'NCERT Class 7 Science (Photosynthesis) · NEP 2020 Environmental Education']
+            ], PASS = 6;
+            ORD.forEach(function (k) { pl[k] = E.planet(k); pl[k].g.visible = false; env.add(pl[k]); });
+            var sel = 'earth', mode = 'x', cutOn = false, hi = -1, q = null, orbit = false;
+
+            var EARTH_LAYERS = [
+                [/crust/i, '8 to 40 km', 'Thin solid shell and continental plates.'],
+                [/mantle/i, '2,900 km', 'Hot, dense, slowly flowing rock.'],
+                [/outer/i, '2,250 km', 'Liquid iron and nickel that makes the magnetic field.'],
+                [/inner/i, '1,300 km', 'Solid iron-nickel ball, about 5,400 °C.']
+            ];
+            function EL(name) { for (var j = 0; j < EARTH_LAYERS.length; j++) if (EARTH_LAYERS[j][0].test(name)) return [EARTH_LAYERS[j][1], EARTH_LAYERS[j][2]]; return null; }
+            function other() { return sel === 'earth' ? 'mars' : sel; }
+            function layout() {
+                var two = mode === 'c', o = other(); orbit = false;
+                ORD.forEach(function (k) { pl[k].g.visible = false; });
+                if (!two) { var p = pl[sel]; p.g.visible = true; p.g.position.set(0, 0, 0); p.g.scale.setScalar(1.25); var mo = sel === 'earth' && !cutOn; orbit = mo; if (mo) { pl.moon.g.visible = true; pl.moon.g.scale.setScalar(.34); } env.dist(mo ? 7.5 : 4 * Math.max(1, P[sel].ext * .62)); }
+                else {
+                    var s = SZ[o], ex = s * P[o].ext, tot = 2.5 + 2 * ex, a = pl.earth, b = pl[o]; a.g.visible = b.g.visible = true;
+                    a.g.scale.setScalar(1); a.g.position.set(-tot / 2 + 1, 0, 0); b.g.scale.setScalar(s); b.g.position.set(tot / 2 - ex, 0, 0); env.dist(Math.max(4.2, 2.4 + tot * .62));
+                }
+                ORD.forEach(function (k) { pl[k].cut(cutOn); pl[k].hi(hi); });
+            }
+            function quiz() {
+                if (!q) return '<p style="color:var(--m)">Questions follow NEP 2020 competency-based style and NCERT / Indian sources. Score ' + PASS + '+ to earn XP.</p><button data-a="qs">Start the ' + QZ.length + '-question quiz (+20 XP)</button>';
+                if (q.i >= QZ.length) return '<p><b>Score: ' + q.s + '/' + QZ.length + '</b> ' + (q.s >= PASS ? (q.xp ? '· +20 XP earned! 🎉' : '· great job!') : '· read the facts above and try again.') + '</p><button data-a="qs">Try again</button>';
+                var z = QZ[q.i];
+                return '<div class="q"><p><b>Q' + (q.i + 1) + '.</b> ' + z[0] + '</p>' + z[1].map(function (o, i) {
+                    var c = q.a < 0 ? '' : i === z[2] ? ' good' : i === q.a ? ' bad' : '';
+                    return '<button data-a="qa" data-i="' + i + '" class="' + c + '"' + (q.a >= 0 ? ' disabled' : '') + '>' + o + '</button>';
+                }).join('') + (q.a >= 0 ? '<p>' + (q.a === z[2] ? '✅ ' : '❌ ') + z[3] + '</p><p style="color:var(--m);font-size:11px">📘 ' + z[4] + '</p><button data-a="qn">Next →</button>' : '') + '</div>';
+            }
+            function render() {
+                var st = ui.scrollTop, two = mode === 'c', k = two ? other() : sel, d = P[k], e = P.earth, h = '';
+                h += '<h2>' + (two ? 'EARTH vs ' + d.n.toUpperCase() : d.n.toUpperCase()) + '</h2><div style="color:var(--m)">' + d.tag + '</div>';
+                h += '<h3>Choose a world</h3><div class="row">' + ORD.map(function (x) { return '<button data-a="p" data-v="' + x + '" class="' + (x === sel ? 'on' : '') + '">' + ICON[x] + ' ' + P[x].n + '</button>'; }).join('') + '</div>';
+                h += '<div class="row" style="margin-top:8px"><button data-a="m" data-v="x" class="' + (!two ? 'on' : '') + '">Explore</button><button data-a="m" data-v="c" class="' + (two ? 'on' : '') + '">Compare with Earth</button><button data-a="cut" class="split' + (cutOn ? ' on' : '') + '">' + (cutOn ? 'Close layers' : two ? 'Split both' : 'Split ' + d.n) + '</button></div>';
+                if (cutOn) {
+                    var Ls = d.layers;
+                    h += '<h3>Inside ' + d.n + '</h3><div class="lcs">' + Ls.map(function (l, i) {
+                        var x = k === 'earth' ? EL(l[2]) : null;
+                        return '<button data-a="L" data-i="' + i + '" class="lc' + (hi === i ? ' on' : '') + '" style="--lc:' + l[1] + '"><b><i></i>' + l[2] + '</b>' + (x ? '<em>' + x[0] + '</em>' : '') + '<span>' + (x ? x[1] : l[3]) + '</span></button>';
+                    }).join('') + '</div>';
+                    h += '<p style="color:var(--m)">' + (hi < 0 ? 'Tap a layer to light it up. Drag the planet to look around the cut.' : 'Showing: <b style="color:var(--t)">' + Ls[hi][2] + '</b>. ' + Ls[hi][3]) + '</p>';
+                }
+                h += '<h3>' + (two ? 'Compare' : 'Facts') + '</h3><table>' + (two ? '<tr><td></td><td><b>Earth</b></td><td><b>' + d.n + '</b></td></tr>' : '') +
+                    LB.map(function (l, i) { return '<tr><td>' + l + '</td>' + (two ? '<td>' + e.f[i] + '</td>' : '') + '<td>' + d.f[i] + '</td></tr>'; }).join('') + '</table>';
+                if (two && SZ[k] < d.r * .9) h += '<p style="color:var(--m)">' + d.n + ' is ' + d.r + '× wider than Earth – drawn smaller here so both fit.</p>';
+                h += '<h3>' + (k === 'earth' ? 'Why life works here' : 'Why is ' + d.n + ' not suitable for life?') + '</h3><div class="row chk">' + CK.map(function (c, i) { var ok = d.k[i] === '1'; return '<span class="' + (ok ? 'ok' : 'no') + '">' + (ok ? '✔ ' : '✖ ') + c + '</span>'; }).join('') + '</div><p>' + d.why + '</p>';
+                if (two) h += '<p style="color:var(--m)">Tip: press “Split” to compare the insides too.</p>';
+                if (k === 'earth' && !two) { var PO = E.POP; h += '<h3>People on Earth</h3><p id="pop" style="font-size:22px;font-weight:700;color:var(--c);margin:2px 0">' + Math.round(PO.now()).toLocaleString() + '</p><p style="color:var(--m)">live estimate, rounded UN-based figures</p><table>' + PO.hist.map(function (x) { return '<tr><td>' + x[0] + '</td><td>' + x[1] + '</td></tr>'; }).join('') + '</table><h3>Most populous countries</h3><table>' + PO.top.map(function (x) { return '<tr><td>' + x[0] + '</td><td>' + x[1] + '</td></tr>'; }).join('') + '</table>'; if (orbit) h += '<p style="color:var(--m)">🌙 The Moon is drawn closer and bigger than real so you can see it orbit.</p>'; }
+                h += '<h3>Test yourself</h3>' + quiz() + '<p style="margin-top:14px"><a href="index12.html" style="color:var(--c)">🛠 Now build your own Earth in the Skill Lab →</a></p>';
+                ui.innerHTML = h; ui.scrollTop = st;
+            }
+            ui.addEventListener('click', function (ev) {
+                var b = ev.target.closest('button'); if (!b || b.disabled) return;
+                var a = b.dataset.a, v = b.dataset.v, i = +b.dataset.i;
+                if (a === 'p') { sel = v; hi = -1; } else if (a === 'm') mode = v; else if (a === 'cut') { cutOn = !cutOn; hi = -1; }
+                else if (a === 'L') hi = hi === i ? -1 : i;
+                else if (a === 'qs') q = { i: 0, s: 0, a: -1 };
+                else if (a === 'qa') { q.a = i; if (i === QZ[q.i][2]) q.s++; }
+                else if (a === 'qn') { q.i++; q.a = -1; if (q.i >= QZ.length && q.s >= PASS) q.xp = E.award('discover', 20, 'Earth & Neighbours quiz'); }
+                layout(); render();
+            });
+            env.onFrame = function (dt, t) { if (orbit) pl.moon.g.position.set(Math.cos(t * .22) * 3.7, Math.sin(t * .22) * .5, Math.sin(t * .22) * 3.7); };
+            setInterval(function () { var e = document.getElementById('pop'); if (e) e.textContent = Math.round(E.POP.now()).toLocaleString(); }, 1000);
+            layout(); render();
+        })();
+    </script>
+    <script src="script3.js" defer></script>
+</body>
+
+</html>

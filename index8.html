@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+    <title>NavIC Explorer</title>
+    <style>
+        :root {
+            --g: rgba(8, 16, 28, .5);
+            --b: rgba(120, 200, 255, .2);
+            --c: #5fd8ff;
+            --t: #e3edf8;
+            --m: #9fb3c8;
+            --si: env(safe-area-inset-top, 0px);
+            --sb: env(safe-area-inset-bottom, 0px)
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        html,
+        body {
+            margin: 0;
+            height: 100%;
+            background: #000;
+            color: var(--t);
+            font: 13px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif;
+            overflow: hidden
+        }
+
+        #c {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            display: block;
+            touch-action: none
+        }
+
+        #c.hov {
+            cursor: pointer
+        }
+
+        .glass {
+            background: var(--g);
+            -webkit-backdrop-filter: blur(14px);
+            backdrop-filter: blur(14px);
+            border: 1px solid var(--b);
+            border-radius: 14px
+        }
+
+        .fx {
+            position: fixed;
+            z-index: 5
+        }
+
+        #title {
+            left: 16px;
+            top: calc(56px + var(--si));
+            text-shadow: 0 1px 6px #000
+        }
+
+        #title b {
+            letter-spacing: .22em;
+            color: var(--c);
+            font-size: 14px
+        }
+
+        #title span {
+            display: block;
+            color: var(--m);
+            font-size: 11px
+        }
+
+        #infoBtn {
+            right: 14px;
+            top: calc(12px + var(--si))
+        }
+
+        #status {
+            right: 14px;
+            top: calc(56px + var(--si));
+            padding: 10px 14px;
+            max-width: 270px;
+            font-size: 11px;
+            color: var(--m);
+            display: none
+        }
+
+        #status.open {
+            display: block
+        }
+
+        #status b {
+            color: var(--t);
+            font-weight: 600
+        }
+
+        #info {
+            left: 50%;
+            transform: translateX(-50%);
+            top: calc(70px + var(--si));
+            width: min(520px, calc(100vw - 24px));
+            padding: 12px 16px;
+            animation: fade 1s both;
+            cursor: default
+        }
+
+        @keyframes fade {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -8px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translate(-50%, 0)
+            }
+        }
+
+        #nm {
+            margin: 0 0 4px;
+            font-size: 14px;
+            letter-spacing: .14em;
+            color: var(--c);
+            font-weight: 600;
+            min-height: 1.4em
+        }
+
+        #bd {
+            margin: 0;
+            min-height: 4.2em;
+            font-size: 13px
+        }
+
+        #sc {
+            margin: 6px 0 0;
+            font-size: 10.5px;
+            color: var(--m);
+            min-height: 1.3em;
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            align-items: center
+        }
+
+        #sc a {
+            color: var(--c)
+        }
+
+        .ty::after {
+            content: "";
+            display: inline-block;
+            width: 6px;
+            height: 1em;
+            background: var(--c);
+            margin-left: 2px;
+            vertical-align: -2px;
+            animation: bl .8s steps(1) infinite
+        }
+
+        @keyframes bl {
+            50% {
+                opacity: 0
+            }
+        }
+
+        button {
+            font: inherit;
+            color: var(--t);
+            background: rgba(255, 255, 255, .07);
+            border: 1px solid var(--b);
+            border-radius: 9px;
+            padding: 6px 10px;
+            cursor: pointer;
+            min-height: 32px
+        }
+
+        button:hover {
+            background: rgba(95, 216, 255, .18)
+        }
+
+        button.on {
+            background: rgba(95, 216, 255, .26);
+            border-color: var(--c)
+        }
+
+        button:focus-visible {
+            outline: 2px solid var(--c)
+        }
+
+        .ic {
+            border-radius: 50%;
+            width: 38px;
+            height: 38px;
+            padding: 0;
+            font-size: 15px;
+            background: rgba(8, 16, 28, .5)
+        }
+
+        #res {
+            display: none;
+            padding: 3px 10px;
+            min-height: 24px;
+            font-size: 11px;
+            flex: none
+        }
+
+        #bot {
+            position: fixed;
+            z-index: 5;
+            left: 16px;
+            right: 14px;
+            bottom: calc(14px + var(--sb));
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+            justify-content: space-between;
+            pointer-events: none
+        }
+
+        #bot>* {
+            pointer-events: auto
+        }
+
+        #chips {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            max-width: 270px
+        }
+
+        #chips button {
+            border-radius: 999px;
+            padding: 3px 10px;
+            min-height: 28px;
+            font-size: 11px;
+            background: rgba(8, 16, 28, .4)
+        }
+
+        #prog {
+            flex: 1;
+            max-width: 340px;
+            text-align: center;
+            font-size: 11px;
+            color: var(--m);
+            text-shadow: 0 1px 4px #000;
+            pointer-events: none
+        }
+
+        #bar {
+            height: 2px;
+            background: rgba(255, 255, 255, .14);
+            border-radius: 2px;
+            margin-top: 6px;
+            overflow: hidden
+        }
+
+        #bar div {
+            height: 100%;
+            width: 0;
+            background: var(--c)
+        }
+
+        #cbar {
+            display: flex;
+            gap: 6px
+        }
+
+        #menu {
+            position: fixed;
+            z-index: 6;
+            right: 14px;
+            bottom: calc(64px + var(--sb));
+            padding: 8px;
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            min-width: 150px
+        }
+
+        #menu.open {
+            display: flex
+        }
+
+        #menu button {
+            text-align: left
+        }
+
+        .lbl {
+            position: fixed;
+            z-index: 3;
+            font-size: 10px;
+            letter-spacing: .12em;
+            color: #bcd;
+            pointer-events: none;
+            transform: translate(-50%, -100%);
+            white-space: nowrap;
+            text-shadow: 0 0 4px #000
+        }
+
+        .lbl.p {
+            color: var(--c);
+            font-size: 11px
+        }
+
+        #hud {
+            position: fixed;
+            inset: 0;
+            z-index: 4;
+            pointer-events: none;
+            width: 100%;
+            height: 100%
+        }
+
+        #tag {
+            position: fixed;
+            z-index: 4;
+            pointer-events: none;
+            font-size: 10px;
+            letter-spacing: .12em;
+            padding: 3px 8px;
+            border: 1px solid;
+            border-radius: 6px;
+            background: rgba(0, 0, 0, .55);
+            display: none;
+            white-space: nowrap
+        }
+
+        #load,
+        #err {
+            position: fixed;
+            inset: 0;
+            z-index: 20;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            letter-spacing: .2em;
+            color: var(--c);
+            text-align: center;
+            padding: 24px
+        }
+
+        #err {
+            display: none;
+            letter-spacing: 0;
+            color: #ffb4a8
+        }
+
+        @media(max-width:760px) {
+            #bot {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 8px;
+                left: 12px;
+                right: 12px
+            }
+
+            #prog {
+                max-width: none;
+                order: 1
+            }
+
+            #chips {
+                order: 3;
+                max-width: none;
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                padding-bottom: 2px
+            }
+
+            #chips button {
+                flex: none
+            }
+
+            #cbar {
+                order: 2;
+                justify-content: center
+            }
+
+            #info {
+                top: calc(58px + var(--si));
+                padding: 10px 14px
+            }
+
+            #bd {
+                font-size: 12.5px;
+                min-height: 5em
+            }
+
+            #title span {
+                display: none
+            }
+
+            #menu {
+                bottom: calc(120px + var(--sb));
+                right: 12px
+            }
+        }
+    </style>
+    <script src="script2.js"></script>
+    <script src="script1.js"></script>
+    <style>
+        /* ===== Go Back button ===== */
+        .back-btn {
+            --back-accent: #5fd8ff;
+            position: fixed;
+            top: calc(env(safe-area-inset-top, 0px) + 12px);
+            left: max(14px, env(safe-area-inset-left, 0px));
+            z-index: 1000;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            height: 36px;
+            padding: 0 15px 0 11px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, .18);
+            background: rgba(8, 14, 26, .55);
+            -webkit-backdrop-filter: blur(12px) saturate(140%);
+            backdrop-filter: blur(12px) saturate(140%);
+            color: #eef2fb;
+            font: 600 13px/1 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+            letter-spacing: .04em;
+            text-decoration: none;
+            white-space: nowrap;
+            box-shadow: 0 4px 18px rgba(0, 0, 0, .4);
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+            transition: background .2s, border-color .2s, color .2s, transform .2s
+        }
+
+        .back-btn svg {
+            width: 16px;
+            height: 16px;
+            flex: none;
+            transition: transform .2s
+        }
+
+        .back-btn:hover {
+            background: rgba(8, 14, 26, .82);
+            border-color: var(--back-accent);
+            color: #fff
+        }
+
+        .back-btn:hover svg {
+            transform: translateX(-3px)
+        }
+
+        .back-btn:focus-visible {
+            outline: 2px solid var(--back-accent);
+            outline-offset: 3px
+        }
+
+        .back-btn:active {
+            transform: scale(.96)
+        }
+
+        @media (prefers-reduced-motion:reduce) {
+
+            .back-btn,
+            .back-btn svg {
+                transition: none
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <a class="back-btn" href="index.html" aria-label="Go back to the home page"><svg viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M15 6l-6 6 6 6" />
+        </svg><span>Go Back</span></a>
+    <canvas id="c"></canvas>
+    <svg id="hud">
+        <line id="ln" stroke-width="1.2" opacity="0" />
+        <circle id="dot" r="4" fill="none" stroke-width="1.5" opacity="0" />
+    </svg>
+    <div id="tag"></div>
+    <div id="lbls"></div>
+    <div id="title" class="fx"><b>NAVIC EXPLORER</b><span>India's Regional Satellite Navigation System</span></div>
+    <button id="infoBtn" class="fx ic" aria-label="About this simulation" title="About this simulation">i</button>
+    <div id="status" class="fx glass"><b>Historical design:</b> 7 satellites (3 GEO + 4 GSO)<br><b>Simulation
+            objects:</b> 7 (IRNSS-1A…1G)<br><b>Operational status:</b> not verified here — consult ISRO<br><br>Orbits
+        are an illustrative model, not live tracking. Later craft (1H, 1I, NVS-series) are not modelled. Scale is
+        exaggerated and the satellite model is generic.</div>
+    <div id="info" class="fx glass" aria-live="polite">
+        <h2 id="nm"></h2>
+        <p id="bd"></p>
+        <div id="sc"><span id="srcs"></span><button id="res">Resume tour</button></div>
+    </div>
+    <div id="bot">
+        <div id="chips"></div>
+        <div id="prog"><span id="pt">Starting…</span>
+            <div id="bar">
+                <div></div>
+            </div>
+        </div>
+        <div id="cbar"><button class="ic" data-a="prev" aria-label="Previous satellite"
+                title="Previous satellite">‹</button><button class="ic" data-a="pause" aria-label="Pause or resume"
+                title="Pause / resume">❚❚</button><button class="ic" data-a="next" aria-label="Next satellite"
+                title="Next satellite">›</button><button class="ic" data-a="menu" aria-label="More controls"
+                title="More controls">⋯</button></div>
+    </div>
+    <div id="menu" class="glass"><button data-a="restart">Restart inspection</button><button data-a="reset">Reset
+            camera</button><button data-a="orbits" class="on">Orbit paths</button><button data-a="labels"
+            class="on">Labels</button><button data-a="over">Overview</button><button data-a="free">Free
+            orbit</button><button data-a="expl">Exploded view</button></div>
+    <div id="load">LOADING NAVIC EXPLORER…</div>
+    <div id="err"></div>
+    <!-- Dependencies (pinned): three.js r128 + OrbitControls r128 from jsDelivr -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script>
+        (function () {
+            'use strict';
+            const $ = s => document.querySelector(s);
+            function fail(m) { const e = $('#err'); e.textContent = m; e.style.display = 'flex'; const l = $('#load'); if (l) l.remove() }
+            if (!window.THREE || !THREE.OrbitControls) { fail('Could not load Three.js from the CDN. Check your connection and reload.'); return }
+            try { init() } catch (e) { console.error(e); fail('Could not start the 3D scene (WebGL may be unavailable): ' + e.message) }
+
+            function init() {
+                /* ---------- CONFIG ---------- */
+                const CFG = { INSPECT_SECONDS: 20, INTRO_SECONDS: 7, TRAVEL_SECONDS: 3.5, TIME_SCALE: 600, TYPE_CPS: 120 };
+                const D2R = Math.PI / 180, RE = 6.371, RO = 42.164, WE = 2 * Math.PI / 86164; // 1 unit = 1000 km
+                const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+                const ISRO = { name: 'ISRO (official site)', url: 'https://www.isro.gov.in' };
+                const CAT = { power: 0xffb020, nav: 0x22d3ee, bus: 0x3b82f6, prop: 0xff7a1a, therm: 0xa855f7, ttc: 0x22c55e };
+                const CTXT = { power: '#ffb020', nav: '#22d3ee', bus: '#3b82f6', prop: '#ff7a1a', therm: '#a855f7', ttc: '#22c55e' };
+
+                /* ---------- DATA ---------- */
+                const COMPS = {
+                    bus: { n: 'SATELLITE BUS & STRUCTURE', c: 'bus', t: 'The structural core that carries payload, power, thermal and propulsion hardware inside a foil-wrapped shell.', s: null },
+                    solar: { n: 'SOLAR ARRAY ASSEMBLY', c: 'power', t: 'Photovoltaic cells convert sunlight into electricity that powers the payload, control electronics and batteries.', s: null },
+                    nav: { n: 'NAVIGATION ANTENNA', c: 'nav', t: 'Broadcasts ranging signals to ground users: NavIC uses L5 (1176.45 MHz) and S-band (2492.028 MHz); newer NVS craft add L1.', s: ISRO },
+                    payload: { n: 'NAVIGATION PAYLOAD (INTERNAL)', c: 'nav', t: 'Internal: generates and timestamps the navigation signal using onboard atomic clocks. Shown as a cutaway, not a real view.', s: ISRO },
+                    ttc: { n: 'TELEMETRY, TRACKING & COMMAND', c: 'ttc', t: 'Boom-mounted lattice and whip antennas stand for the command, telemetry and ranging links with ground stations (generic illustration).', s: null },
+                    prop: { n: 'PROPULSION SUBSYSTEM', c: 'prop', t: 'An apogee motor and small thrusters raise the orbit after launch, then hold the satellite on its assigned track.', s: null },
+                    thermal: { n: 'THERMAL-CONTROL SURFACES', c: 'therm', t: 'Radiator plates and foil insulation keep electronics within safe temperatures through sunlight and eclipse.', s: null }
+                };
+                const ORDER = ['bus', 'solar', 'nav', 'payload', 'ttc', 'prop', 'thermal'];
+                const mkS = (id, role, node, ph, launch) => ({
+                    id, name: id, role, node, ph, launch, inc: role === 'GEO' ? 0 : 29, components: ORDER,
+                    orbit: { altitudeKm: 35786, inclinationDeg: role === 'GEO' ? 0 : 29, periodHours: 23.93, basis: 'GEO/GSO design values; phasing illustrative' },
+                    status: 'unverified (historical entry; check ISRO for current status)', sources: [ISRO]
+                });
+                // second satellite of each GSO pair is phased 90° along the shared figure-8 so the two never coincide
+                const SATS = [mkS('IRNSS-1A', 'GSO', 55, 0, 'Jul 2013'), mkS('IRNSS-1B', 'GSO', 55, 90, 'Apr 2014'), mkS('IRNSS-1C', 'GEO', 83, 0, 'Oct 2014'),
+                mkS('IRNSS-1D', 'GSO', 111.75, 0, 'Mar 2015'), mkS('IRNSS-1E', 'GSO', 111.75, 90, 'Jan 2016'), mkS('IRNSS-1F', 'GEO', 32.5, 0, 'Mar 2016'), mkS('IRNSS-1G', 'GEO', 129.5, 0, 'Apr 2016')];
+                const roleTxt = s => s.role === 'GEO' ? 'Geostationary (GEO), ' + s.node + '°E' : 'Inclined geosynchronous (GSO), ~29° inclination, equator crossing ' + s.node + '°E';
+                const summary = s => roleTxt(s) + '. Launched ' + s.launch + '. Status: ' + s.status + '. Orbit phasing is illustrative.';
+
+                /* ---------- renderer / scene ---------- */
+                const cv = $('#c'), renderer = new THREE.WebGLRenderer({ canvas: cv, antialias: true, powerPreference: 'high-performance' });
+                renderer.setClearColor(0x000000); renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+                const scene = new THREE.Scene(), camera = new THREE.PerspectiveCamera(58, 1, .1, 3000);
+                const V = THREE.Vector3, Y = new V(0, 1, 0), SUN = new V(1, .28, .6).normalize();
+                function resize() { renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 1.75)); renderer.setSize(innerWidth, innerHeight, false); camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); if (window.starMat) starMat.uniforms.pr.value = renderer.getPixelRatio() }
+                addEventListener('resize', resize);
+                const mkc = (w, h) => { const c = document.createElement('canvas'); c.width = w; c.height = h; return c };
+                let seed = 7; const rnd = () => (seed = seed * 16807 % 2147483647) / 2147483647;
+
+                /* lights: sun with shadows that follow the inspected satellite */
+                scene.add(new THREE.AmbientLight(0x6677aa, .2));
+                const sunL = new THREE.DirectionalLight(0xfff2dd, 2.6); sunL.castShadow = true; sunL.shadow.mapSize.set(2048, 2048);
+                Object.assign(sunL.shadow.camera, { left: -8, right: 8, top: 8, bottom: -8, near: 1, far: 130 }); sunL.shadow.bias = -.0004; sunL.shadow.normalBias = .03; scene.add(sunL, sunL.target);
+                const fill = new THREE.DirectionalLight(0x4a6fb0, .4); fill.position.copy(SUN).multiplyScalar(-100); scene.add(fill);
+                // environment map with the sun's reflection baked in at the sun's real direction
+                {
+                    const c = mkc(512, 256), g = c.getContext('2d'), gr = g.createLinearGradient(0, 0, 0, 256); gr.addColorStop(0, '#05080f'); gr.addColorStop(.6, '#0a1830'); gr.addColorStop(1, '#2a5da8'); g.fillStyle = gr; g.fillRect(0, 0, 512, 256);
+                    const bx = (Math.atan2(SUN.z, SUN.x) / (2 * Math.PI) + .5) * 512, by = (1 - (Math.asin(SUN.y) / Math.PI + .5)) * 256;
+                    [[70, .9], [18, 1]].forEach(a => { const rg = g.createRadialGradient(bx, by, 0, bx, by, a[0]); rg.addColorStop(0, 'rgba(255,248,225,' + a[1] + ')'); rg.addColorStop(1, 'rgba(255,255,255,0)'); g.fillStyle = rg; g.fillRect(bx - a[0], by - a[0], 2 * a[0], 2 * a[0]) });
+                    const t = new THREE.CanvasTexture(c); t.mapping = THREE.EquirectangularReflectionMapping; const pm = new THREE.PMREMGenerator(renderer); scene.environment = pm.fromEquirectangular(t).texture; pm.dispose(); t.dispose()
+                }
+
+                /* ---------- sky: nebula + milky way, twinkling stars, sun, planets ---------- */
+                {
+                    const w = 1536, h = 768, c = mkc(w, h), g = c.getContext('2d'); g.fillStyle = '#02030a'; g.fillRect(0, 0, w, h);
+                    const bg = g.createLinearGradient(0, h * .3, 0, h * .7); bg.addColorStop(0, 'rgba(0,0,0,0)'); bg.addColorStop(.5, 'rgba(150,160,210,.2)'); bg.addColorStop(1, 'rgba(0,0,0,0)'); g.fillStyle = bg; g.fillRect(0, h * .3, w, h * .4);
+                    const cols = ['120,60,200', '40,120,220', '220,70,130', '30,180,170'];
+                    for (let i = 0; i < 90; i++) { const x = rnd() * w, y = h * (.2 + rnd() * .6), r = 40 + rnd() * 130, cc = cols[i % 4], rg = g.createRadialGradient(x, y, 0, x, y, r); rg.addColorStop(0, 'rgba(' + cc + ',.13)'); rg.addColorStop(1, 'rgba(' + cc + ',0)'); g.fillStyle = rg; g.fillRect(x - r, y - r, 2 * r, 2 * r) }
+                    for (let i = 0; i < 7000; i++) { const y = h * (.5 + (rnd() + rnd() + rnd() - 1.5) * .32); g.fillStyle = 'rgba(255,255,255,' + rnd() * .55 + ')'; g.fillRect(rnd() * w, y, 1.2, 1.2) }
+                    const sky = new THREE.Mesh(new THREE.SphereGeometry(1000, 48, 32), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(c), side: THREE.BackSide, depthWrite: false })); sky.rotation.z = .45; sky.renderOrder = -10; scene.add(sky)
+                }
+                {
+                    const n = 3200, p = new Float32Array(n * 3), col = new Float32Array(n * 3), sz = new Float32Array(n), ph = new Float32Array(n);
+                    for (let i = 0; i < n; i++) {
+                        const u = rnd() * 2 - 1, a = rnd() * 6.283, r = Math.sqrt(1 - u * u); p.set([900 * r * Math.cos(a), 900 * u, 900 * r * Math.sin(a)], i * 3);
+                        const k = rnd(), tint = k < .2 ? [.7, .8, 1] : k < .35 ? [1, .85, .65] : [1, 1, 1], b = .5 + rnd() * .5; col.set([tint[0] * b, tint[1] * b, tint[2] * b], i * 3); sz[i] = rnd() < .04 ? 5 + rnd() * 3 : 1.5 + rnd() * 2; ph[i] = rnd()
+                    }
+                    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(p, 3)); g.setAttribute('col', new THREE.BufferAttribute(col, 3)); g.setAttribute('aS', new THREE.BufferAttribute(sz, 1)); g.setAttribute('aP', new THREE.BufferAttribute(ph, 1));
+                    window.starMat = new THREE.ShaderMaterial({
+                        transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, uniforms: { t: { value: 0 }, pr: { value: 1 } },
+                        vertexShader: 'attribute vec3 col;attribute float aS;attribute float aP;uniform float t;uniform float pr;varying vec3 vC;varying float vA;void main(){float tw=.55+.45*sin(t*(.8+aP*2.5)+aP*60.);vC=col;vA=tw;gl_PointSize=aS*(.7+.5*tw)*pr;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
+                        fragmentShader: 'varying vec3 vC;varying float vA;void main(){float d=length(gl_PointCoord-.5);gl_FragColor=vec4(vC,smoothstep(.5,0.,d)*vA);}'
+                    });
+                    const pts = new THREE.Points(g, starMat); pts.frustumCulled = false; scene.add(pts)
+                }
+                resize();
+                {
+                    const sp = SUN.clone().multiplyScalar(800), sm = new THREE.Mesh(new THREE.SphereGeometry(26, 32, 16), new THREE.MeshBasicMaterial({ color: 0xfff3c8 })); sm.position.copy(sp); scene.add(sm);
+                    const c = mkc(256, 256), g = c.getContext('2d'), r = g.createRadialGradient(128, 128, 0, 128, 128, 128); r.addColorStop(0, 'rgba(255,250,225,1)'); r.addColorStop(.12, 'rgba(255,225,150,.75)'); r.addColorStop(.4, 'rgba(255,160,60,.18)'); r.addColorStop(1, 'rgba(255,120,40,0)'); g.fillStyle = r; g.fillRect(0, 0, 256, 256);
+                    const gl = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(c), blending: THREE.AdditiveBlending, depthWrite: false, transparent: true })); gl.scale.setScalar(420); gl.position.copy(sp); scene.add(gl)
+                }
+                function planetTex(h, s, l, bands, craters) {
+                    const c = mkc(256, 128), g = c.getContext('2d'); g.fillStyle = 'hsl(' + h + ',' + s + '%,' + l + '%)'; g.fillRect(0, 0, 256, 128);
+                    if (bands) for (let y = 0; y < 128; y += 2 + rnd() * 8) { g.fillStyle = 'hsla(' + (h + rnd() * 16 - 8) + ',' + s + '%,' + (l + rnd() * 24 - 12) + '%,.55)'; g.fillRect(0, y, 256, 2 + rnd() * 7) }
+                    for (let i = 0; i < (craters ? 160 : 60); i++) { g.fillStyle = craters ? 'rgba(0,0,0,' + rnd() * .18 + ')' : 'hsla(' + h + ',' + s + '%,' + (l + rnd() * 30 - 15) + '%,.25)'; g.beginPath(); g.arc(rnd() * 256, rnd() * 128, 1 + rnd() * (craters ? 7 : 12), 0, 7); g.fill() }
+                    return new THREE.CanvasTexture(c)
+                }
+                function ringTex() { const c = mkc(256, 256), g = c.getContext('2d'); for (let r = 82; r < 128; r += 1.5) { g.strokeStyle = 'rgba(225,205,165,' + (.2 + rnd() * .5) + ')'; g.lineWidth = 1.6; g.beginPath(); g.arc(128, 128, r, 0, 7); g.stroke() } return new THREE.CanvasTexture(c) }
+                // [hue,sat,light,bands,craters,radius,direction,distance,ring]
+                [[0, 0, 60, 0, 1, 18, [.2, .9, -.4], 520], [8, 60, 42, 0, 0, 10, [-.3, .55, .78], 720], [32, 45, 60, 1, 0, 42, [.4, -.2, .9], 800], [45, 40, 68, 1, 0, 28, [.6, .6, -.5], 800, 1], [50, 35, 78, 1, 0, 9, [.7, -.5, -.5], 700], [205, 70, 45, 1, 0, 14, [-.95, .1, .3], 760]].forEach(a => {
+                    const m = planetTex(a[0], a[1], a[2], a[3], a[4]), o = new THREE.Mesh(new THREE.SphereGeometry(a[5], 32, 24), new THREE.MeshStandardMaterial({ map: m, roughness: 1, metalness: 0, emissive: 0xffffff, emissiveMap: m, emissiveIntensity: .2 }));
+                    o.position.set(a[6][0], a[6][1], a[6][2]).normalize().multiplyScalar(a[7]); scene.add(o);
+                    if (a[8]) { const rg = new THREE.Mesh(new THREE.RingGeometry(a[5] * 1.45, a[5] * 2.3, 64), new THREE.MeshBasicMaterial({ map: ringTex(), transparent: true, side: THREE.DoubleSide, depthWrite: false })); rg.rotation.set(1.2, .3, 0); o.add(rg) }
+                });
+
+                /* ---------- Earth ---------- */
+                const LAND = [[[-168, 66], [-140, 70], [-95, 72], [-80, 68], [-60, 52], [-68, 44], [-80, 25], [-97, 18], [-88, 15], [-78, 8], [-105, 20], [-118, 32], [-125, 48], [-140, 60]],
+                [[-78, 8], [-60, 10], [-35, -6], [-40, -22], [-58, -38], [-68, -54], [-75, -45], [-72, -20], [-81, -5]],
+                [[-17, 21], [-6, 36], [10, 37], [32, 31], [43, 12], [51, 11], [40, -12], [35, -25], [20, -35], [12, -18], [9, 4], [-8, 5], [-17, 14]],
+                [[-10, 36], [-9, 43], [5, 50], [10, 58], [28, 71], [70, 73], [110, 77], [180, 68], [160, 55], [140, 45], [122, 30], [110, 20], [106, 10], [100, 2], [98, 16], [92, 22], [88, 21], [80, 15], [77, 8], [73, 17], [72, 21], [67, 25], [57, 25], [59, 22], [52, 16], [44, 13], [35, 28], [28, 36], [10, 44]],
+                [[114, -22], [130, -12], [142, -11], [153, -26], [147, -38], [135, -34], [115, -34]]];
+                const ICE = [[[-180, -90], [180, -90], [180, -70], [-180, -70]], [[-55, 60], [-20, 70], [-30, 83], [-60, 80]]];
+                function earthTex() {
+                    const w = 1024, h = 512, c = mkc(w, h), g = c.getContext('2d'), gr = g.createLinearGradient(0, 0, 0, h);
+                    gr.addColorStop(0, '#0b3a6e'); gr.addColorStop(.5, '#0f5ea3'); gr.addColorStop(1, '#0b3a6e'); g.fillStyle = gr; g.fillRect(0, 0, w, h);
+                    const path = L => { g.beginPath(); L.forEach(p => { p.forEach((q, i) => { const x = (q[0] + 180) / 360 * w, y = (90 - q[1]) / 180 * h; i ? g.lineTo(x, y) : g.moveTo(x, y) }); g.closePath() }) };
+                    path(LAND); g.fillStyle = '#4f7a3c'; g.fill(); g.save(); g.clip();
+                    for (let i = 0; i < 1000; i++) { g.fillStyle = 'hsla(' + (30 + rnd() * 70) + ',' + (25 + rnd() * 30) + '%,' + (26 + rnd() * 24) + '%,.35)'; g.beginPath(); g.arc(rnd() * w, rnd() * h, 3 + rnd() * 14, 0, 7); g.fill() } g.restore();
+                    path(ICE); g.fillStyle = '#e8f1fa'; g.fill(); return new THREE.CanvasTexture(c)
+                }
+                const earth = new THREE.Mesh(new THREE.SphereGeometry(RE, 96, 64), new THREE.ShaderMaterial({
+                    uniforms: { map: { value: earthTex() }, sun: { value: SUN } },
+                    vertexShader: 'varying vec2 vUv;varying vec3 vN;varying vec3 vW;void main(){vUv=uv;vN=normalize(mat3(modelMatrix)*normal);vec4 w=modelMatrix*vec4(position,1.);vW=w.xyz;gl_Position=projectionMatrix*viewMatrix*w;}',
+                    fragmentShader: 'uniform sampler2D map;uniform vec3 sun;varying vec2 vUv;varying vec3 vN;varying vec3 vW;void main(){vec3 n=normalize(vN);float d=dot(n,sun);float day=smoothstep(-.12,.25,d);vec3 c=texture2D(map,vUv).rgb;vec3 col=c*(.035+day*1.2);vec3 v=normalize(cameraPosition-vW);float f=pow(1.-max(dot(n,v),0.),3.);col+=vec3(.15,.4,.9)*f*(.12+day*.9);gl_FragColor=vec4(col,1.);}'
+                })); scene.add(earth);
+                let clouds; {
+                    const c = mkc(512, 256), g = c.getContext('2d'); for (let i = 0; i < 260; i++) { g.fillStyle = 'rgba(255,255,255,' + (.05 + rnd() * .1) + ')'; g.beginPath(); g.ellipse(rnd() * 512, 30 + rnd() * 196, 8 + rnd() * 30, 4 + rnd() * 10, 0, 0, 7); g.fill() }
+                    clouds = new THREE.Mesh(new THREE.SphereGeometry(RE * 1.012, 64, 48), new THREE.MeshLambertMaterial({ map: new THREE.CanvasTexture(c), transparent: true, depthWrite: false })); scene.add(clouds)
+                }
+                scene.add(new THREE.Mesh(new THREE.SphereGeometry(RE * 1.07, 64, 48), new THREE.ShaderMaterial({
+                    transparent: true, side: THREE.BackSide, blending: THREE.AdditiveBlending, depthWrite: false,
+                    vertexShader: 'varying vec3 vN;void main(){vN=normalize(normalMatrix*normal);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
+                    fragmentShader: 'varying vec3 vN;void main(){float i=pow(max(.72-dot(vN,vec3(0.,0.,1.)),0.),2.6);gl_FragColor=vec4(.3,.6,1.,1.)*i*1.6;}'
+                })));
+
+                /* ---------- detailed satellite model (generic, GPS-style reference look) ---------- */
+                const std = o => new THREE.MeshStandardMaterial(o);
+                function foilTex() {
+                    const c = mkc(256, 256), g = c.getContext('2d'); g.fillStyle = '#b88a2e'; g.fillRect(0, 0, 256, 256);
+                    for (let i = 0; i < 600; i++) { const x = rnd() * 256, y = rnd() * 256, r = 8 + rnd() * 28; g.strokeStyle = 'hsla(40,' + (60 + rnd() * 30) + '%,' + (28 + rnd() * 48) + '%,.55)'; g.lineWidth = 1 + rnd() * 3; g.beginPath(); g.moveTo(x, y); g.lineTo(x + (rnd() - .5) * r * 2, y + (rnd() - .5) * r * 2); g.stroke() }
+                    const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 4; return t
+                }
+                function panelTex() {
+                    const c = mkc(512, 384), g = c.getContext('2d'); g.fillStyle = '#0a1a40'; g.fillRect(0, 0, 512, 384); const cx = 8, cy = 6, w = 512 / cx, h = 384 / cy;
+                    for (let i = 0; i < cx; i++)for (let j = 0; j < cy; j++) {
+                        const gr = g.createLinearGradient(i * w, j * h, (i + 1) * w, (j + 1) * h); gr.addColorStop(0, '#2d5cc0'); gr.addColorStop(.5, '#17398b'); gr.addColorStop(1, '#2a50ac'); g.fillStyle = gr; g.fillRect(i * w + 3, j * h + 3, w - 6, h - 6);
+                        g.strokeStyle = 'rgba(210,222,255,.35)'; g.beginPath(); g.moveTo(i * w + w / 2, j * h + 3); g.lineTo(i * w + w / 2, j * h + h - 3); g.stroke()
+                    }
+                    const t = new THREE.CanvasTexture(c); t.anisotropy = 8; return t
+                }
+                function stripeTex() { const c = mkc(16, 64), g = c.getContext('2d'); for (let i = 0; i < 8; i++) { g.fillStyle = i % 2 ? '#f2efe8' : '#d8641c'; g.fillRect(0, i * 8, 16, 8) } return new THREE.CanvasTexture(c) }
+                const FOIL = foilTex();
+                const M = {
+                    gold: std({ map: FOIL, bumpMap: FOIL, bumpScale: 1.6, color: 0xffffff, metalness: .92, roughness: .32 }), dark: std({ color: 0x262b33, metalness: .6, roughness: .5 }), silver: std({ color: 0xc8d0d8, metalness: .9, roughness: .28 }),
+                    panel: std({ map: panelTex(), metalness: .55, roughness: .22 }), frame: std({ color: 0x9aa3ad, metalness: .8, roughness: .4 }), rad: std({ color: 0xeceef1, metalness: .2, roughness: .55 }), noz: std({ color: 0x8a6a3a, metalness: .85, roughness: .38 }),
+                    helix: std({ map: stripeTex(), metalness: .5, roughness: .4 }), pay: std({ color: 0x1d2a3a, emissive: 0x0a2a3a, metalness: .4, roughness: .5 }),
+                    ghost: std({ color: 0xd4a13a, metalness: .5, roughness: .5, transparent: true, opacity: .16, depthWrite: false }), hover: std({ color: 0xffffff, emissive: 0xffffff, emissiveIntensity: .35, metalness: .3, roughness: .5 })
+                };
+                const HL = {}; Object.keys(CAT).forEach(k => HL[k] = std({ color: CAT[k], emissive: CAT[k], emissiveIntensity: .75, metalness: .3, roughness: .5 }));
+                function merge(list) {
+                    const P = [], N = [], I = []; let o = 0; list.forEach(g => { const p = g.attributes.position.array, n = g.attributes.normal.array, ix = g.index.array; for (let i = 0; i < p.length; i++) { P.push(p[i]); N.push(n[i]) } for (let i = 0; i < ix.length; i++)I.push(ix[i] + o); o += p.length / 3 });
+                    const m = new THREE.BufferGeometry(); m.setAttribute('position', new THREE.Float32BufferAttribute(P, 3)); m.setAttribute('normal', new THREE.Float32BufferAttribute(N, 3)); m.setIndex(I); return m
+                }
+                function lattice() {
+                    const a = [], bx = (w, h, d, x, y, z) => { const b = new THREE.BoxGeometry(w, h, d); b.translate(x, y, z); a.push(b) };
+                    for (let i = 0; i < 7; i++)bx(1.2, .016, .016, 0, 0, -.4 + i * .133); for (let j = 0; j < 9; j++)bx(.016, .016, .9, -.6 + j * .15, 0, 0); bx(1.24, .02, .02, 0, 0, -.45); bx(1.24, .02, .02, 0, 0, .45); return merge(a)
+                }
+                const G = {
+                    bus: new THREE.BoxGeometry(1, .9, 1.3), plate: new THREE.BoxGeometry(.4, .02, .4), sens: new THREE.BoxGeometry(.3, .02, .3), frame: new THREE.BoxGeometry(1.08, .02, .88), cell: new THREE.BoxGeometry(1, .032, .8),
+                    yoke: new THREE.CylinderGeometry(.035, .035, .5, 8), joint: new THREE.CylinderGeometry(.08, .08, .12, 12), helix: new THREE.CylinderGeometry(.075, .045, .4, 12), disk: new THREE.CylinderGeometry(.55, .55, .04, 32),
+                    rod: new THREE.CylinderGeometry(.012, .012, 1, 6), blade: new THREE.BoxGeometry(.03, .45, .01), bell: new THREE.CylinderGeometry(.12, .26, .4, 20), th: new THREE.CylinderGeometry(.035, .05, .14, 8),
+                    pay: new THREE.BoxGeometry(.6, .5, .7), clock: new THREE.CylinderGeometry(.09, .09, .25, 12), lat: lattice()
+                };
+                function buildSat(s) {
+                    s.group = new THREE.Group(); s.meshes = []; s.pos = new V();
+                    const mk = (c, g, m, p, r, ex) => {
+                        const o = new THREE.Mesh(g, m); o.position.set(p[0], p[1], p[2]); if (r) o.rotation.set(r[0], r[1], r[2]);
+                        o.userData = { c, orig: m, base: o.position.clone(), ex: new V().fromArray(ex || [0, 0, 0]) }; s.group.add(o); s.meshes.push(o); return o
+                    };
+                    const rod = (c, a, b, m, ex) => {
+                        const A = new V().fromArray(a), B = new V().fromArray(b), d = B.clone().sub(A), o = mk(c, G.rod, m, A.clone().add(B).multiplyScalar(.5).toArray(), null, ex);
+                        o.scale.y = d.length(); o.quaternion.setFromUnitVectors(Y, d.normalize()); return o
+                    };
+                    const H = Math.PI / 2;
+                    mk('bus', G.bus, M.gold, [0, 0, 0]);
+                    [-.24, .24].forEach(x => { mk('thermal', G.plate, M.rad, [x, .46, .32], 0, [0, .8, 0]); mk('thermal', G.plate, M.rad, [x, -.46, .32], 0, [0, -.8, 0]) });
+                    mk('bus', G.sens, M.dark, [0, .455, -.38], 0, [0, .4, 0]);
+                    [-1, 1].forEach(k => {
+                        mk('bus', G.yoke, M.frame, [k * .75, 0, 0], [0, 0, H]); mk('solar', G.joint, M.dark, [k * 1.02, 0, 0], [0, 0, H], [k, 0, 0]);
+                        [1.57, 2.67].forEach((x, i) => { mk('solar', G.frame, M.frame, [k * x, 0, 0], 0, [k * (i + 1) * .9, 0, 0]); mk('solar', G.cell, M.panel, [k * x, 0, 0], 0, [k * (i + 1) * .9, 0, 0]) }); mk('solar', G.joint, M.dark, [k * 2.12, 0, 0], [0, 0, H], [k * 1.8, 0, 0])
+                    });
+                    mk('nav', G.disk, M.silver, [0, 0, .67], [H, 0, 0], [0, 0, .9]);
+                    for (let i = 0; i < 8; i++) { const a = i / 8 * 6.283; mk('nav', G.helix, M.helix, [Math.cos(a) * .34, Math.sin(a) * .34, .87], [H, 0, 0], [0, 0, .9]) }
+                    for (let i = 0; i < 4; i++) { const a = i / 4 * 6.283 + .78; mk('nav', G.helix, M.helix, [Math.cos(a) * .14, Math.sin(a) * .14, .87], [H, 0, 0], [0, 0, .9]) }
+                    rod('ttc', [.25, .45, -.45], [.8, 1.5, -1.0], M.frame, [.3, .8, 0]); mk('ttc', G.lat, M.dark, [.8, 1.5, -1.0], [H + .3, 0, .35], [.3, .8, 0]);
+                    rod('ttc', [-.25, -.45, -.45], [-.8, -1.5, -1.0], M.frame, [-.3, -.8, 0]); mk('ttc', G.lat, M.dark, [-.8, -1.5, -1.0], [H + .3, 0, -.35], [-.3, -.8, 0]);
+                    rod('ttc', [-.3, .45, -.45], [-.55, 1.1, -.9], M.silver, [-.3, .5, 0]); mk('ttc', G.blade, M.silver, [-.55, 1.3, -.9], [0, 0, .5], [-.3, .5, 0]);
+                    mk('prop', G.bell, M.noz, [0, 0, -.85], [H, 0, 0], [0, 0, -.9]);
+                    [[.38, .32], [-.38, .32], [.38, -.32], [-.38, -.32]].forEach(p => mk('prop', G.th, M.noz, [p[0], p[1], -.72], [H, 0, 0], [p[0], p[1], -.6]));
+                    mk('payload', G.pay, M.pay, [0, 0, .05]);[[-.15, .1], [.15, .1], [0, -.2]].forEach(p => mk('payload', G.clock, M.silver, [p[0], p[1], -.35], [H, 0, 0]));
+                    s.meshes.forEach(m => { m.visible = m.userData.c !== 'payload' }); scene.add(s.group)
+                }
+                SATS.forEach(buildSat);
+                function shadowFlags() { SATS.forEach((s, i) => s.meshes.forEach(m => { m.castShadow = m.receiveShadow = i === cur })) }
+
+                /* orbits (inertial frame): node N=(cosO,0,-sinO), east E=(-sinO,0,-cosO) */
+                function orbitPt(s, u, out) {
+                    const O = (s.node - s.ph) * D2R, ci = Math.cos(s.inc * D2R), si = Math.sin(s.inc * D2R), cu = Math.cos(u), su = Math.sin(u), co = Math.cos(O), so = Math.sin(O);
+                    return out.set(RO * (cu * co - su * ci * so), RO * su * si, RO * (-cu * so - su * ci * co))
+                }
+                const orbitGrp = new THREE.Group(); scene.add(orbitGrp);
+                SATS.forEach(s => {
+                    const pts = [], t = new V(); for (let i = 0; i <= 180; i++)pts.push(orbitPt(s, i / 180 * 6.283 + s.ph * D2R, t).clone());
+                    orbitGrp.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), new THREE.LineBasicMaterial({ color: s.role === 'GEO' ? 0x2a8fb0 : 0x8a7a3a, transparent: true, opacity: .4 })))
+                });
+
+                /* ---------- labels, selector ---------- */
+                const lbBox = $('#lbls');
+                SATS.forEach((s, i) => {
+                    s.lbl = document.createElement('div'); s.lbl.className = 'lbl'; s.lbl.textContent = s.name; lbBox.appendChild(s.lbl);
+                    s.btn = document.createElement('button'); s.btn.textContent = s.name.replace('IRNSS-', ''); s.btn.title = s.name; s.btn.setAttribute('aria-label', 'Inspect ' + s.name); s.btn.onclick = () => go(i); $('#chips').appendChild(s.btn)
+                });
+
+                /* ---------- typewriter panel ---------- */
+                const nm = $('#nm'), bd = $('#bd'), sc = $('#srcs'); let tok = 0, skip = false;
+                function typeInto(el, txt, my) {
+                    return new Promise(res => {
+                        if (RM) { el.textContent = txt; return res() } el.classList.add('ty'); const t0 = performance.now();
+                        (function step(now) {
+                            if (my !== tok) { el.classList.remove('ty'); return res() } const n = skip ? txt.length : Math.floor((now - t0) / 1000 * CFG.TYPE_CPS); el.textContent = txt.slice(0, n);
+                            if (n >= txt.length) { el.classList.remove('ty'); return res() } requestAnimationFrame(step)
+                        })(t0)
+                    })
+                }
+                async function show(n, b, src) {
+                    const my = ++tok; skip = false;[nm, bd, sc].forEach(e => { e.textContent = ''; e.classList.remove('ty') });
+                    await typeInto(nm, n, my); if (my !== tok) return; await typeInto(bd, b, my); if (my !== tok) return;
+                    await typeInto(sc, src ? 'Source: ' + src.name : 'General explanation — no official source attached.', my); if (my !== tok) return;
+                    if (src) { sc.textContent = 'Source: '; const a = document.createElement('a'); a.href = src.url; a.target = '_blank'; a.rel = 'noopener noreferrer'; a.textContent = src.name; sc.appendChild(a) }
+                }
+                $('#info').addEventListener('click', e => { if (e.target.tagName !== 'A' && e.target.tagName !== 'BUTTON') skip = true });
+
+                /* ---------- state machine ---------- */
+                let cur = 0, phase = 'intro', T = 0, paused = false, held = false, activeComp = null, hoverComp = null, segI = -1, lastKey = '', camMode = 'auto', expl = false, xk = 0, clockT = 0, overA = 0, simT = 0, tl = [], curMode = 'overview';
+                function timeline(s) { const L = CFG.INSPECT_SECONDS, e = Math.min(2.5, L * .125), n = s.components.length, m = (L - 2 * e) / n, a = [{ c: null, end: e }]; s.components.forEach((c, i) => a.push({ c, end: e + m * (i + 1) })); a.push({ c: null, end: L + 1 }); return a }
+                function setComp(c) {
+                    const s = SATS[cur], key = s.id + ':' + c; if (key === lastKey) return; lastKey = key; activeComp = c;
+                    if (c) show(COMPS[c].n, COMPS[c].t, COMPS[c].s); else show(s.name + ' · NAVIC', summary(s), ISRO)
+                }
+                function go(i) {
+                    cur = (i + SATS.length) % SATS.length; phase = 'travel'; T = 0; held = false; segI = -1; tl = timeline(SATS[cur]); $('#res').style.display = 'none';
+                    if (camMode === 'free') { camMode = 'auto'; ctl.enabled = false } lastKey = ''; setComp(null); shadowFlags(); SATS.forEach((s, k) => s.btn.classList.toggle('on', k === cur)); sync()
+                }
+                function sync() { const q = a => $('[data-a=' + a + ']'); q('over').classList.toggle('on', camMode === 'overview'); q('free').classList.toggle('on', camMode === 'free'); q('expl').classList.toggle('on', expl); q('pause').textContent = paused ? '▶' : '❚❚' }
+                function enterFree() { ctl.enabled = true; ctl.target.copy(camTgt); camera.position.copy(camPos); lastP.copy(SATS[cur].pos) }
+                $('#res').onclick = () => { held = false; segI = -1; lastKey = ''; $('#res').style.display = 'none' };
+                $('#infoBtn').onclick = () => $('#status').classList.toggle('open');
+                addEventListener('click', e => { if (!e.target.closest('#menu,[data-a=menu]')) $('#menu').classList.remove('open') });
+                function act(a, btn) {
+                    if (a === 'prev') go(cur - 1); else if (a === 'next') go(cur + 1); else if (a === 'pause') paused = !paused;
+                    else if (a === 'menu') $('#menu').classList.toggle('open');
+                    else if (a === 'restart') { phase = 'inspect'; T = 0; segI = -1; held = false; lastKey = ''; $('#res').style.display = 'none' }
+                    else if (a === 'reset') { camMode = 'auto'; expl = false; ctl.enabled = false }
+                    else if (a === 'orbits') { orbitGrp.visible = !orbitGrp.visible; btn.classList.toggle('on', orbitGrp.visible) }
+                    else if (a === 'labels') { lbBox.style.display = lbBox.style.display === 'none' ? '' : 'none'; btn.classList.toggle('on') }
+                    else if (a === 'over') { camMode = camMode === 'overview' ? 'auto' : 'overview'; ctl.enabled = false }
+                    else if (a === 'free') { camMode = camMode === 'free' ? 'auto' : 'free'; if (camMode === 'free') enterFree(); else ctl.enabled = false }
+                    else if (a === 'expl') expl = !expl;
+                    sync()
+                }
+                document.body.addEventListener('click', e => { const b = e.target.closest('button[data-a]'); if (b) act(b.dataset.a, b) });
+
+                /* ---------- camera ---------- */
+                const ctl = new THREE.OrbitControls(camera, cv); ctl.enabled = false; ctl.enablePan = false; ctl.enableDamping = true; ctl.minDistance = 3; ctl.maxDistance = 120;
+                const camPos = new V(0, 70, 170), camTgt = new V(), lastP = new V(), tA = new V(), tB = new V(), tC = new V(), tD = new V(), tE = new V(), tP = new V();
+                const VIEW = { d: [.6, .75, .35], nav: [-.4, .85, .3], payload: [.4, .85, .4], prop: [.85, .4, .3] };
+                function compPos(c, s, out) { out.set(0, 0, 0); let n = 0; s.meshes.forEach(m => { if (m.userData.c === c) { m.getWorldPosition(tP); out.add(tP); n++ } }); return out.divideScalar(n || 1) }
+                function updCam(dt) {
+                    const s = SATS[cur], p = s.pos, mul = camera.aspect < 1.1 ? 1.7 : 1, mode = camMode === 'auto' ? (phase === 'intro' ? 'overview' : 'follow') : camMode; curMode = mode;
+                    if (mode === 'free') {
+                        tA.copy(p).sub(lastP); camera.position.add(tA); ctl.target.add(tA); lastP.copy(p); ctl.update();
+                        if (camera.position.length() < RE * 1.2) camera.position.setLength(RE * 1.2); camPos.copy(camera.position); camTgt.copy(ctl.target); return
+                    }
+                    ctl.enabled = false; lastP.copy(p);
+                    if (mode === 'overview') { overA += dt * (RM ? 0 : .04); tC.set(Math.sin(overA) * 105 * mul, 45 * mul, Math.cos(overA) * 105 * mul); tD.set(0, 0, 0) }
+                    else {
+                        tA.copy(p).normalize(); tB.copy(Y).cross(tA).normalize(); const v = VIEW[activeComp] || VIEW.d, D = (activeComp ? 5.8 : 9.5) * mul, sw = 1 + (RM ? 0 : .25 * Math.sin(clockT * .3));
+                        tC.copy(tA).multiplyScalar(v[0]).addScaledVector(tB, v[1] * sw).addScaledVector(Y, v[2]).multiplyScalar(D).add(p);
+                        tD.copy(p); if (activeComp && phase === 'inspect') tD.lerp(compPos(activeComp, s, tE), .6); tD.y += .6 * mul
+                    }
+                    const k = 1 - Math.exp(-dt * (phase === 'inspect' ? 3 : 1.6)); camPos.lerp(tC, k); camTgt.lerp(tD, k);
+                    if (camPos.length() < RE * 1.2) camPos.setLength(RE * 1.2); camera.position.copy(camPos); camera.lookAt(camTgt)
+                }
+
+                /* ---------- picking ---------- */
+                const ray = new THREE.Raycaster(), ndc = new THREE.Vector2(), ptr = { x: 0, y: 0, on: false, dx: 0, dy: 0 };
+                function pick() {
+                    const s = SATS[cur]; ndc.set(ptr.x / innerWidth * 2 - 1, -(ptr.y / innerHeight) * 2 + 1); ray.setFromCamera(ndc, camera);
+                    const h = ray.intersectObjects(s.group.children, false).find(i => i.object.visible); return h ? h.object.userData.c : null
+                }
+                cv.addEventListener('pointermove', e => { ptr.x = e.clientX; ptr.y = e.clientY; ptr.on = e.pointerType === 'mouse' });
+                cv.addEventListener('pointerleave', () => { ptr.on = false });
+                cv.addEventListener('pointerdown', e => { ptr.dx = e.clientX; ptr.dy = e.clientY });
+                cv.addEventListener('pointerup', e => {
+                    if (Math.hypot(e.clientX - ptr.dx, e.clientY - ptr.dy) > 6) return; ptr.x = e.clientX; ptr.y = e.clientY; const c = pick();
+                    if (c) { held = true; lastKey = ''; setComp(c); $('#res').style.display = '' }
+                });
+
+                /* ---------- loop ---------- */
+                const ln = $('#ln'), dot = $('#dot'), tag = $('#tag'), pt = $('#pt'), bar = $('#bar div'), tmpP = new V(); let last = performance.now(), ptxt = '', running = true;
+                const scr = v => { tmpP.copy(v).project(camera); return [(tmpP.x + 1) / 2 * innerWidth, (1 - tmpP.y) / 2 * innerHeight, tmpP.z < 1] };
+                function tick(now) {
+                    if (!running) return; requestAnimationFrame(tick); const dt = Math.min((now - last) / 1000, .1); last = now; clockT += dt; simT += dt * CFG.TIME_SCALE; const th = simT * WE;
+                    earth.rotation.y = th; clouds.rotation.y = th * 1.02; xk += ((expl ? 1 : 0) - xk) * (1 - Math.exp(-dt * 4)); starMat.uniforms.t.value = RM ? 0 : clockT;
+                    SATS.forEach((s, i) => {
+                        orbitPt(s, th + s.ph * D2R, s.pos); s.group.position.copy(s.pos); s.group.lookAt(0, 0, 0);
+                        const sc2 = i === cur ? 1 : .62; s.group.scale.setScalar(s.group.scale.x + (sc2 - s.group.scale.x) * (1 - Math.exp(-dt * 3))); s.group.updateMatrixWorld(true);
+                        s.meshes.forEach(m => {
+                            const u = m.userData; if (i === cur) { m.position.copy(u.base).addScaledVector(u.ex, xk); if (u.c === 'payload') m.visible = activeComp === 'payload' || xk > .3 }
+                            let w = u.orig; if (i === cur) { if (u.c === activeComp) w = HL[COMPS[u.c].c]; else if (u.c === hoverComp) w = M.hover; else if (u.c === 'bus' && (activeComp === 'payload' || xk > .3)) w = M.ghost }
+                            if (m.material !== w) m.material = w
+                        })
+                    });
+                    const cp = SATS[cur].pos; sunL.position.copy(cp).addScaledVector(SUN, 60); sunL.target.position.copy(cp); sunL.target.updateMatrixWorld();
+                    if (!paused) T += dt;
+                    if (phase === 'intro' && T >= CFG.INTRO_SECONDS) go(0);
+                    else if (phase === 'travel' && T >= CFG.TRAVEL_SECONDS) { phase = 'inspect'; T = 0; segI = -1 }
+                    else if (phase === 'inspect' && T >= CFG.INSPECT_SECONDS) go(cur + 1);
+                    if (phase === 'inspect' && !held) { let k = tl.findIndex(x => T < x.end); if (k < 0) k = tl.length - 1; if (k !== segI) { segI = k; setComp(tl[k].c) } }
+                    if (ptr.on && !ctl.enabled) { hoverComp = pick(); cv.classList.toggle('hov', !!hoverComp) } else if (hoverComp) { hoverComp = null; cv.classList.remove('hov') }
+                    updCam(dt);
+                    // labels: primary always, others only in overview, never overlapping
+                    if (lbBox.style.display !== 'none') {
+                        const placed = [];[cur, ...SATS.map((_, i) => i).filter(i => i !== cur)].forEach(i => {
+                            const s = SATS[i], q = scr(tA.copy(s.pos).addScaledVector(Y, i === cur ? 3.2 : 1.6));
+                            let ok = q[2] && (i === cur || curMode === 'overview') && !placed.some(o => Math.hypot(o[0] - q[0], o[1] - q[1]) < 46); if (ok) placed.push(q.slice());
+                            s.lbl.style.display = ok ? '' : 'none'; s.lbl.style.left = q[0] + 'px'; s.lbl.style.top = q[1] + 'px'; s.lbl.className = 'lbl' + (i === cur ? ' p' : '')
+                        })
+                    }
+                    if (activeComp && phase !== 'travel' && curMode !== 'overview') {
+                        const col = CTXT[COMPS[activeComp].c], q = scr(compPos(activeComp, SATS[cur], tE));
+                        if (q[2]) {
+                            const x2 = q[0] + (q[0] > innerWidth * .6 ? -60 : 60), y2 = q[1] + (q[1] < innerHeight * .5 ? 60 : -60);
+                            ln.setAttribute('x1', q[0]); ln.setAttribute('y1', q[1]); ln.setAttribute('x2', x2); ln.setAttribute('y2', y2); ln.setAttribute('stroke', col); ln.setAttribute('opacity', .8);
+                            dot.setAttribute('cx', q[0]); dot.setAttribute('cy', q[1]); dot.setAttribute('stroke', col); dot.setAttribute('opacity', 1);
+                            tag.style.display = 'block'; tag.textContent = COMPS[activeComp].n; tag.style.color = col; tag.style.borderColor = col;
+                            tag.style.left = Math.max(6, Math.min(innerWidth - tag.offsetWidth - 6, x2 - tag.offsetWidth / 2)) + 'px'; tag.style.top = (y2 + (y2 > q[1] ? 4 : -28)) + 'px'
+                        }
+                        else { ln.setAttribute('opacity', 0); dot.setAttribute('opacity', 0); tag.style.display = 'none' }
+                    }
+                    else { ln.setAttribute('opacity', 0); dot.setAttribute('opacity', 0); tag.style.display = 'none' }
+                    const s = SATS[cur], L = CFG.INSPECT_SECONDS; let txt;
+                    if (phase === 'intro') { txt = 'Establishing shot · constellation overview'; bar.style.width = T / CFG.INTRO_SECONDS * 100 + '%' }
+                    else if (phase === 'travel') { txt = s.name + ' · approaching…'; bar.style.width = '0%' }
+                    else { txt = s.name + ' · ' + (activeComp ? COMPS[activeComp].n : 'Full view') + ' · ' + Math.max(0, Math.ceil(L - T)) + 's' + (paused ? ' · paused' : held ? ' · holding' : ''); bar.style.width = Math.min(100, T / L * 100) + '%' }
+                    if (txt !== ptxt) { pt.textContent = txt; ptxt = txt }
+                    renderer.render(scene, camera)
+                }
+                shadowFlags(); tl = timeline(SATS[0]); sync();
+                lastKey = 'intro'; show('NAVIC · INDIA\'S REGIONAL NAVIGATION SYSTEM', 'The original design uses 3 geostationary and 4 inclined geosynchronous satellites. Click any part of the highlighted satellite to inspect it.', ISRO);
+                requestAnimationFrame(t => { last = t; $('#load').remove(); tick(t) });
+                addEventListener('beforeunload', () => { running = false; renderer.dispose(); Object.values(G).forEach(g => g.dispose()); Object.values(M).forEach(m => m.dispose()) });
+            }
+        })();
+    </script>
+    <script src="script3.js" defer></script>
+</body>
+
+</html>

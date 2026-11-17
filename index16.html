@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>Cosmosis: the scale of the universe</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Hanken+Grotesk:wght@300;400;500&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #02030a;
+            --ink: #ece8df;
+            --mute: #97a0b8;
+            --acc: #a9c7ff;
+            --glass: rgba(12, 16, 30, .52);
+            --line: rgba(236, 232, 223, .14);
+            color-scheme: dark
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0
+        }
+
+        html,
+        body {
+            height: 100%;
+            overflow: hidden;
+            background: var(--bg);
+            color: var(--ink);
+            font: 300 14px/1.55 'Hanken Grotesk', system-ui, sans-serif;
+            touch-action: none;
+            -webkit-font-smoothing: antialiased
+        }
+
+        #c {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            display: block
+        }
+
+        .hdr {
+            position: fixed;
+            inset: 0 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: calc(14px + env(safe-area-inset-top, 0px)) 20px 0;
+            pointer-events: none
+        }
+
+        .logo {
+            font: 400 27px/1 'Instrument Serif', Georgia, serif
+        }
+
+        .btn {
+            pointer-events: auto;
+            font: 400 13px 'Hanken Grotesk', system-ui, sans-serif;
+            color: var(--ink);
+            background: var(--glass);
+            border: 1px solid var(--line);
+            border-radius: 99px;
+            padding: 9px 18px;
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            cursor: pointer
+        }
+
+        .btn:hover {
+            border-color: var(--acc)
+        }
+
+        :focus-visible {
+            outline: 2px solid var(--acc);
+            outline-offset: 3px
+        }
+
+        .read {
+            position: fixed;
+            inset: calc(72px + env(safe-area-inset-top, 0px)) 0 auto;
+            text-align: center;
+            pointer-events: none
+        }
+
+        .read b {
+            display: block;
+            font: 400 clamp(40px, 11vw, 76px)/1.05 'Instrument Serif', Georgia, serif;
+            text-shadow: 0 2px 30px rgba(0, 0, 0, .7)
+        }
+
+        .read span {
+            font-size: 12px;
+            color: var(--mute)
+        }
+
+        .dock {
+            position: fixed;
+            left: 50%;
+            bottom: 0;
+            width: min(100%, 600px);
+            transform: translateX(-50%);
+            padding: 0 14px calc(12px + env(safe-area-inset-bottom, 0px));
+            pointer-events: none
+        }
+
+        .card,
+        .rail {
+            pointer-events: auto
+        }
+
+        .card {
+            background: var(--glass);
+            backdrop-filter: blur(20px) saturate(140%);
+            -webkit-backdrop-filter: blur(20px) saturate(140%);
+            border: 1px solid var(--line);
+            border-radius: 20px;
+            padding: 16px 20px 18px
+        }
+
+        #cb {
+            animation: in .6s ease
+        }
+
+        @keyframes in {
+            from {
+                opacity: 0;
+                transform: translateY(6px)
+            }
+        }
+
+        .card h2 {
+            font: 400 30px/1.1 'Instrument Serif', Georgia, serif
+        }
+
+        .sz {
+            color: var(--acc);
+            font-size: 12.5px;
+            margin: 3px 0 6px
+        }
+
+        .card p {
+            font-size: 13.5px;
+            color: #cfd3df;
+            max-width: 60ch
+        }
+
+        .hint {
+            text-align: center;
+            font-size: 12px;
+            color: var(--mute);
+            margin-bottom: 10px;
+            transition: opacity .6s
+        }
+
+        .rail {
+            position: relative;
+            height: 34px;
+            margin: 6px 8px 0;
+            cursor: pointer;
+            touch-action: none
+        }
+
+        .trk,
+        .fill {
+            position: absolute;
+            left: 0;
+            top: 16px;
+            height: 1px;
+            background: var(--line);
+            right: 0
+        }
+
+        .fill {
+            background: var(--acc);
+            right: auto;
+            width: 0
+        }
+
+        .tk {
+            position: absolute;
+            top: 12px;
+            width: 9px;
+            height: 9px;
+            margin-left: -4.5px;
+            border-radius: 50%;
+            background: #070a14;
+            border: 1px solid var(--mute);
+            transition: .4s
+        }
+
+        .tk.on {
+            border-color: var(--acc);
+            background: var(--acc);
+            box-shadow: 0 0 12px var(--acc)
+        }
+
+        .thumb {
+            position: absolute;
+            z-index: 2;
+            top: 9px;
+            width: 15px;
+            height: 15px;
+            margin-left: -7.5px;
+            border-radius: 50%;
+            border: 1px solid #fff;
+            background: rgba(255, 255, 255, .18)
+        }
+
+        .lb {
+            position: fixed;
+            left: 0;
+            top: -7px;
+            pointer-events: none;
+            font-size: 12px;
+            color: var(--ink);
+            padding-left: 15px;
+            white-space: nowrap;
+            opacity: 0;
+            text-shadow: 0 0 8px #000, 0 0 3px #000
+        }
+
+        .lb:before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 50%;
+            width: 7px;
+            height: 7px;
+            margin-top: -3.5px;
+            border: 1px solid var(--ink);
+            border-radius: 50%
+        }
+
+        @media(prefers-reduced-motion:reduce) {
+            #cb {
+                animation: none
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="c"></canvas>
+    <div class="hdr">
+        <div class="logo">Cosmosis</div><button class="btn" id="play">Begin journey</button>
+    </div>
+    <div class="read"><b id="rv">12,742 km</b><span>Viewing span, <i id="re"></i></span></div>
+    <div class="dock">
+        <div class="hint" id="hint">Scroll, drag up or down, or use the timeline to travel. Drag sideways to rotate.
+        </div>
+        <div class="card">
+            <div id="cb">
+                <div class="sz" id="ci"></div>
+                <h2 id="ct"></h2>
+                <div class="sz" id="cs" style="color:var(--mute)"></div>
+                <p id="cp"></p>
+            </div>
+        </div>
+        <div class="rail" id="rail"><i class="trk"></i><i class="fill" id="fill"></i><i class="thumb" id="th"></i></div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        const $ = i => document.getElementById(i), ss = (a, b, x) => { x = Math.min(1, Math.max(0, (x - a) / (b - a))); return x * x * (3 - 2 * x) }, l = (a, b, t) => a + (b - a) * t, g3 = () => Math.random() + Math.random() + Math.random() - 1.5;
+        const dir = () => { const u = Math.random() * 2 - 1, a = Math.random() * 6.2832, r = Math.sqrt(1 - u * u); return [r * Math.cos(a), u, r * Math.sin(a)] };
+        const rgb = h => { const c = new THREE.Color(h); return [c.r, c.g, c.b] };
+        const RM = matchMedia('(prefers-reduced-motion: reduce)').matches, mo = RM ? 0 : 1;
+        /* value noise for procedural planet textures */
+        const H = (x, y, z) => { const h = Math.sin(x * 127.1 + y * 311.7 + z * 74.7) * 43758.5453; return h - Math.floor(h) };
+        function vn(x, y, z) {
+            const i = Math.floor(x), j = Math.floor(y), k = Math.floor(z), a = x - i, b = y - j, c = z - k, u = a * a * (3 - 2 * a), v = b * b * (3 - 2 * b), w = c * c * (3 - 2 * c);
+            return l(l(l(H(i, j, k), H(i + 1, j, k), u), l(H(i, j + 1, k), H(i + 1, j + 1, k), u), v), l(l(H(i, j, k + 1), H(i + 1, j, k + 1), u), l(H(i, j + 1, k + 1), H(i + 1, j + 1, k + 1), u), v), w)
+        }
+        const fb = (x, y, z, o) => { let s = 0, a = .5; for (let i = 0; i < o; i++) { s += a * vn(x, y, z); x *= 2; y *= 2; z *= 2; a /= 2 } return s };
+        function earth() {
+            const W = 512, Hh = 256, mk = () => { const c = document.createElement('canvas'); c.width = W; c.height = Hh; const g = c.getContext('2d'); return [c, g, g.createImageData(W, Hh)] }, [c1, g1, A] = mk(), [c2, g2, B] = mk();
+            for (let j = 0; j < Hh; j++)for (let i = 0; i < W; i++) {
+                const lo = i / W * 6.2832, la = (j / Hh - .5) * 3.1416, cx = Math.cos(la), x = cx * Math.cos(lo), y = Math.sin(la), z = cx * Math.sin(lo), n = fb(x * 2 + 7, y * 2 + 7, z * 2 + 7, 6), k = (j * W + i) * 4; let r, g, b;
+                if (Math.abs(y) > .9 - n * .14) { r = 236; g = 242; b = 250 }
+                else if (n > .54) { const h = Math.min(1, (n - .54) * 5), d = Math.max(0, Math.min(1, (fb(x * 3 + 20, y * 3, z * 3, 3) - .35) * 3)) * (1 - Math.abs(y) * .9); r = 56 + d * 135 + h * 70; g = 98 + d * 70 + h * 55; b = 48 + d * 50 + h * 65 }
+                else { const t = Math.min(1, (.54 - n) * 5); r = 34 - 28 * t; g = 100 - 78 * t; b = 138 - 76 * t }
+                A.data.set([r, g, b, 255], k); const cn = fb(x * 3 + 40, y * 5 + 40, z * 3 + 40, 5); B.data.set([255, 255, 255, Math.max(0, Math.min(1, (cn - .52) * 3.6)) * 235], k)
+            }
+            g1.putImageData(A, 0, 0); g2.putImageData(B, 0, 0); return [new THREE.CanvasTexture(c1), new THREE.CanvasTexture(c2)]
+        }
+        /* scene */
+        const scene = new THREE.Scene(), camera = new THREE.PerspectiveCamera(45, 1, .1, 300), ren = new THREE.WebGLRenderer({ canvas: $('c'), antialias: true });
+        ren.setPixelRatio(Math.min(devicePixelRatio, 2)); ren.setClearColor(0x02030a); camera.position.set(0, 1.1, 7);
+        scene.add(new THREE.AmbientLight(0x2a3a5c, .75)); const sunL = new THREE.DirectionalLight(0xfff2dd, 1.6); sunL.position.set(-4, 2, 3); scene.add(sunL);
+        const gt = (() => { const c = document.createElement('canvas'); c.width = c.height = 64; const g = c.getContext('2d'), r = g.createRadialGradient(32, 32, 0, 32, 32, 32);[[0, 1], [.18, .7], [.45, .14], [1, 0]].forEach(([o, a]) => r.addColorStop(o, 'rgba(255,255,255,' + a + ')')); g.fillStyle = r; g.fillRect(0, 0, 64, 64); return new THREE.CanvasTexture(c) })();
+        const AD = THREE.AdditiveBlending;
+        function pts(p, k, sz, op = 1) { const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(p, 3)); g.setAttribute('color', new THREE.Float32BufferAttribute(k, 3)); const m = new THREE.PointsMaterial({ size: sz, map: gt, vertexColors: true, transparent: true, depthWrite: false, blending: AD, sizeAttenuation: false, opacity: op }); m.userData.b = op; const o = new THREE.Points(g, m); o.frustumCulled = false; return o }
+        const glow = (c, s, op = 1) => { const m = new THREE.SpriteMaterial({ map: gt, color: c, transparent: true, depthWrite: false, blending: AD, opacity: op }); m.userData.b = op; const o = new THREE.Sprite(m); o.scale.setScalar(s); return o };
+        const at = (p, x, y, z) => { const o = new THREE.Object3D(); o.position.set(x, y, z); p.add(o); return o };
+        const circ = r => { const p = []; for (let i = 0; i < 160; i++) { const a = i / 160 * 6.2832; p.push(Math.cos(a) * r, 0, Math.sin(a) * r) } const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(p, 3)); return g };
+        const ring = (n, a, b, h, c, sz) => { const p = [], k = []; for (let i = 0; i < n; i++) { const t = Math.random() * 6.2832, r = a + Math.random() * (b - a), m = .45 + Math.random() * .55; p.push(Math.cos(t) * r, (Math.random() - .5) * h, Math.sin(t) * r); k.push(c[0] * m, c[1] * m, c[2] * m) } return pts(p, k, sz, .8) };
+        const sc = () => { const r = Math.random(); return r < .12 ? [.62, .72, 1] : r < .5 ? [1, .95, .86] : r < .85 ? [1, .8, .52] : [1, .55, .36] };
+        /* shaders */
+        const GN = 'float h(vec3 q){return fract(sin(dot(q,vec3(127.1,311.7,74.7)))*43758.5453);}float vn(vec3 x){vec3 i=floor(x),f=fract(x);f=f*f*(3.-2.*f);return mix(mix(mix(h(i),h(i+vec3(1,0,0)),f.x),mix(h(i+vec3(0,1,0)),h(i+vec3(1,1,0)),f.x),f.y),mix(mix(h(i+vec3(0,0,1)),h(i+vec3(1,0,1)),f.x),mix(h(i+vec3(0,1,1)),h(i+vec3(1,1,1)),f.x),f.y),f.z);}float fbm(vec3 q){float a=0.,s=.5;for(int i=0;i<5;i++){a+=s*vn(q);q=q*2.1+1.7;s*=.5;}return a;}';
+        const VS = 'varying vec3 p,n,v;void main(){p=position;n=normalize(normalMatrix*normal);vec4 m=modelViewMatrix*vec4(position,1.);v=normalize(-m.xyz);gl_Position=projectionMatrix*m;}';
+        const sm = (fs, u, x) => new THREE.ShaderMaterial(Object.assign({ uniforms: Object.assign({ op: { value: 1 }, t: { value: 0 } }, u), vertexShader: VS, fragmentShader: 'varying vec3 p,n,v;uniform float op,t,k;uniform vec3 c;' + GN + fs, transparent: true }, x));
+        const sunM = () => sm('void main(){float a=fbm(p*3.+t*.06);float f=max(dot(normalize(n),normalize(v)),0.);vec3 o=mix(vec3(.85,.2,.02),vec3(1.,.72,.25),smoothstep(.3,.75,a));o=mix(o,vec3(1.,.95,.75),smoothstep(.62,.9,a));o*=.55+.45*pow(f,.6);gl_FragColor=vec4(o*1.25,op);}');
+        const cmbM = () => sm('void main(){float a=fbm(p*6.);vec3 o=mix(vec3(.04,.1,.55),vec3(.98,.5,.12),smoothstep(.3,.7,a));o=mix(o,vec3(1.,.93,.8),smoothstep(.62,.8,a)*.6);float f=pow(1.-max(dot(normalize(n),normalize(v)),0.),1.5);gl_FragColor=vec4(o*(.35+f),op*(.2+.55*f));}');
+        const atmo = (r, col) => { const m = new THREE.Mesh(new THREE.SphereGeometry(r, 64, 48), sm('void main(){float x=clamp(-dot(normalize(n),normalize(v))/k,0.,1.);gl_FragColor=vec4(c*pow(x,2.2)*1.5,op);}', { c: { value: new THREE.Color(col) }, k: { value: Math.sqrt(1 - 1 / (r * r)) } }, { side: THREE.BackSide, blending: AD, depthWrite: false })); m.renderOrder = 2; return m };
+        function galaxy(n, R, sz, tw) {
+            const p = [], k = []; for (let i = 0; i < n; i++) {
+                let x, y, z, c; const b = .45 + Math.random() * .55;
+                if (Math.random() < .2) { const r = Math.pow(Math.random(), 2) * .3 * R, [a, d, e] = dir(); x = a * r; y = d * r * .6; z = e * r; c = [1, .82, .58] }
+                else { const f = Math.pow(Math.random(), .65), r = f * R, a = Math.floor(Math.random() * 2) * 3.1416 + tw * f + g3() * .5 * (1.1 - .5 * f); x = Math.cos(a) * r; z = Math.sin(a) * r; y = g3() * .05 * R * (1.1 - f); c = Math.random() < .04 ? [1, .45, .65] : [1 - .5 * f, .85 - .17 * f, .62 + .38 * f] }
+                p.push(x, y, z); k.push(c[0] * b, c[1] * b, c[2] * b)
+            } return pts(p, k, sz, .9)
+        }
+        function web(nn, per, sp, bl, sz, pre) {
+            const N = pre.map(a => new THREE.Vector3(...a)); while (N.length < nn) { const [x, y, z] = dir(), r = Math.cbrt(Math.random()) * sp; N.push(new THREE.Vector3(x * r, y * r, z * r)) }
+            const p = [], k = [], add = (q, b, c) => { p.push(q.x, q.y, q.z); k.push(c[0] * b, c[1] * b, c[2] * b) }, J = s => new THREE.Vector3(Math.random() - .5, Math.random() - .5, Math.random() - .5).multiplyScalar(s);
+            N.forEach(a => {
+                N.map(b => [a.distanceTo(b), b]).sort((u, v) => u[0] - v[0]).slice(1, 4).forEach(([, b]) => { for (let m = 0; m < per; m++)add(a.clone().lerp(b, Math.random()).add(J(bl)), .25 + Math.random() * .5, [.5, .55, 1]) });
+                for (let m = 0; m < per; m++)add(a.clone().add(new THREE.Vector3(g3(), g3(), g3()).multiplyScalar(bl * 1.6)), .5 + Math.random() * .5, [1, .82, .55])
+            }); return [pts(p, k, sz, .9), N]
+        }
+        /* the journey: L = log10 of the stage’s width in metres */
+        const mb = (c, b = 1) => { const m = new THREE.MeshBasicMaterial({ color: c, transparent: true, side: 2, opacity: b }); m.userData.b = b; return m }, ph = (c, e = 0, sh = 40) => new THREE.MeshPhongMaterial({ color: c, emissive: e, shininess: sh, transparent: true, side: 2 }),
+            ball = (r, m, w = 28) => new THREE.Mesh(new THREE.SphereGeometry(r, w, w * .7 | 0), m),
+            inst = (n, geo, mat, f) => { const m = new THREE.InstancedMesh(geo, mat, n), d = new THREE.Object3D(), c = new THREE.Color(); for (let i = 0; i < n; i++) { const [x, y, z, q, k] = f(i); d.position.set(x, y, z); d.scale.setScalar(q); d.rotation.set(Math.random() * 6, Math.random() * 6, 0); d.updateMatrix(); m.setMatrixAt(i, d.matrix); c.setRGB(k[0], k[1], k[2]); m.setColorAt(i, c) } m.frustumCulled = false; return m },
+            rk = (n, a, b, hh, r, c) => inst(n, new THREE.IcosahedronGeometry(r, 0), ph(c, 0, 10), () => { const t = Math.random() * 6.2832, d = a + Math.random() * (b - a), v = .6 + Math.random() * .4; return [Math.cos(t) * d, (Math.random() - .5) * hh, Math.sin(t) * d, .5 + Math.random(), [v, v, v]] }),
+            bulge = R => { const o = ball(R, ph(0xffd9a0, 0x7a5a28, 20)); o.scale.y = .55; return o };
+        const S = [
+            {
+                n: 'The Planck length', L: -34.79, z: '1.6 × 10⁻³⁵ metres', d: 'The smallest length physics can meaningfully describe. Below it, space itself is thought to dissolve into a fluctuating quantum foam, and our theories of gravity and quantum mechanics stop working. A proton is 10²⁰ times wider, and the scales in between are still beyond any experiment.',
+                b(g, lab) {
+                    const ic = new THREE.IcosahedronGeometry(.85, 3), P = ic.attributes.position, B = Float32Array.from(P.array), w = new THREE.Mesh(ic, mb(0x7fb4ff, .55)); w.material.wireframe = true; g.add(w, ball(.5, ph(0x2a4a9a, 0x10204a, 60), 24), glow(0x5f8fff, 3, .5));
+                    g.add(inst(260, new THREE.IcosahedronGeometry(.03, 1), ph(0xbcd6ff, 0x4a70c0), () => { const [x, y, z] = dir(), r = .3 + Math.random() * .8; return [x * r, y * r, z * r, .4 + Math.random() * 1.6, [1, 1, 1]] }));
+                    let q = 0; this.tk = dt => { q += dt; for (let i = 0; i < P.count; i++) { const x = B[i * 3], y = B[i * 3 + 1], z = B[i * 3 + 2], f = 1 + .16 * Math.sin(q * 1.7 + x * 9) * Math.sin(q * 1.1 + y * 8 + z * 5); P.setXYZ(i, x * f, y * f, z * f) } P.needsUpdate = true }; lab(at(g, 0, .95, 0), 'Quantum foam')
+                }
+            },
+            {
+                n: 'A proton', L: -14.77, z: '1.7 × 10⁻¹⁵ metres', d: 'Three quarks bound by gluons make a proton. Their masses add up to only about 1% of the proton’s; the rest is the energy of the gluon field holding them together.',
+                b(g, lab) {
+                    g.add(ball(.95, mb(0x6f8fff, .14), 40), glow(0x7fa0ff, 2.6, .35)); const Q = [0xff4040, 0x40e070, 0x4f8bff].map(c => { const o = ball(.2, ph(c, (c >> 2) & 0x3f3f3f, 80)); o.add(glow(c, .9, .7)); g.add(o); return o }), ln = new THREE.LineSegments(new THREE.BufferGeometry(), new THREE.LineBasicMaterial({ color: 0xffe8a0, transparent: true, opacity: .7 })); ln.geometry.setAttribute('position', new THREE.Float32BufferAttribute(new Array(18).fill(0), 3)); ln.frustumCulled = false; ln.material.userData.b = .7; g.add(ln); let q = 0;
+                    this.tk = dt => { q += dt; const A = ln.geometry.attributes.position; Q.forEach((o, i) => { const a = q * .9 + i * 2.0944, r = .48 + .1 * Math.sin(q * 2 + i * 2); o.position.set(Math.cos(a) * r, Math.sin(q * .7 + i * 2.1) * .35, Math.sin(a) * r) });[[0, 1], [1, 2], [2, 0]].forEach(([a, b], i) => { A.setXYZ(i * 2, Q[a].position.x, Q[a].position.y, Q[a].position.z); A.setXYZ(i * 2 + 1, Q[b].position.x, Q[b].position.y, Q[b].position.z) }); A.needsUpdate = true }; lab(Q[0], 'Up quark'); lab(Q[1], 'Up quark'); lab(Q[2], 'Down quark')
+                }
+            },
+            {
+                n: 'An atom', L: -9.7, z: 'About 0.1 nanometres across', d: 'Almost all of an atom is empty space. The nucleus is roughly 100,000 times narrower than the atom, yet holds over 99.9% of its mass. Electrons are really clouds of probability; the orbits drawn here are a picture, not the physics.',
+                b(g, lab) {
+                    g.add(ball(1, mb(0x4f8bff, .1), 40), glow(0x5f9bff, 2.6, .3));
+                    for (let i = 0; i < 12; i++) { const [x, y, z] = dir(), o = ball(.05, ph(i % 2 ? 0xff5a4a : 0xb8c4e0, 0x201010, 60), 14), r = .07 * Math.cbrt(Math.random()); o.position.set(x * r, y * r, z * r); g.add(o) }
+                    const E = []; for (let i = 0; i < 6; i++) { const rr = .55 + (i > 3 ? .25 : 0), pv = at(g, 0, 0, 0); pv.rotation.set(i * .9, i * 1.3, i * .5); const m = new THREE.LineBasicMaterial({ color: 0x8fa4d0, transparent: true, opacity: .3 }); m.userData.b = .3; pv.add(new THREE.LineLoop(circ(rr), m)); const e = ball(.045, mb(0x9fe8ff), 14), ro = at(pv, 0, 0, 0); e.position.x = rr; e.add(glow(0x7fd8ff, .3, .8)); ro.add(e); E.push([ro, 1.6 / (1 + i * .15)]) }
+                    this.tk = dt => E.forEach(([o, w]) => o.rotation.y += w * dt); lab(at(g, 0, 0, 0), 'Nucleus'); lab(E[0][0].children[0], 'Electron')
+                }
+            },
+            {
+                n: 'DNA', L: -8.4, z: '2 nanometres wide', d: 'The double helix is about 2 nanometres wide. Stretched out, the DNA in a single human cell would reach roughly two metres, packed into a nucleus a few micrometres across.',
+                b(g, lab) {
+                    const h = at(g, 0, 0, 0), N = 44, pa = []; h.rotation.z = .5;
+                    h.add(inst(N * 2, new THREE.IcosahedronGeometry(.1, 1), ph(0xffffff, 0x202020), i => { const j = i >> 1, a = j * .5 + (i & 1) * 3.1416; return [Math.cos(a) * .38, (j / N - .5) * 2.6, Math.sin(a) * .38, 1, i & 1 ? [1, .42, .54] : [.31, .61, 1]] }));
+                    for (let j = 0; j < N; j++) { const a = j * .5, y = (j / N - .5) * 2.6; pa.push(Math.cos(a) * .38, y, Math.sin(a) * .38, Math.cos(a + 3.1416) * .38, y, Math.sin(a + 3.1416) * .38) }
+                    const gm = new THREE.BufferGeometry(), lm = new THREE.LineBasicMaterial({ color: 0xbfd0ff, transparent: true, opacity: .7 }); lm.userData.b = .7; gm.setAttribute('position', new THREE.Float32BufferAttribute(pa, 3)); h.add(new THREE.LineSegments(gm, lm));
+                    this.tk = dt => h.rotation.y += dt * .3; lab(at(h, 0, 1.3, 0), 'Double helix')
+                }
+            },
+            {
+                n: 'Red blood cells', L: -4.6, z: 'About 7 micrometres each', d: 'Red blood cells are biconcave discs, thinner in the middle so they can squeeze through the narrowest capillaries. You carry roughly 25 trillion, and each completes a circuit of your body in about a minute.',
+                b(g, lab) {
+                    const pr = []; for (let k = 0; k < 2; k++)for (let i = 0; i <= 14; i++) { const r = k ? 1 - i / 14 : i / 14; pr.push(new THREE.Vector2(r, (k ? 1 : -1) * Math.sqrt(Math.max(0, 1 - r * r)) * (.2 + .9 * r * r - .7 * Math.pow(r, 4)))) }
+                    const C = inst(16, new THREE.LatheGeometry(pr, 32), ph(0xff3b3b, 0x3a0606, 50), () => { const [x, y, z] = dir(), r = Math.cbrt(Math.random()) * .8; return [x * r, y * r, z * r, .26 + Math.random() * .06, [1, .75 + Math.random() * .25, .75 + Math.random() * .25]] }); g.add(C); this.tk = dt => C.rotation.y += dt * .15; lab(at(g, 0, .95, 0), 'Red blood cells')
+                }
+            },
+            {
+                n: 'A human', L: .25, z: 'About 1.7 metres tall', d: 'A human body stands about 1.7 metres tall and is built from roughly 30 trillion human cells.',
+                b(g, lab) {
+                    const m = ph(0xd9a47c, 0, 25), c = (t, bt, hh, x, y, rz) => { const o = new THREE.Mesh(new THREE.CylinderGeometry(t, bt, hh, 20), m); o.position.set(x, y, 0); o.rotation.z = rz; g.add(o) };
+                    c(.2, .17, .6, 0, .3, 0); c(.075, .06, .8, -.09, -.4, 0); c(.075, .06, .8, .09, -.4, 0); c(.055, .045, .55, -.27, .28, .12); c(.055, .045, .55, .27, .28, -.12); c(.05, .05, .12, 0, .66, 0); const hd = ball(.13, m, 20); hd.position.y = .8; g.add(hd);
+                    this.tk = dt => g.rotation.y += dt * .3; lab(at(g, 0, 1.05, 0), 'You')
+                }
+            },
+            {
+                n: 'Mount Everest', L: 4.2, z: '8,849 metres above sea level', d: 'The highest point on Earth’s surface stands about 8.8 km above sea level, only 1/1,400th of the planet’s width.',
+                b(g, lab) {
+                    const ge = new THREE.ConeGeometry(.95, 1.4, 64, 24, true), P = ge.attributes.position, C = []; for (let i = 0; i < P.count; i++) { const x = P.getX(i), y = P.getY(i), z = P.getZ(i), n = fb(x * 3 + 9, y * 3, z * 3 + 9, 5), u = (y + .7) / 1.4, f = 1 + (n - .5) * .7 * (1.1 - u); P.setXYZ(i, x * f, y + (n - .5) * .18, z * f); const q = u + (n - .5) * .5, w = q > .62 ? 1 : q > .4 ? .55 : 0; C.push(.35 + .65 * w, .32 + .65 * w, .28 + .7 * w) }
+                    ge.setAttribute('color', new THREE.Float32BufferAttribute(C, 3)); ge.computeVertexNormals(); const m = new THREE.Mesh(ge, new THREE.MeshPhongMaterial({ vertexColors: true, flatShading: true, transparent: true, shininess: 5, side: 2 })); m.position.y = -.1; g.add(m); lab(at(g, 0, .65, 0), 'Summit'); this.tk = dt => g.rotation.y += dt * .25
+                }
+            },
+            {
+                n: 'Earth', L: 7.105, z: '12,742 km across', d: 'Home to every living thing we know of. Its atmosphere is a thin film: 99% of the air lies within 32 km of the ground.',
+                b(g, lab) { const [a, c] = earth(), e = new THREE.Mesh(new THREE.SphereGeometry(1, 96, 64), new THREE.MeshPhongMaterial({ map: a, specular: 0x335577, shininess: 18, transparent: true })), cl = new THREE.Mesh(new THREE.SphereGeometry(1.012, 96, 64), new THREE.MeshPhongMaterial({ map: c, transparent: true, depthWrite: false })); cl.renderOrder = 1; g.add(e, cl, atmo(1.09, 0x4f9bff)); this.tk = dt => { e.rotation.y += dt * .04; cl.rotation.y += dt * .055 }; lab(at(g, 0, 1, 0), 'Earth') }
+            },
+            {
+                n: 'The Sun', L: 9.286, z: '1.39 million km across', d: 'A middle-aged star holding 99.86% of the Solar System’s mass. About 1.3 million Earths would fit inside it.',
+                b(g, lab) { g.add(new THREE.Mesh(new THREE.SphereGeometry(.72, 64, 48), sunM()), glow(0xff7a1a, 3.6, .85), glow(0xffd28a, 2.1, .7)); lab(at(g, 0, .74, 0), 'The Sun') }
+            },
+            {
+                n: 'The Solar System', L: 13.03, z: 'Neptune orbits 4.5 billion km from the Sun', d: 'Eight planets, an asteroid belt and the icy Kuiper Belt circle one star. Sunlight takes over four hours to reach Neptune. The Sun and planets are enlarged here to stay visible.',
+                b(g, lab) {
+                    const u = 1 / 36, D = new THREE.Object3D(), orb = []; D.rotation.x = .8; g.add(D); D.add(glow(0xffc65a, .24), ball(.03, sunM())); lab(at(D, 0, 0, 0), 'The Sun');
+                    [['Mercury', .39, 0xb5aaa0, 3], ['Venus', .72, 0xe8c98a, 4], ['Earth', 1, 0x4f9bff, 4], ['Mars', 1.52, 0xd9673c, 3.5], ['Jupiter', 5.2, 0xd8b48c, 7], ['Saturn', 9.54, 0xe6d3a0, 6.5], ['Uranus', 19.2, 0x9fe0e6, 5.5], ['Neptune', 30.07, 0x4a6dff, 5.5]].forEach(([nm, au, c, sz]) => { const r = au * u, m = new THREE.LineBasicMaterial({ color: 0x8fa4d0, transparent: true, opacity: .22 }); m.userData.b = .22; D.add(new THREE.LineLoop(circ(r), m)); const pv = at(D, 0, 0, 0); pv.rotation.y = Math.random() * 6.28; const pl = ball(sz * .0035, ph(c)); pl.position.x = r; if (nm == 'Saturn') { const rg = new THREE.Mesh(new THREE.RingGeometry(.03, .052, 48), mb(0xd9c590, .75)); rg.rotation.x = 1.35; pl.add(rg) } pv.add(pl); orb.push([pv, .12 / Math.pow(au, 1.5)]); if (au > .9 && au != 1.52) lab(pl, nm) });
+                    D.add(ring(2500, 2.2 * u, 3.2 * u, .01, [.7, .68, .62], 1.1), ring(5000, 30 * u, 50 * u, .03, [.55, .7, 1], 1.1), rk(700, 2.2 * u, 3.2 * u, .01, .0022, 0xb8aea0), rk(1200, 30 * u, 50 * u, .03, .0026, 0xa8c4ff)); lab(at(D, .95, 0, .62), 'Kuiper Belt'); this.tk = dt => orb.forEach(([o, w]) => o.rotation.y += w * dt)
+                }
+            },
+            {
+                n: 'The Oort Cloud', L: 16.4, z: 'About 2 light-years across', d: 'A vast shell of icy bodies thought to surround the Sun and send long-period comets inward. Voyager 1 needs roughly 300 years to reach its inner edge.',
+                b(g, lab) { const p = [], k = []; for (let i = 0; i < 9000; i++) { const [x, y, z] = dir(), r = .5 + Math.pow(Math.random(), .6) * .5, m = .4 + Math.random() * .6; p.push(x * r, y * r, z * r); k.push(.6 * m, .8 * m, m) } g.add(pts(p, k, 1.3, .8), glow(0xffd9a0, .12), ball(.012, mb(0xffe3a0), 16), inst(1800, new THREE.IcosahedronGeometry(.006, 0), ph(0xcfe3ff, 0x223344, 10), () => { const [x, y, z] = dir(), r = .5 + Math.pow(Math.random(), .6) * .5; return [x * r, y * r, z * r, .5 + Math.random(), [.7, .85, 1]] })); lab(at(g, 0, 0, 0), 'The Sun'); lab(at(g, .6, .6, .1), 'Outer Oort Cloud') }
+            },
+            {
+                n: 'The Stellar Neighbourhood', L: 17.67, z: 'About 50 light-years across', d: 'The closest star, Proxima Centauri, is 4.2 light-years away, around 40 trillion km. Sirius, the brightest star in our sky, is 8.6.',
+                b(g, lab) {
+                    const p = [], k = []; for (let i = 0; i < 900; i++) { const [x, y, z] = dir(), r = Math.cbrt(Math.random()); p.push(x * r, y * r, z * r); k.push(...sc()) } g.add(pts(p, k, 1.8, .9), glow(0xffd9a0, .1), ball(.02, mb(0xffd9a0), 16), inst(400, new THREE.IcosahedronGeometry(.012, 1), mb(0xffffff), i => [p[3 * i], p[3 * i + 1], p[3 * i + 2], 1, [k[3 * i], k[3 * i + 1], k[3 * i + 2]]])); lab(at(g, 0, 0, 0), 'The Sun');
+                    [['Alpha Centauri', .175, 0xffe2a8, .07], ['Sirius', .34, 0xcfe0ff, .1], ['Procyon', .46, 0xfff2d8, .07], ['Altair', .67, 0xe6efff, .07], ['Vega', 1, 0xbcd3ff, .1]].forEach(([nm, r, c, s], i) => { const a = i * 2.4 + .7, y = Math.sin(i * 1.7) * .45, q = Math.sqrt(1 - y * y) * r, o = at(g, Math.cos(a) * q, y * r, Math.sin(a) * q); o.add(glow(c, s), ball(s * .22, mb(c), 16)); lab(o, nm) })
+                }
+            },
+            {
+                n: 'The Milky Way', L: 20.98, z: 'About 100,000 light-years across', d: 'A barred spiral of 100 to 400 billion stars. The Sun sits about 26,000 light-years from the centre and circles it once every 230 million years.',
+                b(g, lab) { const t = at(g, 0, 0, 0); t.rotation.set(1, 0, .25); t.add(galaxy(48000, 1, 1.6, 5), glow(0xffd9a0, .55, .6), bulge(.16)); const m = at(t, .52, 0, 0); m.add(glow(0xffffff, .07)); lab(m, 'You are here'); lab(at(t, 0, 0, 0), 'Sagittarius A*, a black hole'); this.tk = dt => t.rotation.y += dt * .02 }
+            },
+            {
+                n: 'The Local Group', L: 22.98, z: 'About 10 million light-years across', d: 'The Milky Way, Andromeda, Triangulum and more than 80 smaller galaxies, all bound by gravity. Andromeda is 2.5 million light-years away and approaching. Galaxies are enlarged here to stay visible.',
+                b(g, lab) {
+                    const gs = [];[['The Milky Way', -.28, .02, .06, .1, 6000, .7], ['Andromeda', .38, .1, -.12, .17, 9000, .4], ['Triangulum', .62, .18, -.38, .07, 2500, .8]].forEach(([nm, x, y, z, R, n, tl], i) => { const o = at(g, x, y, z); o.rotation.set(tl, i, tl * .5); o.add(galaxy(n, R, 1.3, 5), glow(0xffd9a0, R * .9, .5), bulge(R * .2)); lab(o, nm); gs.push(o) });
+                    const p = [], k = []; for (let i = 0; i < 70; i++) { const [x, y, z] = dir(), r = Math.cbrt(Math.random()) * .9; p.push(x * r, y * r, z * r); k.push(.8, .85, 1) } g.add(pts(p, k, 1.4, .7)); this.tk = dt => gs.forEach(o => o.rotation.y += dt * .1)
+                }
+            },
+            {
+                n: 'The Laniakea Supercluster', L: 24.69, z: 'About 520 million light-years across', d: 'Around 100,000 galaxies flowing toward a region called the Great Attractor. Galaxies gather along filaments with enormous voids between them.',
+                b(g, lab) { const [P, N] = web(64, 90, .85, .035, 1.5, [[.05, 0, 0], [.28, .05, -.12], [-.62, -.03, .3]]); g.add(P, inst(N.length, new THREE.IcosahedronGeometry(.012, 1), mb(0xffd9a0), i => [N[i].x, N[i].y, N[i].z, .6 + Math.random() * 1.4, [1, .85, .6]]));['The Milky Way', 'Virgo Cluster', 'Great Attractor'].forEach((nm, i) => lab(at(g, ...N[i].toArray()), nm)) }
+            },
+            {
+                n: 'The Observable Universe', L: 26.94, z: 'About 93 billion light-years across', d: 'Everything whose light has had time to reach us since the Big Bang: hundreds of billions of galaxies. Every observer has their own observable universe centred on themselves. Beyond our horizon lie countless others, shown here as neighbouring spheres.',
+                b(g, lab) {
+                    const [P] = web(150, 60, .92, .03, 1.3, [[0, 0, 0]]), cm = cmbM(), sh = new THREE.SphereGeometry(1, 48, 36); g.add(P, new THREE.Mesh(sh, cm)); lab(at(g, 0, 0, 0), 'You are here'); lab(at(g, .68, .68, .2), 'Cosmic microwave background');
+                    const q = [], k = []; for (let i = 0; i < 46; i++) { const [x, y, z] = dir(), d = 2.2 + Math.pow(Math.random(), .8) * 5, r = .3 + Math.random() * .4, o = new THREE.Mesh(sh, cm); o.position.set(x * d, y * d * .7, z * d); o.scale.setScalar(r); g.add(o); const gl = glow(0xffc890, r * 2.4, .25); gl.position.copy(o.position); g.add(gl); if (i == 2) lab(o, 'Another observable universe'); for (let j = 0; j < 120; j++) { const [a, b, c] = dir(), m = Math.cbrt(Math.random()) * .9 * r, w = .5 + Math.random() * .5, s2 = sc(); q.push(o.position.x + a * m, o.position.y + b * m, o.position.z + c * m); k.push(s2[0] * w, s2[1] * w, s2[2] * w) } } g.add(pts(q, k, 1.4, .8))
+                }
+            }
+        ];
+        const bg = (() => { const p = [], k = []; for (let i = 0; i < 2500; i++) { const [x, y, z] = dir(), c = sc(), b = .3 + Math.random() * .7; p.push(x * 120, y * 120, z * 120); k.push(c[0] * b, c[1] * b, c[2] * b) } const o = pts(p, k, 1.3, .8); scene.add(o); return o })();
+        const CC = new THREE.Color();
+        /* background: 3D star field with real depth, spiked bright stars, distant galaxies and black holes */
+        const spk = (() => { const c = document.createElement('canvas'); c.width = c.height = 128; const g = c.getContext('2d'), r = g.createRadialGradient(64, 64, 0, 64, 64, 64);[[0, 1], [.07, .8], [.22, .2], [1, 0]].forEach(([o, a]) => r.addColorStop(o, 'rgba(255,255,255,' + a + ')')); g.fillStyle = r; g.fillRect(0, 0, 128, 128);[[0, 64, 128, 64], [64, 0, 64, 128]].forEach(([a, b, e, f]) => { const q = g.createLinearGradient(a, b, e, f); q.addColorStop(0, 'rgba(255,255,255,0)'); q.addColorStop(.5, 'rgba(255,255,255,.9)'); q.addColorStop(1, 'rgba(255,255,255,0)'); g.strokeStyle = q; g.lineWidth = 1.3; g.beginPath(); g.moveTo(a, b); g.lineTo(e, f); g.stroke() }); return new THREE.CanvasTexture(c) })();
+        { const mk = (n, r0, r1, sz, map) => { const p = [], k = []; for (let i = 0; i < n; i++) { const [x, y, z] = dir(), d = r0 + Math.pow(Math.random(), .7) * (r1 - r0), c = sc(), b = .4 + Math.random() * .6; p.push(x * d, y * d, z * d); k.push(c[0] * b, c[1] * b, c[2] * b) } const o = pts(p, k, sz, .95); o.material.sizeAttenuation = true; if (map) o.material.map = map; bg.add(o) }; mk(6000, 20, 140, .35, 0); mk(140, 25, 130, 3.2, spk) }
+        for (let i = 0; i < 16; i++) { const [x, y, z] = dir(), d = 75 + Math.random() * 50, R = 6 + Math.random() * 8, o = at(bg, x * d, y * d, z * d); o.rotation.set(Math.random() * 3, Math.random() * 3, 0); o.add(galaxy(1600, R, 1.1, 3 + Math.random() * 3), glow(0xffd9a0, R * .7, .3)) }
+        const bhT = (() => { const c = document.createElement('canvas'); c.width = c.height = 256; const g = c.getContext('2d'), d = () => { g.save(); g.translate(128, 128); g.scale(1, .15); const r = g.createRadialGradient(0, 0, 8, 0, 0, 126); r.addColorStop(0, 'rgba(255,240,210,1)'); r.addColorStop(.35, 'rgba(255,150,60,.85)'); r.addColorStop(1, 'rgba(190,60,20,0)'); g.fillStyle = r; g.beginPath(); g.arc(0, 0, 126, 0, 6.2832); g.fill(); g.restore() }, h = g.createRadialGradient(128, 128, 30, 128, 128, 128); h.addColorStop(0, 'rgba(255,170,80,.55)'); h.addColorStop(.3, 'rgba(255,110,40,.18)'); h.addColorStop(1, 'rgba(255,90,20,0)'); g.fillStyle = h; g.fillRect(0, 0, 256, 256); d(); g.fillStyle = '#000'; g.beginPath(); g.arc(128, 128, 34, 0, 6.2832); g.fill(); g.strokeStyle = 'rgba(255,215,160,.95)'; g.lineWidth = 3; g.beginPath(); g.arc(128, 128, 38, 0, 6.2832); g.stroke(); g.save(); g.beginPath(); g.rect(0, 128, 256, 128); g.clip(); d(); g.restore(); return new THREE.CanvasTexture(c) })();
+        for (let i = 0; i < 3; i++) { const [x, y, z] = dir(), m = new THREE.SpriteMaterial({ map: bhT, transparent: true, depthWrite: false }), o = new THREE.Sprite(m); m.userData.b = 1; o.position.set(x * 105, y * 105, z * 105); o.scale.setScalar(12 + i * 3); bg.add(o) }
+        const LB = [];
+        S.forEach(st => { st.g = new THREE.Group(); scene.add(st.g); st.mats = []; st.b(st.g, (o, t) => { const e = document.createElement('div'); e.className = 'lb'; e.textContent = t; document.body.appendChild(e); LB.push({ e, st, o }) }); st.g.traverse(o => o.material && st.mats.push(o.material)) });
+        /* ui + navigation */
+        const SMIN = -35.3, SMAX = 27.9, V = new THREE.Vector3(), clamp = (x, a, b) => Math.min(b, Math.max(a, x));
+        let s = 6.9, T = 6.9, tour = false, cur = -1, mx = 0, my = 0, t = 0, last = performance.now(), W = 1, Hh = 1, lr = '', lv = '';
+        const tks = S.map(st => { const i = document.createElement('i'); i.className = 'tk'; i.style.left = (st.L - SMIN) / (SMAX - SMIN) * 100 + '%'; $('rail').insertBefore(i, $('th')); return i });
+        function show(i) { cur = i; const st = S[i]; $('ci').textContent = 'Stage ' + (i + 1) + ' of ' + S.length; $('ct').textContent = st.n; $('cs').textContent = st.z; $('cp').textContent = st.d; tks.forEach((e, j) => e.classList.toggle('on', j == i)); const c = $('cb'); c.style.animation = 'none'; c.offsetWidth; c.style.animation = '' }
+        function fmt(m) {
+            const f = (x, u) => (x < 10 ? x.toFixed(2) : x < 100 ? x.toFixed(1) : Math.round(x).toLocaleString('en')) + ' ' + u, ly = m / 9.461e15;
+            if (m < 1) { for (const [v, u] of [[1e-3, 'mm'], [1e-6, 'µm'], [1e-9, 'nm'], [1e-12, 'pm'], [1e-15, 'fm'], [1e-18, 'am'], [1e-21, 'zm'], [1e-24, 'ym']]) if (m >= v * .9995) return f(m / v, u); const e = Math.floor(Math.log10(m)); return (m / Math.pow(10, e)).toFixed(2) + ' × 10' + String(e).replace('-', '⁻').replace(/\d/g, d => '⁰¹²³⁴⁵⁶⁷⁸⁹'[d]) + ' m' } if (m < 1e3) return f(m, 'm'); if (m < 1e9) return f(m / 1e3, 'km'); if (m < 1e12) return f(m / 1e9, 'million km'); if (m < 4.7e15) return f(m / 1.496e11, 'AU');
+            if (ly < 1e3) return f(ly, 'light-years'); if (ly < 1e6) return f(ly / 1e3, 'thousand light-years'); if (ly < 1e9) return f(ly / 1e6, 'million light-years'); return f(ly / 1e9, 'billion light-years')
+        }
+        const nudge = v => { T = clamp(T + v, SMIN, SMAX); stop(); $('hint').style.opacity = 0 };
+        function stop() { tour = false; $('play').textContent = T >= SMAX - .01 ? 'Replay' : 'Begin journey' }
+        $('play').onclick = () => { if (tour) return stop(); if (T >= SMAX - .01) T = SMIN; tour = true; $('play').textContent = 'Pause'; $('hint').style.opacity = 0 };
+        addEventListener('wheel', e => { e.preventDefault(); nudge(e.deltaY * .004) }, { passive: false });
+        let ly0 = null, lx0 = 0, yw = 0; const cv = $('c'); cv.onpointerdown = e => { ly0 = e.clientY; lx0 = e.clientX; cv.setPointerCapture(e.pointerId) }; cv.onpointerup = () => ly0 = null;
+        cv.onpointermove = e => { mx = e.clientX / W * 2 - 1; my = e.clientY / Hh * 2 - 1; if (ly0 !== null) { nudge((ly0 - e.clientY) * .02); ly0 = e.clientY; yw += (e.clientX - lx0) * .008; lx0 = e.clientX } };
+        addEventListener('keydown', e => { if (/Arrow(Up|Right)|\+/.test(e.key)) nudge(.4); if (/Arrow(Down|Left)|-/.test(e.key)) nudge(-.4) });
+        let dr = false; const rl = $('rail'), fromX = e => { const r = rl.getBoundingClientRect(); T = SMIN + clamp((e.clientX - r.left) / r.width, 0, 1) * (SMAX - SMIN); stop(); $('hint').style.opacity = 0 };
+        rl.onpointerdown = e => { dr = true; rl.setPointerCapture(e.pointerId); fromX(e) }; rl.onpointermove = e => dr && fromX(e); rl.onpointerup = () => dr = false;
+        function fit() { W = innerWidth; Hh = innerHeight; ren.setSize(W, Hh, false); camera.aspect = W / Hh; camera.setViewOffset(W, Hh, 0, W < Hh ? Hh * .07 : 0, W, Hh) }
+        addEventListener('resize', fit); fit(); show(0);
+        function loop(now) {
+            requestAnimationFrame(loop); const dt = Math.min(.05, (now - last) / 1e3); last = now; t += dt;
+            if (tour) { T = Math.min(SMAX, T + dt * .8); if (T >= SMAX) stop() }
+            s += (T - s) * Math.min(1, dt * 4.5);
+            camera.position.x += (mx * .7 * mo - camera.position.x) * .04; camera.position.y += (1.1 - my * .4 * mo - camera.position.y) * .04; camera.lookAt(0, 0, 0); bg.rotation.y = s * .04; const bo = 1 - .8 * ss(24, 26, s); bg.traverse(o => o.material && (o.material.opacity = bo * (o.material.userData.b ?? 1))); ren.setClearColor(CC.setHSL((.62 + .22 * Math.sin(s * .33) + 1) % 1, .55, .045));
+            const K = 1.3 * Math.min(1, camera.aspect * 1.15); let best = 0, bd = 99;
+            S.forEach((st, i) => {
+                const d = s - st.L, o = (i ? ss(-1.5, -.3, d) : 1) * (i < S.length - 1 ? 1 - ss(1.6, 3.2, d) : 1), g = st.g; st.o = o; if (Math.abs(d) < bd) { bd = Math.abs(d); best = i } g.visible = o > .004; if (!g.visible) return;
+                g.scale.setScalar(K * Math.pow(10, -d)); g.rotation.y += dt * .012 * mo + yw; st.tk && st.tk(dt * mo); st.mats.forEach(m => { if (m.uniforms) { m.uniforms.op.value = o; m.uniforms.t.value = t } else m.opacity = o * (m.userData.b ?? 1) })
+            });
+            yw = 0; if (best !== cur) show(best);
+            const q = fmt(Math.pow(10, s)); if (q !== lv) { lv = q; $('rv').textContent = q } const e = s.toFixed(1); if (e !== lr) { lr = e; $('re').innerHTML = '10<sup>' + e + '</sup> metres' + (s < -20 ? ' · ' + (Math.pow(10, s) / 1.616e-35).toPrecision(3) + ' Planck lengths' : '') }
+            const p = (s - SMIN) / (SMAX - SMIN) * 100; $('th').style.left = p + '%'; $('fill').style.width = p + '%';
+            ren.render(scene, camera);
+            LB.forEach(b => { const o = b.st.o; if (o < .25 || !b.st.g.visible) { b.e.style.opacity = 0; return } b.o.getWorldPosition(V); V.project(camera); b.e.style.opacity = V.z < 1 ? Math.min(1, (o - .25) * 2) : 0; b.e.style.transform = 'translate(' + (V.x * .5 + .5) * W + 'px,' + (-V.y * .5 + .5) * Hh + 'px)' })
+        }
+        requestAnimationFrame(loop);
+    </script>
+</body>
+
+</html>
