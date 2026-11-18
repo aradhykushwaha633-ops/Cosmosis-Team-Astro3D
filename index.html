@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en" class="dark">
 
 <head>
@@ -3339,10 +3339,10 @@
     <script>
         // ===== Google Sheets backend (Apps Script web app) =====
         // Paste your deployed Web App URL here (see setup steps). Leave as-is to run in local-only mode.
-        const COSMOSIS_SHEET_URL = 'https://script.google.com/macros/s/AKfycbwvRzDNz2xkT41e30QD75RJHIedcxvMNkS15sxhugKbBtm48iPefZE3fglQl6Nyb-sw/exec';
+        const COSMOSIS_SHEET_URL = 'https://script.google.com/macros/s/AKfycbyh9SKAXGVVio1_19yRZh3pzQF6oOQKh_WYfvrW65f1fqDKFIgbmbtixPhtXKa_Zl4F/exec';
 
         // Optional: set a school passcode so only real teachers can register or sign in as teachers (leave '' for no code).
-        const COSMOSIS_TEACHER_CODE = '';
+        const COSMOSIS_TEACHER_CODE = '14011990';
 
         const sheetsEnabled = () => /^https:\/\/script\.google\.com\/macros\/s\/.+\/exec$/.test(COSMOSIS_SHEET_URL);
 
@@ -3503,8 +3503,9 @@
                     return;
                 }
                 if (useSheet) {
-                    const payload = { action: 'signup', name, email, passHash: hash, role };
+                    const payload = { action: 'signup', name, email, passHash: hash, role, teacherCode: tCode };
                     const r = await sheetCall(payload);
+                    if (r.error === 'teachercode') { showToast('Wrong teacher access code.', 'error'); return; }
                     if (r.error === 'exists') {
                         showToast('Email already registered. Please Sign In.', 'error');
                         return;
@@ -3526,12 +3527,16 @@
             // ---- Sign in ----
             let user = null;
             if (useSheet) {
-                const r = await sheetCall({ action: 'signin', email, passHash: hash });
+                const r = await sheetCall({ action: 'signin', email, passHash: hash, role, teacherCode: tCode });
                 if (r.ok) {
                     user = { name: r.name || name, email };
+                    const sheetRole = (r.role === 'teacher' || r.role === 'student') ? r.role : undefined; // role saved in the Google Sheet
                     const lu = users.find(u => u.email === email);
-                    if (lu) { lu.passHash = hash; delete lu.pass; } else { users.push({ name: user.name, email, passHash: hash }); }
+                    if (lu) { lu.passHash = hash; delete lu.pass; if (sheetRole) lu.role = sheetRole; } else { users.push({ name: user.name, email, passHash: hash, role: sheetRole }); }
                     saveUsers();
+                } else if (r.error === 'teachercode') {
+                    showToast('Wrong teacher access code.', 'error');
+                    return;
                 } else if (r.error === 'badpass') {
                     showToast('Invalid email or password / Account not found.', 'error');
                     return;
@@ -3542,7 +3547,7 @@
                         return;
                     }
                     // Account created before the sheet was connected: add it to the sheet now
-                    const payload = { action: 'signup', name: lu.name, email, passHash: hash };
+                    const payload = { action: 'signup', name: lu.name, email, passHash: hash, role: lu.role || role, teacherCode: tCode };
                     const sr = await sheetCall(payload);
                     if (!sr.ok && sr.error !== 'exists') queuePending(payload);
                     user = { name: lu.name, email };
