@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /Cosmosis-Team-Astro3D/index21.html
+
+Sitemap: https://aradhykushwaha633-ops.github.io/Cosmosis-Team-Astro3D/sitemap.xml

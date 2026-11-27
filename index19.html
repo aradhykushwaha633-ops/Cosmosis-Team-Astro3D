@@ -1,0 +1,2165 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+    <title>Sky Tonight India: 3D Planetarium &amp; Space Weather · COSMOSIS</title>
+<meta name="description" content="See tonight’s sky over India in an interactive 3D planetarium with space-weather and satellite-pass links.">
+<meta name="theme-color" content="#050b18">
+<link rel="canonical" href="https://aradhykushwaha633-ops.github.io/Cosmosis-Team-Astro3D/index19.html">
+<meta property="og:type" content="website"><meta property="og:site_name" content="COSMOSIS"><meta property="og:title" content="Sky Tonight India: 3D Planetarium &amp; Space Weather · COSMOSIS"><meta property="og:description" content="See tonight’s sky over India in an interactive 3D planetarium with space-weather and satellite-pass links."><meta property="og:image" content="https://aradhykushwaha633-ops.github.io/Cosmosis-Team-Astro3D/image1.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:url" content="https://aradhykushwaha633-ops.github.io/Cosmosis-Team-Astro3D/index19.html">
+<meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="Sky Tonight India: 3D Planetarium &amp; Space Weather · COSMOSIS"><meta name="twitter:description" content="See tonight’s sky over India in an interactive 3D planetarium with space-weather and satellite-pass links."><meta name="twitter:image" content="https://aradhykushwaha633-ops.github.io/Cosmosis-Team-Astro3D/image1.png">
+
+    <meta name="claude:viewport-fit-sides" content="cover">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap">
+    <style>
+        :root {
+            --ink: #03050c;
+            --ink-2: #070b19;
+            --panel: rgba(11, 17, 38, 0.72);
+            --panel-solid: #0c1329;
+            --panel-2: #131e42;
+            --line: rgba(130, 165, 255, 0.16);
+            --line-bright: rgba(110, 243, 214, 0.45);
+            --text: #f2f5ff;
+            --muted: #9aa7cf;
+            --accent: #6ef3d6;
+            --accent-2: #7aa2ff;
+            --amber: #ffca63;
+            --rose: #ff7b8b;
+            --violet: #b68aff;
+            --display: 'Space Grotesk', system-ui, sans-serif;
+            --body: 'Plus Jakarta Sans', system-ui, sans-serif;
+            --mono: 'JetBrains Mono', monospace;
+            color-scheme: dark;
+            box-sizing: border-box;
+            padding-top: env(safe-area-inset-top, 0px);
+            padding-bottom: env(safe-area-inset-bottom, 0px);
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-padding-top: env(safe-area-inset-top, 0px);
+            scroll-behavior: smooth;
+        }
+
+        body {
+            margin: 0;
+            background-color: var(--ink);
+            background-image:
+                radial-gradient(1100px 550px at 85% -5%, rgba(76, 108, 245, 0.22), transparent 70%),
+                radial-gradient(900px 500px at 5% 18%, rgba(110, 243, 214, 0.09), transparent 65%),
+                radial-gradient(800px 600px at 50% 85%, rgba(150, 90, 255, 0.08), transparent 70%),
+                linear-gradient(180deg, #02040a 0%, #050916 50%, #03050c 100%);
+            color: var(--text);
+            font: 15.5px/1.6 var(--body);
+            padding-block: 28px 80px;
+            padding-left: max(18px, env(safe-area-inset-left, 0px));
+            padding-right: max(18px, env(safe-area-inset-right, 0px));
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background-image: radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+            background-size: 32px 32px;
+            mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.4), transparent 75%);
+            z-index: 0;
+        }
+
+        img {
+            max-width: 100%;
+        }
+
+        [hidden]:not([hidden=until-found i]) {
+            display: none !important;
+        }
+
+        .wrap {
+            position: relative;
+            z-index: 1;
+            max-width: 1240px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 36px;
+        }
+
+        h1,
+        h2,
+        h3 {
+            font-family: var(--display);
+            margin: 0;
+            text-wrap: balance;
+            letter-spacing: -0.02em;
+        }
+
+        h1 {
+            font-size: clamp(36px, 5.5vw, 60px);
+            line-height: 1.02;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            background: linear-gradient(135deg, #ffffff 15%, #c5d8ff 60%, #6ef3d6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        h2 {
+            font-size: clamp(22px, 3vw, 30px);
+            font-weight: 700;
+        }
+
+        h3 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        p {
+            margin: 0;
+        }
+
+        a {
+            color: var(--accent);
+            text-decoration: none;
+            border-bottom: 1px solid rgba(110, 243, 214, 0.35);
+            transition: all 0.2s ease;
+        }
+
+        a:hover {
+            color: #fff;
+            border-bottom-color: #fff;
+        }
+
+        a:focus-visible,
+        button:focus-visible,
+        select:focus-visible,
+        input:focus-visible,
+        summary:focus-visible,
+        canvas:focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
+
+        .muted {
+            color: var(--muted);
+        }
+
+        .small {
+            font-size: 12.5px;
+        }
+
+        .mono {
+            font-family: var(--mono);
+            font-weight: 500;
+            font-variant-numeric: tabular-nums;
+            font-size: 0.92em;
+        }
+
+        .label {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            font-family: var(--display);
+            font-size: 12.5px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--accent);
+        }
+
+        .label::before {
+            content: "";
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--accent);
+            box-shadow: 0 0 10px var(--accent);
+        }
+
+        .panel {
+            background: linear-gradient(160deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%), var(--panel);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--line);
+            border-radius: 22px;
+            padding: 22px;
+            box-shadow: 0 20px 50px -25px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+            transition: border-color 0.25s ease, transform 0.25s ease;
+        }
+
+        header {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 360px);
+            gap: 28px;
+            align-items: end;
+            padding-bottom: 6px;
+        }
+
+        header .lede {
+            margin-top: 12px;
+            max-width: 62ch;
+            color: var(--muted);
+            font-size: 16.5px;
+            line-height: 1.6;
+        }
+
+        .controls {
+            background: linear-gradient(160deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.015)), rgba(12, 19, 44, 0.78);
+            border: 1px solid var(--line);
+            border-radius: 20px;
+            padding: 16px 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            box-shadow: 0 18px 40px -20px rgba(0, 0, 0, 0.7);
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            min-width: 0;
+        }
+
+        select,
+        input[type=number] {
+            background: rgba(5, 9, 22, 0.75);
+            color: var(--text);
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 11px 14px;
+            font: 600 14.5px var(--body);
+            width: 100%;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        select:hover,
+        input[type=number]:hover {
+            border-color: rgba(130, 165, 255, 0.38);
+        }
+
+        select option {
+            background: #0b1126;
+            color: var(--text);
+        }
+
+        .btn {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.03));
+            color: var(--text);
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 9px 14px;
+            font: 600 13.5px var(--body);
+            cursor: pointer;
+            transition: all 0.18s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            user-select: none;
+        }
+
+        .btn:hover {
+            border-color: var(--accent);
+            background: rgba(110, 243, 214, 0.1);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px -6px rgba(110, 243, 214, 0.35);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn[aria-pressed=true] {
+            background: linear-gradient(135deg, rgba(110, 243, 214, 0.24), rgba(122, 162, 255, 0.18));
+            border-color: var(--accent);
+            color: var(--accent);
+            box-shadow: 0 0 20px rgba(110, 243, 214, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+
+        details summary {
+            cursor: pointer;
+            color: var(--muted);
+            font-size: 12.5px;
+            font-weight: 600;
+            padding-top: 2px;
+            transition: color 0.2s;
+        }
+
+        details summary:hover {
+            color: var(--accent);
+        }
+
+        .custom {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 8px;
+            margin-top: 10px;
+            align-items: end;
+        }
+
+        input[type=range] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 7px;
+            border-radius: 99px;
+            background: var(--line);
+            outline-offset: 6px;
+            margin: 8px 0;
+            cursor: pointer;
+        }
+
+        #tt {
+            background: linear-gradient(90deg,
+                    #ff944d 0%,
+                    #5265d4 16%,
+                    #141d46 32%,
+                    #080d24 50%,
+                    #141d46 68%,
+                    #5265d4 84%,
+                    #ffcb7d 100%);
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.6), 0 0 12px rgba(82, 101, 212, 0.25);
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: #fff;
+            border: 3.5px solid var(--accent);
+            box-shadow: 0 0 16px rgba(110, 243, 214, 0.9), 0 2px 6px rgba(0, 0, 0, 0.6);
+            transition: transform 0.15s ease;
+        }
+
+        input[type=range]::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+        }
+
+        input[type=range]::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #fff;
+            border: 3.5px solid var(--accent);
+            box-shadow: 0 0 16px rgba(110, 243, 214, 0.9);
+        }
+
+        /* 3D PLANETARIUM STAGE */
+        .stage {
+            position: relative;
+            height: clamp(500px, 78vh, 780px);
+            border-radius: 28px;
+            overflow: hidden;
+            border: 1px solid rgba(130, 170, 255, 0.28);
+            background: #010207;
+            isolation: isolate;
+            box-shadow:
+                0 45px 100px -35px rgba(0, 0, 0, 0.95),
+                0 0 60px -15px rgba(80, 130, 255, 0.18),
+                0 0 0 1px rgba(255, 255, 255, 0.05);
+        }
+
+        .stage canvas {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            display: block;
+            cursor: grab;
+            touch-action: none;
+        }
+
+        .stage canvas:active {
+            cursor: grabbing;
+        }
+
+        .stage::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            border-radius: inherit;
+            box-shadow: inset 0 0 120px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+        }
+
+        .glass {
+            background: rgba(6, 10, 26, 0.62);
+            -webkit-backdrop-filter: blur(16px) saturate(140%);
+            backdrop-filter: blur(16px) saturate(140%);
+            border: 1px solid rgba(150, 180, 255, 0.22);
+            border-radius: 16px;
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        .hud {
+            position: absolute;
+            z-index: 3;
+        }
+
+        #facing {
+            left: 18px;
+            top: 18px;
+            padding: 8px 15px;
+            font: 600 13.5px var(--mono);
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            letter-spacing: 0.02em;
+        }
+
+        #facing::before {
+            content: "";
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent);
+            box-shadow: 0 0 10px var(--accent);
+            animation: pulseDot 2.2s infinite ease-in-out;
+        }
+
+        @keyframes pulseDot {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.45;
+                transform: scale(0.8);
+            }
+        }
+
+        #focus {
+            left: 18px;
+            top: 64px;
+            max-width: min(355px, calc(100% - 104px));
+            padding: 14px 18px;
+            font-size: 13.8px;
+            line-height: 1.52;
+            transition: all 0.25s ease;
+        }
+
+        #focus .t {
+            font: 700 20px var(--display);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+
+        #focus .t .badge {
+            font: 600 11px var(--mono);
+            padding: 2px 8px;
+            border-radius: 99px;
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--muted);
+            border: 1px solid var(--line);
+        }
+
+        #focus p+p {
+            margin-top: 6px;
+        }
+
+        .tools {
+            right: 18px;
+            top: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            padding: 7px;
+        }
+
+        .tools .btn {
+            min-width: 54px;
+            min-height: 38px;
+            padding: 6px 10px;
+            font-size: 12.5px;
+            font-family: var(--display);
+            letter-spacing: 0.02em;
+        }
+
+        .timeline {
+            left: 18px;
+            right: 18px;
+            bottom: 18px;
+            padding: 13px 18px;
+            display: grid;
+            grid-template-columns: auto minmax(0, 1fr) auto;
+            gap: 6px 20px;
+            align-items: center;
+        }
+
+        .when {
+            font: 700 18px var(--display);
+            white-space: nowrap;
+            color: #fff;
+            letter-spacing: -0.01em;
+        }
+
+        .marks {
+            position: relative;
+            height: 15px;
+            font: 600 11.5px var(--mono);
+            color: var(--muted);
+        }
+
+        .marks span {
+            position: absolute;
+            top: 0;
+        }
+
+        .tl-r {
+            display: flex;
+            gap: 8px;
+        }
+
+        .chartnote {
+            font-size: 13.5px;
+            color: var(--muted);
+            text-align: center;
+            margin-top: -18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .chartnote kbd {
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid var(--line);
+            border-radius: 6px;
+            padding: 1px 7px;
+            font: 500 11.5px var(--mono);
+            color: var(--text);
+        }
+
+        /* HIGHLIGHT CARDS */
+        .hl {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 16px;
+        }
+
+        .hlcard {
+            position: relative;
+            overflow: hidden;
+            text-align: left;
+            color: inherit;
+            font: inherit;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding: 20px;
+            border-radius: 22px;
+            border: 1px solid var(--line);
+            background:
+                radial-gradient(180px 140px at 90% 10%, color-mix(in srgb, var(--c) 18%, transparent), transparent 70%),
+                linear-gradient(160deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.015)),
+                var(--panel);
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+            box-shadow: 0 16px 36px -20px rgba(0, 0, 0, 0.6);
+        }
+
+        .hlcard:hover {
+            border-color: var(--c, var(--accent));
+            transform: translateY(-4px);
+            box-shadow: 0 22px 44px -18px rgba(0, 0, 0, 0.8), 0 0 25px -8px color-mix(in srgb, var(--c) 45%, transparent);
+        }
+
+        .hlcard b {
+            font: 700 19px var(--display);
+            letter-spacing: -0.01em;
+        }
+
+        .hlcard .d {
+            color: var(--muted);
+            font-size: 13.8px;
+            line-height: 1.5;
+        }
+
+        .orb {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            margin-bottom: 4px;
+            background: radial-gradient(circle at 32% 28%, #fff, var(--c) 45%, rgba(0, 0, 0, 0.4) 78%);
+            box-shadow: 0 0 24px var(--c);
+        }
+
+        /* SKY GRIDS & LISTS */
+        .sky {
+            display: grid;
+            grid-template-columns: minmax(0, 1.08fr) minmax(0, 1fr);
+            gap: 26px;
+            align-items: start;
+        }
+
+        .col {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            min-width: 0;
+        }
+
+        .rows {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .row {
+            display: block;
+            width: 100%;
+            text-align: left;
+            background: linear-gradient(160deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.015)), rgba(12, 18, 40, 0.65);
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            padding: 13px 16px;
+            color: inherit;
+            font: inherit;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .row:hover {
+            border-color: rgba(122, 162, 255, 0.5);
+            background: rgba(25, 37, 78, 0.6);
+            transform: translateX(3px);
+        }
+
+        .row[aria-pressed=true] {
+            border-color: var(--accent);
+            background: linear-gradient(135deg, rgba(110, 243, 214, 0.13), rgba(122, 162, 255, 0.06));
+            box-shadow: 0 0 25px -6px rgba(110, 243, 214, 0.3);
+        }
+
+        .row .top {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            flex-wrap: wrap;
+        }
+
+        .dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            flex: none;
+            box-shadow: 0 0 12px currentColor;
+            background: radial-gradient(circle at 30% 30%, #fff, currentColor 60%);
+        }
+
+        .row .name {
+            font-family: var(--display);
+            font-weight: 700;
+            font-size: 17.5px;
+        }
+
+        .pill {
+            margin-left: auto;
+            font-family: var(--display);
+            font-size: 11.5px;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+            padding: 3px 11px;
+            border-radius: 99px;
+            border: 1px solid var(--line);
+            color: var(--muted);
+            white-space: nowrap;
+        }
+
+        .pill.ok {
+            color: #03201b;
+            background: var(--accent);
+            border-color: var(--accent);
+            box-shadow: 0 0 14px rgba(110, 243, 214, 0.4);
+        }
+
+        .pill.warn {
+            color: var(--amber);
+            border-color: rgba(255, 202, 99, 0.4);
+            background: rgba(255, 202, 99, 0.08);
+        }
+
+        .row .detail {
+            margin-top: 6px;
+            font-size: 13.5px;
+            color: var(--muted);
+            line-height: 1.5;
+        }
+
+        .cons {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .con {
+            border-top: 1px solid var(--line);
+            padding-top: 14px;
+            transition: background 0.2s;
+        }
+
+        .con:first-child {
+            border-top: 0;
+            padding-top: 0;
+        }
+
+        .con .where {
+            font-family: var(--mono);
+            font-size: 12.5px;
+            font-weight: 600;
+            color: var(--accent);
+            margin: 3px 0 4px;
+        }
+
+        .con .tip {
+            font-size: 14.5px;
+            color: var(--muted);
+        }
+
+        .chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 7px;
+        }
+
+        .chip {
+            font-size: 12.5px;
+            border: 1px solid var(--line);
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 99px;
+            padding: 4px 12px;
+            color: var(--muted);
+        }
+
+        .callout {
+            border-left: 4px solid var(--amber);
+            background:
+                radial-gradient(240px 140px at 0% 0%, rgba(255, 202, 99, 0.1), transparent 70%),
+                var(--panel);
+        }
+
+        /* SPACE WEATHER & SATELLITES */
+        section.block {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-top: 10px;
+        }
+
+        .blockhead p {
+            color: var(--muted);
+            max-width: 72ch;
+            margin-top: 8px;
+        }
+
+        .lab {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+            gap: 24px;
+        }
+
+        .gaugewrap svg {
+            width: 100%;
+            max-width: 420px;
+            display: block;
+            margin: 4px auto 0;
+        }
+
+        .needle {
+            transform-origin: 150px 150px;
+            transition: transform 0.6s cubic-bezier(0.3, 1.3, 0.5, 1);
+        }
+
+        .presets {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .effects {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            justify-content: center;
+        }
+
+        .effects dl {
+            margin: 0;
+            display: grid;
+            grid-template-columns: 110px 1fr;
+            gap: 12px 16px;
+            background: rgba(0, 0, 0, 0.22);
+            padding: 16px;
+            border-radius: 14px;
+            border: 1px solid var(--line);
+        }
+
+        .effects dt {
+            font-family: var(--display);
+            font-size: 13.5px;
+            font-weight: 700;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .effects dd {
+            margin: 0;
+            font-size: 14.5px;
+        }
+
+        .gtag {
+            display: inline-block;
+            font-family: var(--display);
+            font-weight: 700;
+            padding: 3px 12px;
+            border-radius: 8px;
+            margin-right: 10px;
+        }
+
+        .ruler svg {
+            width: 100%;
+            display: block;
+            margin: 10px 0 6px;
+        }
+
+        .chain {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 16px;
+        }
+
+        .chain .step {
+            border-top: 3px solid var(--accent);
+            padding: 14px 14px 10px;
+            background: rgba(255, 255, 255, 0.025);
+            border-radius: 0 0 14px 14px;
+        }
+
+        .chain .step:nth-child(2) {
+            border-color: var(--amber);
+        }
+
+        .chain .step:nth-child(3) {
+            border-color: var(--rose);
+        }
+
+        .chain .when2 {
+            font: 700 22px var(--display);
+            color: #fff;
+            margin-bottom: 2px;
+        }
+
+        .flares {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 10px;
+            text-align: center;
+        }
+
+        .flares div {
+            border: 1px solid var(--line);
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 14px;
+            padding: 12px 6px;
+            transition: transform 0.2s;
+        }
+
+        .flares div:hover {
+            transform: translateY(-2px);
+            border-color: var(--accent);
+        }
+
+        .flares b {
+            font: 700 24px var(--display);
+            display: block;
+            color: var(--amber);
+        }
+
+        .flares span {
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        .sats {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 18px;
+        }
+
+        .win {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        .win ul {
+            list-style: none;
+            padding: 0;
+            margin: 10px 0 0;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .win li {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            border-bottom: 1px dashed var(--line);
+            padding-bottom: 7px;
+            font-size: 14.5px;
+        }
+
+        .moon-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .moon-svg {
+            width: 58px;
+            height: 58px;
+            flex-shrink: 0;
+            filter: drop-shadow(0 0 16px rgba(243, 239, 224, 0.35));
+        }
+
+        footer {
+            font-size: 13px;
+            color: var(--muted);
+            border-top: 1px solid var(--line);
+            padding-top: 20px;
+            max-width: 85ch;
+            line-height: 1.65;
+        }
+
+        @media (max-width: 920px) {
+
+            header,
+            .sky,
+            .lab,
+            .sats,
+            .win,
+            .chain {
+                grid-template-columns: minmax(0, 1fr);
+            }
+
+            .hl {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 640px) {
+            .stage {
+                height: clamp(500px, 75vh, 660px);
+                border-radius: 22px;
+            }
+
+            .timeline {
+                grid-template-columns: 1fr auto;
+                padding: 11px 14px;
+            }
+
+            .tl-m {
+                grid-column: 1 / -1;
+                order: 3;
+            }
+
+            .when {
+                font-size: 15.5px;
+            }
+
+            .flares {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .custom {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .hl {
+                grid-template-columns: minmax(0, 1fr);
+            }
+
+            #focus {
+                max-width: calc(100% - 92px);
+                padding: 11px 14px;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .needle {
+                transition: none;
+            }
+        }
+
+        /* COSMOSIS Go Back button */
+        .cosmo-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 15px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, .24);
+            background: rgba(10, 16, 34, .62);
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            color: #e8eeff;
+            font: 600 12.5px/1 system-ui, -apple-system, 'Segoe UI', sans-serif;
+            letter-spacing: .04em;
+            text-decoration: none;
+            cursor: pointer;
+            transition: border-color .2s, transform .2s, color .2s;
+            white-space: nowrap;
+            pointer-events: auto;
+            position: relative;
+            z-index: 50
+        }
+
+        .cosmo-back:hover {
+            border-color: #6ef3d6;
+            color: #fff;
+            transform: translateX(-2px)
+        }
+
+        .cosmo-back:focus-visible {
+            outline: 2px solid #6ef3d6;
+            outline-offset: 3px
+        }
+    </style>
+<script src="script9.js"></script>
+<script src="script8.js" defer></script>
+<script src="script7.js" defer></script>
+<link rel="icon" type="image/svg+xml" href="icon1.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="icon3.png">
+<link rel="apple-touch-icon" href="icon2.png">
+<link rel="manifest" href="data1.json">
+<script src="script2.js"></script>
+<script src="script3.js" defer></script>
+<script src="script10.js" defer></script>
+</head>
+
+<body>
+
+    <div class="wrap">
+        <header>
+            <div>
+                <div style="margin-bottom:14px"><a class="cosmo-back" href="index.html"
+                        aria-label="Go back to the Cosmosis home page">&larr; Go Back</a></div>
+                <div class="label">Interactive 3D Sky Observatory · Class 6 to 12</div>
+                <h1>Sky Tonight India</h1>
+                <p class="lede" id="lede"></p>
+            </div>
+            <div class="controls">
+                <div class="field">
+                    <label class="label" for="city">Observatory Location</label>
+                    <select id="city"></select>
+                </div>
+                <details>
+                    <summary>Use custom GPS coordinates (Lat / Lon)</summary>
+                    <div class="custom">
+                        <div class="field"><label class="small muted" for="clat">Latitude °N</label><input type="number"
+                                id="clat" step="0.0001" min="-60" max="60" value="26.4499"></div>
+                        <div class="field"><label class="small muted" for="clon">Longitude °E</label><input
+                                type="number" id="clon" step="0.0001" min="60" max="100" value="80.3319"></div>
+                        <button class="btn" id="capply" type="button">Apply</button>
+                    </div>
+                </details>
+            </div>
+        </header>
+
+        <section class="stage" aria-label="Interactive 3D night sky">
+            <canvas id="chart" tabindex="0" role="img"
+                aria-label="3D night sky. Drag or use the arrow keys to look around. Shows stars, constellations, Milky Way, planets and the Moon for the chosen place and time."></canvas>
+            <div class="hud glass" id="facing"></div>
+            <div class="hud glass" id="focus" aria-live="polite"></div>
+            <div class="hud glass tools">
+                <button class="btn" id="bcons" type="button" aria-pressed="true"
+                    title="Toggle Constellation Lines & Art">Lines</button>
+                <button class="btn" id="bgrid" type="button" aria-pressed="false"
+                    title="Toggle Alt-Az Coordinate Grid">Grid</button>
+                <button class="btn" id="bfist" type="button" aria-pressed="false"
+                    title="10° Hand Fist Angular Scale">10° Scale</button>
+                <button class="btn" id="baur" type="button" aria-pressed="false"
+                    title="Preview Geomagnetic Aurora">Aurora</button>
+                <button class="btn" id="zin" type="button" aria-label="Zoom in">+</button>
+                <button class="btn" id="zout" type="button" aria-label="Zoom out">−</button>
+            </div>
+            <div class="hud glass timeline">
+                <div class="tl-l">
+                    <div class="when" id="when"></div>
+                    <div class="small muted" id="nownote">Indian Standard Time (IST)</div>
+                </div>
+                <div class="tl-m"><input type="range" id="tt" min="0" max="780" step="5" value="180"
+                        aria-label="Time tonight">
+                    <div class="marks"><span style="left:0">17:00</span><span style="left:23%">20:00</span><span
+                            style="left:46%;transform:translateX(-50%)">23:00</span><span
+                            style="left:73%">02:30</span><span style="right:0">06:00</span></div>
+                </div>
+                <div class="tl-r"><button class="btn" id="play" type="button">Play</button><button class="btn" id="now"
+                        type="button">Now</button></div>
+            </div>
+        </section>
+        <p class="chartnote">
+            <span><kbd>Drag</kbd> or <kbd>←↑↓→</kbd> to look around</span> ·
+            <span><kbd>Scroll</kbd> or <kbd>Pinch</kbd> to zoom</span> ·
+            <span><kbd>Tap</kbd> any star or planet to lock &amp; inspect</span> ·
+            <span>Hold your closed fist at arm's length to measure <strong>10°</strong> of sky</span>
+        </p>
+
+        <div class="hl" id="highlights"></div>
+
+        <div class="sky">
+            <div class="col">
+                <div>
+                    <div class="label">Solar System</div>
+                    <h2>Planets and Moon</h2>
+                    <p class="muted" style="margin-top:6px">Ordered by altitude above your horizon. Astronomers measure
+                        brightness using <strong>apparent magnitude (mag)</strong>: lower and negative numbers shine
+                        brightest.</p>
+                </div>
+                <div class="rows" id="planets"></div>
+            </div>
+            <div class="col">
+                <div class="panel" id="moonbox"></div>
+            </div>
+        </div>
+
+        <div class="sky">
+            <div class="col">
+                <div>
+                    <div class="label">Deep Sky &amp; Nakshatras</div>
+                    <h2>Constellations Overhead</h2>
+                    <p class="muted" style="margin-top:6px">Sorted from highest in the sky to lowest at your selected
+                        time. Traditional Indian <em>Nakshatra</em> and Sanskrit names are included alongside modern IAU
+                        names.</p>
+                </div>
+                <div class="panel cons" id="cons"></div>
+            </div>
+            <div class="col">
+                <div class="panel callout" id="polaris"></div>
+                <div class="panel">
+                    <div class="label" style="margin-bottom:4px">Stellar Beacons</div>
+                    <h3>Brightest Stars Tonight</h3>
+                    <div class="rows" id="stars" style="margin-top:12px"></div>
+                </div>
+            </div>
+        </div>
+
+        <section class="block" aria-labelledby="swh">
+            <div class="blockhead">
+                <div class="label">Space Weather Laboratory</div>
+                <h2 id="swh">How a Solar Storm Reaches Earth</h2>
+                <p>The planetary <strong>Kp index</strong> scores how disturbed Earth's magnetic field is, from 0 (calm)
+                    to 9 (extreme G5 storm). Drag the simulator below to see how geomagnetic storms affect satellites,
+                    radio, and auroras—and watch the northern horizon in the 3D sky above!</p>
+            </div>
+            <div class="lab">
+                <div class="panel gaugewrap">
+                    <div class="label">Geomagnetic Kp Simulator</div>
+                    <svg viewBox="0 0 300 195" id="gauge" role="img" aria-label="Kp gauge"></svg>
+                    <div class="field" style="margin-top:6px">
+                        <label class="label" for="kp">Simulate Kp Index (0 – 9)</label>
+                        <input type="range" id="kp" min="0" max="9" step="1" value="2">
+                    </div>
+                    <div class="presets" id="presets"></div>
+                </div>
+                <div class="panel effects" id="effects"></div>
+            </div>
+            <div class="panel ruler">
+                <h3>Can the Aurora Borealis reach your city in India?</h3>
+                <svg viewBox="0 0 640 120" id="ruler" role="img"
+                    aria-label="Ruler of geomagnetic latitude from the pole to the equator"></svg>
+                <p id="rulertext" class="muted"></p>
+            </div>
+
+            <div class="lab">
+                <div class="panel">
+                    <h3>From Solar Flare to Geomagnetic Storm</h3>
+                    <div class="chain" style="margin-top:12px">
+                        <div class="step">
+                            <div class="when2">8 min</div><b>Flash of Light</b>
+                            <p class="muted">A solar flare's X-rays and extreme UV light reach Earth at light speed,
+                                ionizing the upper atmosphere and blacking out HF shortwave radio on the sunlit side.
+                            </p>
+                        </div>
+                        <div class="step">
+                            <div class="when2">30m – hrs</div><b>Relativistic Particles</b>
+                            <p class="muted">Accelerated protons arrive next. They can flip bits in satellite
+                                electronics and pose radiation risks for astronauts and polar flights.</p>
+                        </div>
+                        <div class="step">
+                            <div class="when2">1 – 3 days</div><b>The Plasma Cloud (CME)</b>
+                            <p class="muted">A coronal mass ejection carries billions of tonnes of magnetized plasma.
+                                When it slams into Earth's magnetosphere, Kp spikes and auroras ignite.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel">
+                    <h3>Solar Flare Classes: Logarithmic 10× Scale</h3>
+                    <div class="flares" style="margin-top:12px">
+                        <div><b>A</b><span>background</span></div>
+                        <div><b>B</b><span>tiny</span></div>
+                        <div><b>C</b><span>small</span></div>
+                        <div><b>M</b><span>medium / radio</span></div>
+                        <div><b>X</b><span>extreme</span></div>
+                    </div>
+                    <p class="muted" style="margin-top:12px">Measured by GOES spacecraft in X-rays. Each letter is a
+                        10-fold jump in peak flux. For today's live telemetry, visit <a
+                            href="https://www.swpc.noaa.gov/products/planetary-k-index" target="_blank"
+                            rel="noopener">NOAA SWPC</a>.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="block" aria-labelledby="sath">
+            <div class="blockhead">
+                <div class="label">Orbital Mechanics</div>
+                <h2 id="sath">When Can You Spot the ISS and Starlink?</h2>
+                <p>Low-Earth orbit satellites do not carry headlights—you see them by <strong>reflected
+                        sunlight</strong>. The sweet spot is the 1–2 hours after sunset or before sunrise, when the
+                    ground is dark but the satellite 400–550 km overhead is still bathed in sunlight.</p>
+            </div>
+            <div class="panel">
+                <h3>Your Optimal Satellite Spotting Windows Tonight</h3>
+                <div class="win" id="win" style="margin-top:12px"></div>
+            </div>
+            <div class="sats">
+                <div class="panel">
+                    <h3>International Space Station</h3>
+                    <p class="muted" style="margin-top:6px">Orbiting at ~400 km altitude at 28,000 km/h (one lap every
+                        92 minutes). It glides across the sky in 3 to 6 minutes as a brilliant, steady white light that
+                        never blinks and outshines Sirius.</p>
+                    <p style="margin-top:10px"><a href="https://spotthestation.nasa.gov/" target="_blank"
+                            rel="noopener">NASA Spot the Station →</a></p>
+                </div>
+                <div class="panel">
+                    <h3>Starlink Satellite Trains</h3>
+                    <p class="muted" style="margin-top:6px">Shortly after launch, dozens of flat-panel satellites travel
+                        in a tight formation like a "string of pearls" before ion thrusters raise them to their 550 km
+                        operational shell.</p>
+                    <p style="margin-top:10px"><a href="https://findstarlink.com/" target="_blank" rel="noopener">Find
+                            Starlink Timings →</a></p>
+                </div>
+                <div class="panel">
+                    <h3>Thermospheric Drag &amp; Storms</h3>
+                    <p class="muted" style="margin-top:6px">Solar storms heat and expand Earth's upper atmosphere,
+                        drastically increasing aerodynamic drag on low satellites. In Feb 2022, a G2 storm caused 38
+                        newly launched Starlinks to deorbit.</p>
+                    <p style="margin-top:10px"><a href="https://www.heavens-above.com/" target="_blank"
+                            rel="noopener">Heavens-Above Sky Charts →</a></p>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <strong>Astronomical Engine &amp; Accuracy Note:</strong> Ephemerides are computed in real time on your
+            device using Keplerian orbital elements and spherical trigonometry. Planetary and stellar coordinates are
+            accurate to ~0.5°–1° and lunar coordinates to ~1.5°, ideal for naked-eye and binocular observation across
+            India. All times are Indian Standard Time (UTC+5:30). Geomagnetic coordinates use the IGRF tilted dipole
+            approximation.
+        </footer>
+    </div>
+
+    <script>
+        /* ================= ASTROPHYSICS & EPHEMERIS ENGINE ================= */
+        const RAD = Math.PI / 180, DEG = 180 / Math.PI, IST = 19800000;
+        const norm360 = x => ((x % 360) + 360) % 360;
+        const SUN = { N: [0, 0], i: [0, 0], w: [282.9404, 4.70935e-5], a: [1, 0], e: [0.016709, -1.151e-9], M: [356.0470, 0.9856002585] };
+        const MOON = { N: [125.1228, -0.0529538083], i: [5.1454, 0], w: [318.0634, 0.1643573223], a: [60.2666, 0], e: [0.0549, 0], M: [115.3654, 13.0649929509] };
+        const PL = {
+            mercury: { N: [48.3313, 3.24587e-5], i: [7.0047, 5.00e-8], w: [29.1241, 1.01444e-5], a: [0.387098, 0], e: [0.205635, 5.59e-10], M: [168.6562, 4.0923344368], m0: -0.36, k1: 0.027, k2: 2.2e-13, p2: 6, k3: 0, p3: 0 },
+            venus: { N: [76.6799, 2.46590e-5], i: [3.3946, 2.75e-8], w: [54.8910, 1.38374e-5], a: [0.723330, 0], e: [0.006773, -1.302e-9], M: [48.0052, 1.6021302244], m0: -4.34, k1: 0.013, k2: 4.2e-7, p2: 3 },
+            mars: { N: [49.5574, 2.11081e-5], i: [1.8497, -1.78e-8], w: [286.5016, 2.92961e-5], a: [1.523688, 0], e: [0.093405, 2.516e-9], M: [18.6021, 0.5240207766], m0: -1.51, k1: 0.016, k2: 0, p2: 1 },
+            jupiter: { N: [100.4542, 2.76854e-5], i: [1.3030, -1.557e-7], w: [273.8777, 1.64505e-5], a: [5.20256, 0], e: [0.048498, 4.469e-9], M: [19.8950, 0.0830853001], m0: -9.25, k1: 0.014, k2: 0, p2: 1 },
+            saturn: { N: [113.6634, 2.38980e-5], i: [2.4886, -1.081e-7], w: [339.3939, 2.97661e-5], a: [9.55475, 0], e: [0.055546, -9.499e-9], M: [316.9670, 0.0334442282], m0: -9.0, k1: 0.044, k2: 0, p2: 1 }
+        };
+        function dayNum(ms) { return ms / 86400000 + 2440587.5 - 2451543.5 }
+        function kepler(M, e) { let E = M + e * DEG * Math.sin(M * RAD) * (1 + e * Math.cos(M * RAD)); for (let k = 0; k < 8; k++) { E = E - (E - e * DEG * Math.sin(E * RAD) - M) / (1 - e * Math.cos(E * RAD)) } return E }
+        function helio(o, d) {
+            const N = o.N[0] + o.N[1] * d, i = o.i[0] + o.i[1] * d, w = o.w[0] + o.w[1] * d, a = o.a[0], e = o.e[0] + o.e[1] * d, M = norm360(o.M[0] + o.M[1] * d);
+            const E = kepler(M, e), xv = a * (Math.cos(E * RAD) - e), yv = a * Math.sqrt(1 - e * e) * Math.sin(E * RAD);
+            const v = Math.atan2(yv, xv) * DEG, r = Math.hypot(xv, yv), vw = (v + w) * RAD, Nr = N * RAD, ir = i * RAD;
+            return { x: r * (Math.cos(Nr) * Math.cos(vw) - Math.sin(Nr) * Math.sin(vw) * Math.cos(ir)), y: r * (Math.sin(Nr) * Math.cos(vw) + Math.cos(Nr) * Math.sin(vw) * Math.cos(ir)), z: r * Math.sin(vw) * Math.sin(ir), r };
+        }
+        function toEq(g, d) { const ecl = (23.4393 - 3.563e-7 * d) * RAD, x = g.x, y = g.y * Math.cos(ecl) - g.z * Math.sin(ecl), z = g.y * Math.sin(ecl) + g.z * Math.cos(ecl); return { ra: norm360(Math.atan2(y, x) * DEG) / 15, dec: Math.atan2(z, Math.hypot(x, y)) * DEG } }
+        function horiz(raH, dec, lat, lon, ms) {
+            const jd = ms / 86400000 + 2440587.5, gmst = norm360(280.46061837 + 360.98564736629 * (jd - 2451545.0)), H = (gmst + lon - raH * 15) * RAD, phi = lat * RAD, de = dec * RAD;
+            const alt = Math.asin(Math.sin(phi) * Math.sin(de) + Math.cos(phi) * Math.cos(de) * Math.cos(H)) * DEG;
+            const az = norm360(Math.atan2(Math.sin(H), Math.cos(H) * Math.sin(phi) - Math.tan(de) * Math.cos(phi)) * DEG + 180);
+            return { alt, az };
+        }
+        function bodies(ms) {
+            const d = dayNum(ms), s = helio(SUN, d), sd = Math.hypot(s.x, s.y), out = {};
+            out.sun = { eq: toEq({ x: s.x, y: s.y, z: 0 }, d) };
+            const sunLon = norm360(Math.atan2(s.y, s.x) * DEG), m = helio(MOON, d), mLon = norm360(Math.atan2(m.y, m.x) * DEG), mLat = Math.asin(m.z / m.r) * DEG;
+            out.moon = { eq: toEq(m, d), phase: norm360(mLon - sunLon), elong: Math.acos(Math.cos(mLat * RAD) * Math.cos((mLon - sunLon) * RAD)) * DEG };
+            for (const id in PL) {
+                const o = PL[id], h = helio(o, d), g = { x: h.x + s.x, y: h.y + s.y, z: h.z }, R = Math.hypot(g.x, g.y, g.z), r = h.r;
+                const FV = Math.acos(Math.max(-1, Math.min(1, (r * r + R * R - sd * sd) / (2 * r * R)))) * DEG;
+                let mag = o.m0 + 5 * Math.log10(r * R) + o.k1 * FV + (o.k2 || 0) * Math.pow(FV, o.p2 || 1);
+                const elong = Math.acos(Math.max(-1, Math.min(1, (g.x * s.x + g.y * s.y) / (R * sd)))) * DEG;
+                out[id] = { eq: toEq(g, d), mag, elong };
+            }
+            return out;
+        }
+        function geomagLat(lat, lon) { const pl = 80.7 * RAD, pn = -72.7 * RAD; return Math.asin(Math.sin(lat * RAD) * Math.sin(pl) + Math.cos(lat * RAD) * Math.cos(pl) * Math.cos(lon * RAD - pn)) * DEG }
+
+        /* ================= CATALOGS & METADATA ================= */
+        const META = {
+            sun: { name: 'Sun', color: '#ffd56b', rgb: [255, 213, 107] },
+            moon: { name: 'Moon', color: '#f4f0e2', rgb: [244, 240, 226] },
+            mercury: { name: 'Mercury', color: '#d6cfc2', rgb: [214, 207, 194] },
+            venus: { name: 'Venus', color: '#fff3c4', rgb: [255, 243, 196] },
+            mars: { name: 'Mars', color: '#ff7b54', rgb: [255, 123, 84] },
+            jupiter: { name: 'Jupiter', color: '#f8dfb0', rgb: [248, 223, 176] },
+            saturn: { name: 'Saturn', color: '#ebd094', rgb: [235, 208, 148] }
+        };
+        const PLIDS = ['mercury', 'venus', 'mars', 'jupiter', 'saturn'];
+        const CITIES = [
+            ['Kanpur', 26.4499, 80.3319], ['Lucknow', 26.8467, 80.9462], ['Delhi', 28.6139, 77.2090], ['Jaipur', 26.9124, 75.7873], ['Patna', 25.5941, 85.1376],
+            ['Kolkata', 22.5726, 88.3639], ['Guwahati', 26.1445, 91.7362], ['Bhopal', 23.2599, 77.4126], ['Ahmedabad', 23.0225, 72.5714], ['Mumbai', 19.0760, 72.8777],
+            ['Pune', 18.5204, 73.8567], ['Hyderabad', 17.3850, 78.4867], ['Bengaluru', 12.9716, 77.5946], ['Chennai', 13.0827, 80.2707], ['Thiruvananthapuram', 8.5241, 76.9366], ['Leh (Ladakh)', 34.1526, 77.5771]
+        ];
+        const STARS = {
+            Betelgeuse: [5.919, 7.407, 0.5, 'Ardra'], Rigel: [5.242, -8.202, 0.1], Bellatrix: [5.419, 6.350, 1.6], Saiph: [5.796, -9.670, 2.1], Alnitak: [5.679, -1.943, 1.7], Alnilam: [5.603, -1.202, 1.7], Mintaka: [5.533, -0.299, 2.2], Meissa: [5.585, 9.934, 3.4],
+            Aldebaran: [4.599, 16.509, 0.9, 'Rohini'], Elnath: [5.438, 28.608, 1.7], Tianguan: [5.627, 21.143, 3.0], Alcyone: [3.790, 24.105, 2.9, 'Krittika (Pleiades)'],
+            Sirius: [6.752, -16.716, -1.46, 'Lubdhaka'], Mirzam: [6.378, -17.956, 2.0], Adhara: [6.977, -28.972, 1.5], Wezen: [7.140, -26.393, 1.8], Aludra: [7.403, -29.303, 2.4],
+            Procyon: [7.655, 5.225, 0.4], Castor: [7.577, 31.888, 1.6, 'Punarvasu'], Pollux: [7.755, 28.026, 1.1, 'Punarvasu'],
+            Capella: [5.278, 45.998, 0.1, 'Brahmahridaya'], Menkalinan: [5.992, 44.948, 1.9], Hassaleh: [4.950, 33.166, 2.7], Theta_Aur: [5.995, 37.213, 2.6],
+            Schedar: [0.675, 56.537, 2.2], Caph: [0.153, 59.150, 2.3], Gamma_Cas: [0.945, 60.717, 2.5], Ruchbah: [1.430, 60.235, 2.7], Segin: [1.907, 63.670, 3.4],
+            Markab: [23.079, 15.205, 2.5], Scheat: [23.063, 28.083, 2.4], Algenib: [0.220, 15.184, 2.8], Alpheratz: [0.139, 29.091, 2.1, 'Uttara Bhadrapada'], Mirach: [1.162, 35.62, 2.1], Almach: [2.065, 42.33, 2.1],
+            Dubhe: [11.062, 61.751, 1.8, 'Kratu'], Merak: [11.031, 56.382, 2.4, 'Pulaha'], Phecda: [11.897, 53.695, 2.4, 'Pulastya'], Megrez: [12.257, 57.033, 3.3, 'Atri'], Alioth: [12.900, 55.960, 1.8, 'Angiras'], Mizar: [13.399, 54.925, 2.2, 'Vashistha'], Alkaid: [13.792, 49.313, 1.9, 'Marichi'],
+            Polaris: [2.530, 89.264, 2.0, 'Dhruva Tara'], Vega: [18.616, 38.784, 0.0, 'Abhijit'], Altair: [19.846, 8.868, 0.8, 'Shravana'], Deneb: [20.690, 45.280, 1.2],
+            Fomalhaut: [22.961, -29.622, 1.2], Arcturus: [14.261, 19.182, 0.0, 'Swati'], Regulus: [10.139, 11.967, 1.4, 'Magha'], Spica: [13.420, -11.161, 1.0, 'Chitra'], Mirfak: [3.405, 49.861, 1.8], Algol: [3.136, 40.956, 2.1]
+        };
+        const CONS = [
+            { name: 'Orion', ind: 'Mriga / Kalpurush', stars: ['Betelgeuse', 'Rigel', 'Bellatrix', 'Saiph', 'Alnitak', 'Alnilam', 'Mintaka', 'Meissa'], lines: [['Meissa', 'Betelgeuse'], ['Meissa', 'Bellatrix'], ['Betelgeuse', 'Alnitak'], ['Bellatrix', 'Mintaka'], ['Alnitak', 'Alnilam'], ['Alnilam', 'Mintaka'], ['Alnitak', 'Saiph'], ['Mintaka', 'Rigel'], ['Betelgeuse', 'Bellatrix'], ['Saiph', 'Rigel']], anchor: 'Alnilam', tip: 'Spot the three equally spaced stars of Orion\'s Belt in a tight line. Orange supergiant Betelgeuse (Ardra) marks his shoulder and blue-white Rigel marks his knee.' },
+            { name: 'Taurus', ind: 'Vrishabha', stars: ['Aldebaran', 'Elnath', 'Tianguan', 'Alcyone'], lines: [['Aldebaran', 'Elnath'], ['Aldebaran', 'Tianguan'], ['Aldebaran', 'Alcyone']], anchor: 'Aldebaran', tip: 'Follow Orion\'s belt upward to fiery orange Aldebaran (Rohini), the eye of the Bull, then further to the sparkling Pleiades cluster (Krittika).' },
+            { name: 'Canis Major', ind: 'Lubdhaka (Sirius)', stars: ['Sirius', 'Mirzam', 'Adhara', 'Wezen', 'Aludra'], lines: [['Sirius', 'Mirzam'], ['Sirius', 'Wezen'], ['Wezen', 'Adhara'], ['Wezen', 'Aludra'], ['Adhara', 'Aludra']], anchor: 'Sirius', tip: 'Follow Orion\'s belt downward toward the horizon to find Sirius (Lubdhaka), the brightest star in Earth\'s night sky at magnitude −1.46.' },
+            { name: 'Gemini', ind: 'Mithuna (Punarvasu)', stars: ['Castor', 'Pollux'], lines: [['Castor', 'Pollux']], anchor: 'Pollux', tip: 'Look for the twin stars Castor and Pollux shining side by side high above Orion.' },
+            { name: 'Auriga', ind: 'Brahmahridaya (Capella)', stars: ['Capella', 'Menkalinan', 'Theta_Aur', 'Elnath', 'Hassaleh'], lines: [['Capella', 'Menkalinan'], ['Menkalinan', 'Theta_Aur'], ['Theta_Aur', 'Elnath'], ['Elnath', 'Hassaleh'], ['Hassaleh', 'Capella']], anchor: 'Capella', tip: 'Golden Capella is the 6th brightest star in the sky. Its pentagon of stars forms the Charioteer.' },
+            { name: 'Cassiopeia', ind: 'Sharmishtha', stars: ['Caph', 'Schedar', 'Gamma_Cas', 'Ruchbah', 'Segin'], lines: [['Caph', 'Schedar'], ['Schedar', 'Gamma_Cas'], ['Gamma_Cas', 'Ruchbah'], ['Ruchbah', 'Segin']], anchor: 'Schedar', tip: 'An unmistakable W or M shape in the northern sky, sitting opposite the Big Dipper across Polaris.' },
+            { name: 'Pegasus and Andromeda', ind: 'Uttara Bhadrapada', stars: ['Markab', 'Scheat', 'Alpheratz', 'Algenib', 'Mirach', 'Almach'], lines: [['Markab', 'Scheat'], ['Scheat', 'Alpheratz'], ['Alpheratz', 'Algenib'], ['Algenib', 'Markab'], ['Alpheratz', 'Mirach'], ['Mirach', 'Almach']], anchor: 'Markab', tip: 'The Great Square of Pegasus is a giant cuatro-star window; Andromeda\'s stars trail from its northeast corner toward the Andromeda Galaxy (M31).' },
+            { name: 'Perseus', ind: 'Yayati', stars: ['Mirfak', 'Algol'], lines: [['Mirfak', 'Algol']], anchor: 'Mirfak', tip: 'Home to Algol, an eclipsing binary star system whose brightness visibly dips every 2 days, 20 hours and 49 minutes.' },
+            { name: 'Ursa Major (Big Dipper)', ind: 'Saptarishi', stars: ['Dubhe', 'Merak', 'Phecda', 'Megrez', 'Alioth', 'Mizar', 'Alkaid'], lines: [['Dubhe', 'Merak'], ['Merak', 'Phecda'], ['Phecda', 'Megrez'], ['Megrez', 'Dubhe'], ['Megrez', 'Alioth'], ['Alioth', 'Mizar'], ['Mizar', 'Alkaid']], anchor: 'Dubhe', tip: 'Named after the Seven Sages (Saptarishi). Draw a line from Merak through Dubhe and extend it 5× to hit Polaris (Dhruva Tara).' },
+            { name: 'Summer Triangle', ind: 'Abhijit & Shravana', stars: ['Vega', 'Deneb', 'Altair'], lines: [['Vega', 'Deneb'], ['Deneb', 'Altair'], ['Altair', 'Vega']], anchor: 'Vega', tip: 'A vast geometric triangle of three 1st-magnitude stars—Vega (Abhijit), Deneb, and Altair (Shravana)—straddling the Milky Way.' }
+        ];
+
+        const $ = id => document.getElementById(id);
+        const DIRS = ['North', 'North-East', 'East', 'South-East', 'South', 'South-West', 'West', 'North-West'];
+        const dirName = az => DIRS[Math.round(az / 45) % 8];
+        const pad = n => String(n).padStart(2, '0');
+        function hhmm(ms) { const d = new Date(ms + IST); return pad(d.getUTCHours()) + ':' + pad(d.getUTCMinutes()) }
+        const WD = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'], MN = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        function dateLabel(ms) { const d = new Date(ms + IST); return WD[d.getUTCDay()] + ' ' + d.getUTCDate() + ' ' + MN[d.getUTCMonth()] }
+
+        const state = { loc: { name: 'Kanpur', lat: 26.4499, lon: 80.3319 }, min: 180, sel: null, kp: 2 };
+        try { const s = localStorage.getItem('sky-city'); if (s) { const c = JSON.parse(s); if (c && isFinite(c.lat) && isFinite(c.lon) && c.name) { state.loc = c } } } catch (e) { }
+
+        function baseMs() {
+            const now = new Date(Date.now() + IST);
+            let y = now.getUTCFullYear(), m = now.getUTCMonth(), d = now.getUTCDate();
+            if (now.getUTCHours() < 6) d -= 1;
+            return Date.UTC(y, m, d, 17, 0, 0) - IST;
+        }
+        const BASE = baseMs();
+        function nowOffset() { return Math.round((Date.now() - BASE) / 60000 / 5) * 5 }
+        { const o = nowOffset(); state.min = (o >= 0 && o <= 780) ? o : 180 }
+
+        /* Rise, set and twilight times, cached per place */
+        let cache = { key: '', s: null };
+        function series() {
+            const { lat, lon } = state.loc, key = lat + '|' + lon + '|' + BASE;
+            if (cache.key === key) return cache.s;
+            const start = BASE - 5 * 3600000, N = 289, ids = ['sun', 'moon', ...PLIDS], s = { start };
+            ids.forEach(id => s[id] = new Float64Array(N));
+            for (let k = 0; k < N; k++) { const ms = start + k * 300000, b = bodies(ms); ids.forEach(id => { s[id][k] = horiz(b[id].eq.ra, b[id].eq.dec, lat, lon, ms).alt }) }
+            cache = { key, s }; return s;
+        }
+        function crossings(arr, start, thr) {
+            const out = [];
+            for (let k = 0; k < arr.length - 1; k++) {
+                const a = arr[k] - thr, b = arr[k + 1] - thr;
+                if (a < 0 && b >= 0) out.push({ t: start + (k + a / (a - b)) * 300000, up: true });
+                else if (a >= 0 && b < 0) out.push({ t: start + (k + a / (a - b)) * 300000, up: false });
+            }
+            return out;
+        }
+        function tfmt(t) { return t == null ? '—' : hhmm(t) + (t >= BASE + 7 * 3600000 ? ' (+1)' : '') }
+        function riseSet(id) {
+            const s = series(), thr = id === 'sun' ? -0.83 : (id === 'moon' ? 0 : -0.5), c = crossings(s[id], s.start, thr);
+            const r = c.find(x => x.up), st = c.find(x => !x.up);
+            return { rise: r ? r.t : null, set: st ? st.t : null };
+        }
+
+        /* ================= GOD-LEVEL 3D PLANETARIUM RENDERER ================= */
+        const cv = $('chart'), ctx = cv.getContext('2d');
+        const cam = { az: 180, alt: 30, fov: 85 }, view = { cons: true, grid: false, fist: false, aurora: false };
+        let W = 800, H = 500, F = 400, S = null, hits = [], cs = [1, 0, 1, 0], anim = 0, pos_phase = 0, pos_elong = 0;
+        const P2 = [0, 0], clamp = (x, a, b) => Math.min(b, Math.max(a, x)), mix = (a, b, t) => a.map((v, i) => v + (b[i] - v) * t), rgb = c => 'rgb(' + c.map(Math.round) + ')';
+
+        function rng(a) { return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296 } }
+        const rnd = rng(42), BG = [], MW = [];
+
+        // Generate 2,600 realistic background stars with spectral color indices & twinkle phase
+        const STAR_PAL = [[165, 195, 255], [195, 215, 255], [242, 246, 255], [255, 244, 220], [255, 218, 175], [255, 182, 130]];
+        for (let i = 0; i < 2600; i++) {
+            const mag = 2.2 + Math.pow(rnd(), 0.58) * 4.3;
+            const palIdx = Math.min(5, Math.floor(rnd() * 6));
+            BG.push([rnd() * 24, Math.asin(rnd() * 2 - 1) * DEG, mag, palIdx, rnd() * 6.283]);
+        }
+
+        // Generate Volumetric Milky Way & H-II Nebulae cloud nodes along the Galactic Plane
+        for (let i = 0; i < 1650; i++) {
+            const l = rnd() * 360;
+            const bulge = Math.exp(-Math.pow(((l + 180) % 360 - 180) / 42, 2)); // Galactic Center at l=0 (Sagittarius/Scorpius)
+            const arm = 0.35 + 0.65 * Math.pow((1 + Math.cos(l * RAD)) / 2, 1.4);
+            const spread = 7.5 * (0.7 + 0.65 * bulge);
+            const b = (rnd() + rnd() + rnd() - 1.5) * spread;
+            const w = Math.min(1, 0.25 + 0.75 * bulge + 0.35 * arm * rnd());
+            const isDust = (i % 7 === 0) && Math.abs(b) < 3.2; // Dark Great Rift dust clouds
+            const isNebula = (i % 38 === 0) && Math.abs(b) < 4; // Pinkish H-II star-forming regions
+            const lr = (122.932 - l) * RAD, br = b * RAD, dg = 27.1283 * RAD;
+            const dec = Math.asin(Math.sin(br) * Math.sin(dg) + Math.cos(br) * Math.cos(dg) * Math.cos(lr)) * DEG;
+            const ra = 192.8595 + Math.atan2(Math.cos(br) * Math.sin(lr), Math.sin(br) * Math.cos(dg) - Math.cos(br) * Math.sin(dg) * Math.cos(lr)) * DEG;
+            MW.push([norm360(ra) / 15, dec, w, rnd(), isDust ? 1 : (isNebula ? 2 : 0)]);
+        }
+
+        // Pre-render soft radial glow sprites for ultra-fast 60fps Volumetric Milky Way
+        function makeCloudSprite(r, g, b, a) {
+            const c = document.createElement('canvas'); c.width = c.height = 64;
+            const x = c.getContext('2d'), gr = x.createRadialGradient(32, 32, 0, 32, 32, 32);
+            gr.addColorStop(0, `rgba(${r},${g},${b},${a})`);
+            gr.addColorStop(0.45, `rgba(${r},${g},${b},${a * 0.45})`);
+            gr.addColorStop(1, `rgba(${r},${g},${b},0)`);
+            x.fillStyle = gr; x.fillRect(0, 0, 64, 64);
+            return c;
+        }
+        const SPR_CORE = makeCloudSprite(255, 222, 185, 0.09);
+        const SPR_ARM = makeCloudSprite(155, 185, 255, 0.075);
+        const SPR_NEB = makeCloudSprite(255, 120, 175, 0.12);
+        const SPR_DUST = makeCloudSprite(4, 7, 18, 0.22);
+
+        const COL = {
+            Betelgeuse: '255,168,115', Aldebaran: '255,180,125', Arcturus: '255,198,140',
+            Rigel: '170,205,255', Sirius: '195,222,255', Vega: '195,220,255',
+            Capella: '255,238,185', Pollux: '255,215,165', Spica: '180,210,255',
+            Antares: '255,140,100', Procyon: '245,245,255', Altair: '225,238,255'
+        };
+        const NOTE = {
+            sun: 'Our G-type main-sequence star. Never look directly at the Sun without certified solar filters.',
+            moon: 'Earth\'s natural satellite (mean distance 384,400 km). Notice the dark volcanic plains (Maria) and Earthshine.',
+            mercury: 'The innermost planet. It hugs the horizon near twilight and goes through phases like the Moon.',
+            venus: 'The brightest planet (up to mag −4.6). Covered in reflective sulfuric acid clouds.',
+            mars: 'The Red Planet. Its rusty iron-oxide deserts give it a distinct warm amber-orange hue.',
+            jupiter: 'The largest planet in our Solar System. A pair of binoculars reveals its four Galilean moons!',
+            saturn: 'The ringed gas giant. Its icy ring system spans 282,000 km across.'
+        };
+
+        function vec(alt, az) { const a = alt * RAD, z = az * RAD, c = Math.cos(a); return [c * Math.sin(z), Math.sin(a), c * Math.cos(z)] }
+        function sc(x, y, z) { const x1 = x * cs[0] - z * cs[1], z1 = x * cs[1] + z * cs[0], y2 = y * cs[2] - z1 * cs[3], z2 = y * cs[3] + z1 * cs[2]; if (z2 < .05) return false; P2[0] = W / 2 + F * x1 / z2; P2[1] = H / 2 - F * y2 / z2; return true }
+        function rot(v) { const x1 = v[0] * cs[0] - v[2] * cs[1], z1 = v[0] * cs[1] + v[2] * cs[0]; return [x1, v[1] * cs[2] - z1 * cs[3], v[1] * cs[3] + z1 * cs[2]] }
+
+        function buildScene(ms, pos, b, sunAlt) {
+            const { lat, lon } = state.loc, pk = a => { const o = new Float32Array(a.length * 3); a.forEach((s, i) => { const h = horiz(s[0], s[1], lat, lon, ms), v = vec(h.alt, h.az); o.set(v, i * 3) }); return o };
+            const st = {}, bd = {};
+            for (const k in STARS) { const h = horiz(STARS[k][0], STARS[k][1], lat, lon, ms); st[k] = { alt: h.alt, az: h.az, v: vec(h.alt, h.az) } }
+            for (const id in pos) bd[id] = { alt: pos[id].alt, az: pos[id].az, mag: b[id].mag, v: vec(pos[id].alt, pos[id].az) };
+            S = { ms, sunAlt, pos, st, bd, bg: pk(BG), mw: pk(MW) };
+            renderFocus(); draw();
+        }
+
+        function renderFocus() {
+            const s = state.sel; let h, name, note, col = '#6ef3d6', badge = '';
+            if (!s) {
+                $('focus').innerHTML = '<span class="t"><span>Explore the 3D Sky</span><span class="badge">LIVE DOME</span></span><p class="muted">Drag to pan across the horizon. Tap any planet, the Moon, or a bright star to lock onto it and see how to find it tonight.</p>';
+                return;
+            }
+            if (s.startsWith('star:')) {
+                const k = s.slice(5); h = S.st[k]; name = k.replace('_', ' ');
+                badge = 'mag ' + STARS[k][2].toFixed(1).replace('-', '−');
+                note = (STARS[k][3] ? `Traditional Indian name: <strong style="color:#fff">${STARS[k][3]}</strong>. ` : '') + 'Twinkling starlight arriving from deep outside our Solar System.';
+            } else {
+                h = S.pos[s]; name = META[s].name; note = NOTE[s]; col = META[s].color;
+                badge = s === 'moon' ? Math.round((1 - Math.cos(pos_elong * RAD)) / 2 * 100) + '% LIT' : (s === 'sun' ? 'STAR' : 'mag ' + S.bd[s].mag.toFixed(1).replace('-', '−'));
+            }
+            const f = Math.max(1, Math.round(h.alt / 10));
+            $('focus').innerHTML = `<span class="t"><span style="color:${col}">${name}</span><span class="badge">${badge}</span></span><p>${h.alt > 0 ? `Face <strong>${dirName(h.az)}</strong> (${Math.round(h.az)}°), then look up <strong>${Math.round(h.alt)}°</strong> — about <strong>${f} fist${f > 1 ? 's' : ''}</strong> above the horizon.` : `Currently ${Math.abs(Math.round(h.alt))}° below the ${dirName(h.az)} horizon. Drag the time slider below to watch it rise.`}</p><p class="muted">${note}</p>`;
+        }
+
+        function lab(t, x, y, font, col, al) {
+            ctx.font = font; ctx.textAlign = al || 'left';
+            ctx.shadowColor = 'rgba(0,0,0,0.95)'; ctx.shadowBlur = 8;
+            ctx.fillStyle = col; ctx.fillText(t, x, y); ctx.shadowBlur = 0;
+        }
+
+        const hillH = a => 1.0 + 0.65 * Math.sin(a * RAD * 3 + 1) + 0.45 * Math.sin(a * RAD * 7 + 2) + 0.22 * Math.sin(a * RAD * 19);
+        const treeH = a => hillH(a) + 0.35 * Math.max(0, Math.sin(a * RAD * 11)) * Math.abs(Math.sin(a * RAD * 73));
+
+        // Shooting stars (meteors) state
+        let meteors = [];
+        function updateMeteors(nowSec, darkFactor) {
+            if (darkFactor > 0.65 && Math.random() < 0.018 && meteors.length < 2) {
+                const az = Math.random() * 360, alt = 22 + Math.random() * 52;
+                const dAz = (Math.random() - 0.5) * 35, dAlt = -(12 + Math.random() * 18);
+                meteors.push({ az, alt, dAz, dAlt, t0: nowSec, dur: 0.65 + Math.random() * 0.45 });
+            }
+            meteors = meteors.filter(m => nowSec - m.t0 < m.dur);
+        }
+
+        // 4-point diffraction spike helper for 1st-magnitude stars & bright planets
+        function drawDiffraction(x, y, radius, rgbStr, alpha) {
+            ctx.save();
+            ctx.strokeStyle = `rgba(${rgbStr},${alpha * 0.55})`;
+            ctx.lineWidth = 1.1;
+            ctx.beginPath();
+            ctx.moveTo(x - radius, y); ctx.lineTo(x + radius, y);
+            ctx.moveTo(x, y - radius); ctx.lineTo(x, y + radius);
+            ctx.stroke();
+            ctx.strokeStyle = `rgba(${rgbStr},${alpha * 0.25})`;
+            const d = radius * 0.45;
+            ctx.beginPath();
+            ctx.moveTo(x - d, y - d); ctx.lineTo(x + d, y + d);
+            ctx.moveTo(x - d, y + d); ctx.lineTo(x + d, y - d);
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        // 3D Shaded Planet Renderer (with Saturn's rings, Jupiter's bands, and 3D spherical lighting)
+        function drawPlanet3D(id, x, y, r, m) {
+            ctx.save();
+            ctx.translate(x, y);
+
+            // Outer atmospheric halo
+            const halo = ctx.createRadialGradient(0, 0, r * 0.2, 0, 0, r * 5.5);
+            halo.addColorStop(0, m.color);
+            halo.addColorStop(0.22, m.color + '88');
+            halo.addColorStop(1, m.color + '00');
+            ctx.fillStyle = halo;
+            ctx.beginPath(); ctx.arc(0, 0, r * 5.5, 0, 6.283); ctx.fill();
+
+            // Bright planet diffraction spikes (Venus, Jupiter)
+            if (id === 'venus' || id === 'jupiter') {
+                drawDiffraction(0, 0, r * 4.2, m.rgb.join(','), 0.75);
+            }
+
+            // Saturn back ring half
+            if (id === 'saturn') {
+                ctx.save();
+                ctx.rotate(-0.38);
+                ctx.beginPath();
+                ctx.ellipse(0, 0, r * 2.55, r * 0.82, 0, Math.PI, Math.PI * 2);
+                ctx.strokeStyle = 'rgba(235, 208, 148, 0.75)';
+                ctx.lineWidth = 2.6;
+                ctx.stroke();
+                ctx.restore();
+            }
+
+            // 3D Spherical Body with specular highlight
+            const sph = ctx.createRadialGradient(-r * 0.32, -r * 0.32, r * 0.1, 0, 0, r);
+            sph.addColorStop(0, '#ffffff');
+            sph.addColorStop(0.35, m.color);
+            sph.addColorStop(0.85, `rgb(${Math.round(m.rgb[0] * 0.65)},${Math.round(m.rgb[1] * 0.62)},${Math.round(m.rgb[2] * 0.58)})`);
+            sph.addColorStop(1, `rgb(${Math.round(m.rgb[0] * 0.3)},${Math.round(m.rgb[1] * 0.28)},${Math.round(m.rgb[2] * 0.35)})`);
+            ctx.fillStyle = sph;
+            ctx.beginPath(); ctx.arc(0, 0, r, 0, 6.283); ctx.fill();
+
+            // Subtle equatorial cloud belts on Jupiter
+            if (id === 'jupiter' && r > 5) {
+                ctx.save();
+                ctx.beginPath(); ctx.arc(0, 0, r, 0, 6.283); ctx.clip();
+                ctx.rotate(-0.2);
+                ctx.fillStyle = 'rgba(165, 95, 55, 0.42)';
+                ctx.fillRect(-r, -r * 0.32, r * 2, r * 0.2);
+                ctx.fillRect(-r, r * 0.12, r * 2, r * 0.18);
+                ctx.restore();
+            }
+
+            // Saturn front ring half
+            if (id === 'saturn') {
+                ctx.save();
+                ctx.rotate(-0.38);
+                ctx.beginPath();
+                ctx.ellipse(0, 0, r * 2.55, r * 0.82, 0, 0, Math.PI);
+                ctx.strokeStyle = 'rgba(248, 228, 176, 0.95)';
+                ctx.lineWidth = 2.8;
+                ctx.stroke();
+                ctx.restore();
+            }
+
+            ctx.restore();
+        }
+
+        // Photorealistic 3D Moon with Lunar Maria, Earthshine, and Terminator
+        function drawMoon(x, y, sx, sy) {
+            const rm = clamp(F * 0.028, 13, 22), cphi = Math.cos(pos_phase * RAD);
+            ctx.save(); ctx.translate(x, y);
+
+            // Multi-layered lunar atmospheric corona
+            const gl = ctx.createRadialGradient(0, 0, rm * 0.7, 0, 0, rm * 5.2);
+            gl.addColorStop(0, 'rgba(245,242,228,0.38)');
+            gl.addColorStop(0.35, 'rgba(195,212,255,0.12)');
+            gl.addColorStop(1, 'rgba(180,205,255,0)');
+            ctx.fillStyle = gl; ctx.beginPath(); ctx.arc(0, 0, rm * 5.2, 0, 6.283); ctx.fill();
+
+            // Dark side with realistic Earthshine (Ashen glow)
+            const dkGrad = ctx.createRadialGradient(-rm * 0.2, rm * 0.2, rm * 0.1, 0, 0, rm);
+            dkGrad.addColorStop(0, '#25304d');
+            dkGrad.addColorStop(1, '#141b2e');
+            ctx.beginPath(); ctx.arc(0, 0, rm, 0, 6.283); ctx.fillStyle = dkGrad; ctx.fill();
+
+            // Illuminated lunar hemisphere clipped to phase terminator
+            ctx.save();
+            ctx.rotate(Math.atan2(sy, sx));
+            ctx.beginPath();
+            ctx.arc(0, 0, rm, -Math.PI / 2, Math.PI / 2, false);
+            const rx = Math.max(0.01, rm * Math.abs(cphi));
+            if (pos_elong < 90) ctx.ellipse(0, 0, rx, rm, 0, Math.PI / 2, -Math.PI / 2, true);
+            else ctx.ellipse(0, 0, rx, rm, 0, Math.PI / 2, Math.PI * 1.5, false);
+            ctx.closePath();
+
+            const litGrad = ctx.createRadialGradient(rm * 0.25, 0, rm * 0.1, 0, 0, rm);
+            litGrad.addColorStop(0, '#fffdf6');
+            litGrad.addColorStop(0.7, '#ebe4d0');
+            litGrad.addColorStop(1, '#c7beaa');
+            ctx.fillStyle = litGrad; ctx.fill();
+
+            // Subtle Lunar Maria (Mare Imbrium, Serenitatis, Tranquillitatis, Tycho)
+            ctx.clip();
+            ctx.fillStyle = 'rgba(95, 92, 85, 0.24)';
+            [[-0.25, -0.32, 0.34], [0.12, -0.18, 0.26], [0.28, 0.12, 0.25], [-0.35, 0.18, 0.28], [0.05, 0.38, 0.16]].forEach(([mx, my, mr]) => {
+                ctx.beginPath(); ctx.arc(mx * rm, my * rm, mr * rm, 0, 6.283); ctx.fill();
+            });
+            ctx.restore();
+
+            // Rim highlight
+            ctx.strokeStyle = 'rgba(255,255,255,0.22)';
+            ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.arc(0, 0, rm, 0, 6.283); ctx.stroke();
+            ctx.restore();
+        }
+
+        function draw() {
+            if (!S) return;
+            const nowSec = performance.now() * 0.001;
+            const dpr = Math.min(2, window.devicePixelRatio || 1); W = cv.clientWidth || 800; H = cv.clientHeight || 500;
+            const pw = Math.round(W * dpr), ph = Math.round(H * dpr); if (cv.width !== pw || cv.height !== ph) { cv.width = pw; cv.height = ph }
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0); F = Math.max(W, H * 1.15) / 2 / Math.tan(cam.fov * RAD / 2);
+            const y0 = cam.az * RAD, p0 = cam.alt * RAD; cs = [Math.cos(y0), Math.sin(y0), Math.cos(p0), Math.sin(p0)];
+            const sa = S.sunAlt, f = clamp((-sa - 1) / 13, 0, 1), fade = .05 + .95 * f, yAt = a => H / 2 - F * Math.tan(clamp(a - cam.alt, -89, 89) * RAD);
+
+            // 1. Atmospheric Scattering Sky Dome Gradient
+            const tn = clamp(-sa / 18, 0, 1), tg = Math.exp(-Math.pow((sa + 4) / 6, 2));
+            let top = mix([68, 125, 205], [2, 4, 13], Math.pow(tn, .6)), mid = mix([115, 168, 230], [6, 11, 30], Math.pow(tn, .6)), hor = mix([190, 220, 248], [18, 28, 62], Math.pow(tn, .7));
+            hor = mix(hor, [255, 132, 74], tg * .82); mid = mix(mid, [115, 68, 130], tg * .38);
+            let g = ctx.createLinearGradient(0, yAt(90), 0, yAt(0)); g.addColorStop(0, rgb(top)); g.addColorStop(.62, rgb(mid)); g.addColorStop(1, rgb(hor));
+            ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+
+            // Subtle horizon airglow & twilight scattering
+            g = ctx.createLinearGradient(0, yAt(0), 0, yAt(26));
+            g.addColorStop(0, `rgba(255,165,105,${.15 * f + .22 * tg})`);
+            g.addColorStop(1, 'rgba(255,165,105,0)');
+            ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+
+            // 2. Volumetric Milky Way, Galactic Bulge, Dark Rift & H-II Nebulae
+            if (f > .12) {
+                const s = F / 310;
+                ctx.save();
+                ctx.globalCompositeOperation = 'lighter';
+                for (let i = 0; i < MW.length; i++) {
+                    const tp = MW[i][4]; if (tp === 1) continue;
+                    const x = S.mw[i * 3], y = S.mw[i * 3 + 1], z = S.mw[i * 3 + 2];
+                    if (y < -.05 || !sc(x, y, z)) continue;
+                    const w = MW[i][2], r = MW[i][3], rad = (18 + r * 36) * s;
+                    if (P2[0] < -rad || P2[0] > W + rad || P2[1] < -rad || P2[1] > H + rad) continue;
+                    ctx.globalAlpha = w * f * (tp === 2 ? 0.85 : 0.75);
+                    const spr = tp === 2 ? SPR_NEB : (w > 0.68 ? SPR_CORE : SPR_ARM);
+                    ctx.drawImage(spr, P2[0] - rad, P2[1] - rad, rad * 2, rad * 2);
+                    if (r > .52) {
+                        ctx.fillStyle = `rgba(255,250,242,${0.48 * w * f})`;
+                        ctx.fillRect(P2[0], P2[1], 1.2, 1.2);
+                    }
+                }
+                ctx.restore();
+                // Dark Rift dust lanes
+                ctx.save();
+                for (let i = 0; i < MW.length; i += 7) {
+                    if (MW[i][4] !== 1) continue;
+                    const x = S.mw[i * 3], y = S.mw[i * 3 + 1], z = S.mw[i * 3 + 2];
+                    if (y < -.02 || !sc(x, y, z)) continue;
+                    const rad = (16 + MW[i][3] * 26) * s;
+                    ctx.globalAlpha = f * 0.65;
+                    ctx.drawImage(SPR_DUST, P2[0] - rad, P2[1] - rad, rad * 2, rad * 2);
+                }
+                ctx.restore();
+            }
+
+            // 3. Dynamic Geomagnetic Aurora Borealis Curtain (when Kp >= 5 or Aurora preview is toggled)
+            if ((state.kp >= 5 || view.aurora) && f > 0.2) {
+                const kpIntensity = view.aurora ? Math.max(0.85, (state.kp - 3) / 6) : clamp((state.kp - 4) / 5, 0.25, 1);
+                ctx.save();
+                ctx.globalCompositeOperation = 'lighter';
+                for (let band = 0; band < 2; band++) {
+                    for (let az = -68; az <= 68; az += 2.5) {
+                        const wave = Math.sin(az * 0.11 + nowSec * 0.85 + band * 1.7) * 3.2 + Math.cos(az * 0.23 - nowSec * 0.5) * 1.8;
+                        const baseAlt = 3.5 + band * 4.5 + Math.max(0, wave) + (state.kp >= 8 ? 4 : 0);
+                        const topAlt = baseAlt + 14 + 10 * kpIntensity * (0.5 + 0.5 * Math.sin(az * 0.17 + nowSec * 1.1));
+                        const env = Math.cos((az / 70) * Math.PI / 2);
+                        const vB = vec(baseAlt, norm360(az)), vT = vec(topAlt, norm360(az));
+                        if (!sc(vB[0], vB[1], vB[2])) continue;
+                        const bx = P2[0], by = P2[1];
+                        if (!sc(vT[0], vT[1], vT[2])) continue;
+                        const tx = P2[0], ty = P2[1];
+                        const ag = ctx.createLinearGradient(bx, by, tx, ty);
+                        const alpha = 0.14 * env * kpIntensity * f;
+                        ag.addColorStop(0, 'rgba(80,255,170,0)');
+                        ag.addColorStop(0.25, band === 0 ? `rgba(75,255,165,${alpha})` : `rgba(255,75,145,${alpha * 0.85})`);
+                        ag.addColorStop(0.75, `rgba(185,70,235,${alpha * 0.65})`);
+                        ag.addColorStop(1, 'rgba(185,70,235,0)');
+                        ctx.strokeStyle = ag;
+                        ctx.lineWidth = Math.max(5, F * 0.048);
+                        ctx.lineCap = 'round';
+                        ctx.beginPath(); ctx.moveTo(bx, by); ctx.lineTo(tx, ty); ctx.stroke();
+                    }
+                }
+                ctx.restore();
+            }
+
+            // 4. Coordinate Alt-Az Grid
+            if (view.grid) {
+                ctx.strokeStyle = 'rgba(130, 175, 255, 0.22)'; ctx.lineWidth = 1;
+                [15, 30, 45, 60, 75].forEach(a => {
+                    ctx.beginPath(); let on = false;
+                    for (let z = 0; z <= 360; z += 4) { const v = vec(a, z); if (sc(v[0], v[1], v[2])) { on ? ctx.lineTo(P2[0], P2[1]) : ctx.moveTo(P2[0], P2[1]); on = true } else on = false }
+                    ctx.stroke();
+                    const v = vec(a, cam.az); if (sc(v[0], v[1], v[2])) lab(a + '°', P2[0], P2[1] - 5, '500 11px JetBrains Mono, monospace', 'rgba(170,200,255,0.75)', 'center');
+                });
+                ctx.beginPath();
+                for (let z = 0; z < 360; z += 30) { let on = false; for (let a = 0; a <= 90; a += 5) { const v = vec(a, z); if (sc(v[0], v[1], v[2])) { on ? ctx.lineTo(P2[0], P2[1]) : ctx.moveTo(P2[0], P2[1]); on = true } else on = false } }
+                ctx.stroke();
+                // Zenith crosshair
+                const vz = vec(90, 0); if (sc(vz[0], vz[1], vz[2])) {
+                    ctx.strokeStyle = 'rgba(110,243,214,0.45)';
+                    ctx.beginPath(); ctx.arc(P2[0], P2[1], 6, 0, 6.283); ctx.stroke();
+                    lab('ZENITH (90°)', P2[0], P2[1] - 11, '600 10.5px JetBrains Mono, monospace', 'rgba(110,243,214,0.8)', 'center');
+                }
+            }
+
+            // 5. Constellation Stick Figures
+            if (view.cons) {
+                ctx.save();
+                ctx.lineWidth = 1.4;
+                ctx.strokeStyle = `rgba(110, 243, 214, ${.12 + .42 * fade})`;
+                ctx.shadowColor = 'rgba(110, 243, 214, 0.35)';
+                ctx.shadowBlur = 6;
+                ctx.beginPath();
+                CONS.forEach(c => c.lines.forEach(([a, b]) => {
+                    const A = S.st[a], B = S.st[b]; if (A.alt < -3 && B.alt < -3) return;
+                    if (!sc(A.v[0], A.v[1], A.v[2])) return;
+                    const x = P2[0], y = P2[1];
+                    if (sc(B.v[0], B.v[1], B.v[2])) { ctx.moveTo(x, y); ctx.lineTo(P2[0], P2[1]) }
+                }));
+                ctx.stroke();
+                ctx.restore();
+            }
+
+            // 6. 2,600 Background Stars with Atmospheric Scintillation (Twinkling)
+            for (let i = 0; i < BG.length; i++) {
+                const y = S.bg[i * 3 + 1]; if (y < -.02 || !sc(S.bg[i * 3], y, S.bg[i * 3 + 2])) continue;
+                const m = BG[i][2], pal = STAR_PAL[BG[i][3]], phase = BG[i][4];
+                // Lower stars twinkle more strongly due to thicker atmosphere
+                const airmass = 1 - Math.min(1, Math.max(0, y));
+                const twinkle = 1 - (0.12 + 0.35 * airmass) * (0.5 + 0.5 * Math.sin(nowSec * 3.4 + phase));
+                const r = m < 3.3 ? 1.35 : m < 4.4 ? 0.98 : 0.68;
+                const alpha = clamp((6.7 - m) / 3.3, 0.12, 1) * fade * twinkle;
+                ctx.fillStyle = `rgba(${pal[0]},${pal[1]},${pal[2]},${alpha})`;
+                ctx.beginPath(); ctx.arc(P2[0], P2[1], r, 0, 6.283); ctx.fill();
+            }
+
+            // 7. Shooting Stars (Meteors)
+            updateMeteors(nowSec, f);
+            meteors.forEach(m => {
+                const p = (nowSec - m.t0) / m.dur;
+                const hAlt = m.alt + m.dAlt * p, hAz = m.az + m.dAz * p;
+                const tAlt = m.alt + m.dAlt * Math.max(0, p - 0.28), tAz = m.az + m.dAz * Math.max(0, p - 0.28);
+                const vH = vec(hAlt, hAz), vT = vec(tAlt, tAz);
+                if (sc(vH[0], vH[1], vH[2])) {
+                    const hx = P2[0], hy = P2[1];
+                    if (sc(vT[0], vT[1], vT[2])) {
+                        const tx = P2[0], ty = P2[1], alpha = Math.sin(p * Math.PI);
+                        const mg = ctx.createLinearGradient(hx, hy, tx, ty);
+                        mg.addColorStop(0, `rgba(255,255,255,${alpha})`);
+                        mg.addColorStop(0.3, `rgba(110,243,214,${alpha * 0.7})`);
+                        mg.addColorStop(1, 'rgba(110,243,214,0)');
+                        ctx.strokeStyle = mg; ctx.lineWidth = 2;
+                        ctx.beginPath(); ctx.moveTo(hx, hy); ctx.lineTo(tx, ty); ctx.stroke();
+                    }
+                }
+            });
+
+            // 8. Named Catalog Stars with Halos & Diffraction Spikes
+            hits = [];
+            let idx = 0;
+            for (const k in S.st) {
+                idx++;
+                const s = S.st[k], m = STARS[k][2]; if (s.alt < -2 || !sc(s.v[0], s.v[1], s.v[2])) continue;
+                const x = P2[0], y = P2[1], r = clamp(3.8 - .65 * m, 1.4, 5.2), c = COL[k] || '238,244,255';
+                const tw = 0.88 + 0.12 * Math.sin(nowSec * 4.2 + idx);
+                if (m < 2.2) {
+                    g = ctx.createRadialGradient(x, y, 0, x, y, r * 5.5);
+                    g.addColorStop(0, `rgba(${c},${.62 * fade * tw})`);
+                    g.addColorStop(0.35, `rgba(${c},${.18 * fade * tw})`);
+                    g.addColorStop(1, `rgba(${c},0)`);
+                    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r * 5.5, 0, 6.283); ctx.fill();
+                    if (m < 1.15 && fade > 0.4) drawDiffraction(x, y, r * 4.2, c, fade * tw);
+                    hits.push({ id: 'star:' + k, x, y });
+                }
+                ctx.fillStyle = `rgba(255,255,255,${Math.min(1, fade + .15)})`;
+                ctx.beginPath(); ctx.arc(x, y, r * 0.85, 0, 6.283); ctx.fill();
+                if ((m < 1.45 || k === 'Polaris') && fade > .38) {
+                    lab(k.replace('_', ' '), x + r + 6, y + 4, '600 12.5px Plus Jakarta Sans, sans-serif', 'rgba(225,235,255,.92)');
+                }
+            }
+
+            // 9. Sun, Moon, and 3D Shaded Planets
+            ['sun', 'moon', ...PLIDS].forEach(id => {
+                const p = S.bd[id]; if (p.alt < -1.5 || (id === 'sun' && p.alt < -1) || !sc(p.v[0], p.v[1], p.v[2])) return;
+                const x = P2[0], y = P2[1], m = META[id]; let r;
+                if (id === 'moon') {
+                    const rs = rot(S.bd.sun.v), rm = rot(p.v);
+                    drawMoon(x, y, rs[0] - rm[0], -(rs[1] - rm[1]));
+                    r = clamp(F * 0.028, 13, 22);
+                } else if (id === 'sun') {
+                    r = 14;
+                    g = ctx.createRadialGradient(x, y, 0, x, y, r * 6);
+                    g.addColorStop(0, '#fff'); g.addColorStop(0.2, m.color); g.addColorStop(1, m.color + '00');
+                    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r * 6, 0, 6.283); ctx.fill();
+                    ctx.beginPath(); ctx.arc(x, y, r, 0, 6.283); ctx.fillStyle = '#fff'; ctx.fill();
+                } else {
+                    r = clamp(5.6 - .48 * p.mag, 3.8, 8.5);
+                    drawPlanet3D(id, x, y, r, m);
+                }
+                lab(m.name, x + r + 9, y + 5, '700 15px Space Grotesk, sans-serif', '#ffffff');
+                hits.push({ id, x, y });
+            });
+
+            // 10. Constellation Labels
+            if (view.cons && f > .1) CONS.forEach(c => {
+                let n = 0, sx = 0, sy = 0;
+                c.stars.forEach(k => { const s = S.st[k]; if (s.alt > 0 && sc(s.v[0], s.v[1], s.v[2])) { n++; sx += P2[0]; sy += P2[1] } });
+                if (n > 1) lab(c.name.split(' (')[0].split(' and')[0].toUpperCase(), sx / n, sy / n + 28, '700 11.5px Space Grotesk, sans-serif', 'rgba(110,243,214,' + (.42 + .38 * fade) + ')', 'center');
+            });
+
+            // 11. Silhouette Terrain & Horizon Rim
+            const gp = new Path2D(); let first = null, last = null;
+            for (let a = cam.az - 95; a <= cam.az + 95; a += 1.5) {
+                const v = vec(treeH(a), a);
+                if (sc(v[0], v[1], v[2])) { if (!first) { first = [P2[0], P2[1]]; gp.moveTo(P2[0], P2[1]) } else gp.lineTo(P2[0], P2[1]); last = [P2[0], P2[1]] }
+            }
+            if (first) {
+                ctx.strokeStyle = `rgba(120, 175, 255, ${.14 * f + .06})`; ctx.lineWidth = 1.5; ctx.stroke(gp);
+                gp.lineTo(last[0], H + 600); gp.lineTo(first[0], H + 600); gp.closePath();
+                g = ctx.createLinearGradient(0, yAt(2), 0, yAt(-28));
+                g.addColorStop(0, '#060916'); g.addColorStop(1, '#010206');
+                ctx.fillStyle = g; ctx.fill(gp);
+            }
+
+            // 12. Cardinal & Intercardinal Compass Points along the Horizon
+            [['N', 0, 1], ['NE', 45], ['E', 90, 1], ['SE', 135], ['S', 180, 1], ['SW', 225], ['W', 270, 1], ['NW', 315]].forEach(([t, a, m]) => {
+                const v = vec(-3.2, a);
+                if (sc(v[0], v[1], v[2])) {
+                    if (m) {
+                        ctx.fillStyle = 'rgba(6,12,28,0.75)';
+                        ctx.beginPath(); ctx.arc(P2[0], P2[1], 14, 0, 6.283); ctx.fill();
+                        ctx.strokeStyle = t === 'N' ? '#ff7b8b' : 'rgba(110,243,214,0.5)';
+                        ctx.lineWidth = 1.2; ctx.stroke();
+                    }
+                    lab(t, P2[0], P2[1] + 5, m ? '700 14px Space Grotesk, sans-serif' : '600 11.5px JetBrains Mono, monospace', t === 'N' ? '#ff7b8b' : (m ? '#6ef3d6' : 'rgba(180,200,255,.65)'), 'center');
+                }
+            });
+
+            // 13. 10° Hand Fist Angular Measurement Reticle Overlay
+            if (view.fist) {
+                const r10 = F * Math.tan(5 * RAD); // 10° diameter = 5° radius
+                ctx.save();
+                ctx.translate(W / 2, H / 2);
+                ctx.strokeStyle = 'rgba(255, 202, 99, 0.78)';
+                ctx.lineWidth = 1.6;
+                ctx.setLineDash([6, 5]);
+                ctx.beginPath(); ctx.arc(0, 0, r10, 0, 6.283); ctx.stroke();
+                ctx.setLineDash([]);
+                // Tick marks
+                for (let a = 0; a < 4; a++) {
+                    ctx.rotate(Math.PI / 2);
+                    ctx.beginPath(); ctx.moveTo(r10 - 6, 0); ctx.lineTo(r10 + 6, 0); ctx.stroke();
+                }
+                lab('10° FIELD (1 FIST AT ARM\'S LENGTH)', 0, -r10 - 10, '700 11px JetBrains Mono, monospace', '#ffca63', 'center');
+                ctx.restore();
+            }
+
+            // 14. Selected Target Lock-On Reticle or Off-Screen Wayfinder Arrow
+            const sel = state.sel, so = sel && (sel.startsWith('star:') ? S.st[sel.slice(5)] : S.bd[sel]);
+            if (so && so.alt > -5) {
+                if (sc(so.v[0], so.v[1], so.v[2]) && P2[0] > 20 && P2[0] < W - 20 && P2[1] > 20 && P2[1] < H - 20) {
+                    ctx.save();
+                    ctx.translate(P2[0], P2[1]);
+                    ctx.rotate(nowSec * 0.6);
+                    ctx.strokeStyle = '#6ef3d6'; ctx.lineWidth = 1.8;
+                    for (let k = 0; k < 4; k++) {
+                        ctx.rotate(Math.PI / 2);
+                        ctx.beginPath(); ctx.arc(0, 0, 22, -0.35, 0.35); ctx.stroke();
+                    }
+                    ctx.restore();
+                } else {
+                    const r = rot(so.v), a = Math.atan2(-r[1], r[0]), c = Math.cos(a), s = Math.sin(a), k = Math.min((W / 2 - 46) / Math.abs(c || 1e-6), (H / 2 - 68) / Math.abs(s || 1e-6)), px = W / 2 + c * k, py = H / 2 + s * k;
+                    ctx.save(); ctx.translate(px, py); ctx.rotate(a); ctx.fillStyle = '#6ef3d6';
+                    ctx.beginPath(); ctx.moveTo(14, 0); ctx.lineTo(-8, -9); ctx.lineTo(-4, 0); ctx.lineTo(-8, 9); ctx.closePath(); ctx.fill(); ctx.restore();
+                    lab('Target →', px - c * 28, py - s * 28 + 4, '600 12px Space Grotesk, sans-serif', '#6ef3d6', 'center');
+                }
+            }
+
+            $('facing').textContent = `AZ ${Math.round(norm360(cam.az))}° ${dirName(norm360(cam.az))} · ALT +${Math.round(cam.alt)}° · FOV ${Math.round(cam.fov)}°`;
+        }
+
+        // Continuous 60fps ambient animation loop for star twinkling, meteors, and aurora
+        let lastRender = 0;
+        function ambientLoop(ts) {
+            if (!document.hidden && ts - lastRender > 42) {
+                lastRender = ts;
+                draw();
+            }
+            requestAnimationFrame(ambientLoop);
+        }
+        requestAnimationFrame(ambientLoop);
+
+        function flyTo(h) {
+            const a0 = cam.az, b0 = cam.alt, da = ((h.az - a0 + 540) % 360) - 180, db = clamp(h.alt, 8, 80) - b0, t0 = performance.now(), rm = matchMedia('(prefers-reduced-motion:reduce)').matches;
+            cancelAnimationFrame(anim);
+            (function step(t) { const k = rm ? 1 : clamp((t - t0) / 700, 0, 1), e = k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2; cam.az = norm360(a0 + da * e); cam.alt = b0 + db * e; draw(); if (k < 1) anim = requestAnimationFrame(step) })(t0);
+        }
+
+        const ptrs = new Map(); let moved = 0, pd = 0;
+        const pdist = () => { const [a, b] = [...ptrs.values()]; return Math.hypot(a[0] - b[0], a[1] - b[1]) };
+        cv.addEventListener('pointerdown', e => { cv.setPointerCapture(e.pointerId); ptrs.set(e.pointerId, [e.clientX, e.clientY]); moved = 0; cancelAnimationFrame(anim); pd = ptrs.size === 2 ? pdist() : 0 });
+        cv.addEventListener('pointermove', e => {
+            const p = ptrs.get(e.pointerId); if (!p) return; const dx = e.clientX - p[0], dy = e.clientY - p[1]; ptrs.set(e.pointerId, [e.clientX, e.clientY]);
+            if (ptrs.size === 2) { const d = pdist(); if (pd) cam.fov = clamp(cam.fov * pd / d, 35, 110); pd = d; moved = 99; draw(); return }
+            moved += Math.abs(dx) + Math.abs(dy); const k = DEG / F; cam.az = norm360(cam.az - dx * k); cam.alt = clamp(cam.alt + dy * k, -6, 90); draw();
+        });
+        cv.addEventListener('pointerup', e => {
+            if (ptrs.size === 1 && moved < 7) { const r = cv.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top; let best = null, bd = 32; hits.forEach(h => { const d = Math.hypot(h.x - x, h.y - y); if (d < bd) { bd = d; best = h.id } }); state.sel = best && state.sel !== best ? best : null; update() }
+            ptrs.delete(e.pointerId); pd = 0;
+        });
+        cv.addEventListener('pointercancel', e => { ptrs.delete(e.pointerId) });
+        cv.addEventListener('wheel', e => { e.preventDefault(); cam.fov = clamp(cam.fov * (e.deltaY > 0 ? 1.08 : .92), 35, 110); draw() }, { passive: false });
+        cv.addEventListener('keydown', e => { const m = { ArrowLeft: [-6, 0], ArrowRight: [6, 0], ArrowUp: [0, 6], ArrowDown: [0, -6] }[e.key]; if (m) { e.preventDefault(); cam.az = norm360(cam.az + m[0]); cam.alt = clamp(cam.alt + m[1], -6, 90); draw() } });
+
+        $('zin').onclick = () => { cam.fov = clamp(cam.fov * .82, 35, 110); draw() };
+        $('zout').onclick = () => { cam.fov = clamp(cam.fov * 1.22, 35, 110); draw() };
+        $('bcons').onclick = e => { view.cons = !view.cons; e.currentTarget.setAttribute('aria-pressed', view.cons); draw() };
+        $('bgrid').onclick = e => { view.grid = !view.grid; e.currentTarget.setAttribute('aria-pressed', view.grid); draw() };
+        $('bfist').onclick = e => { view.fist = !view.fist; e.currentTarget.setAttribute('aria-pressed', view.fist); draw() };
+        $('baur').onclick = e => { view.aurora = !view.aurora; e.currentTarget.setAttribute('aria-pressed', view.aurora); if (view.aurora) flyTo({ az: 0, alt: 18 }); draw() };
+
+        let playT = null;
+        $('play').onclick = () => {
+            if (playT) { clearInterval(playT); playT = null; $('play').textContent = 'Play'; return }
+            $('play').textContent = 'Pause';
+            playT = setInterval(() => { state.min = state.min >= 780 ? 0 : state.min + 5; update() }, 140);
+        };
+
+        // SVG Moon Phase Icon Generator for the Moon Panel
+        function moonSvgHtml(phase, elong) {
+            const r = 26, cphi = Math.cos(phase * RAD), rx = Math.max(0.1, r * Math.abs(cphi));
+            const waxing = phase < 180;
+            const sweep1 = waxing ? 1 : 0;
+            const sweep2 = elong < 90 ? (waxing ? 0 : 1) : (waxing ? 1 : 0);
+            const d = `M 30 ${30 - r} A ${r} ${r} 0 0 ${sweep1} 30 ${30 + r} A ${rx} ${r} 0 0 ${sweep2} 30 ${30 - r} Z`;
+            return `<svg class="moon-svg" viewBox="0 0 60 60"><circle cx="30" cy="30" r="${r}" fill="#1b233d" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/><path d="${d}" fill="#f4f0e2"/></svg>`;
+        }
+
+        /* ================= MAIN OBSERVATORY UI UPDATE ================= */
+        function update() {
+            const { lat, lon, name } = state.loc, ms = BASE + state.min * 60000, b = bodies(ms), pos = {};
+            for (const id in b) { const h = horiz(b[id].eq.ra, b[id].eq.dec, lat, lon, ms); pos[id] = h }
+            const sunAlt = pos.sun.alt;
+            pos_phase = b.moon.phase; pos_elong = b.moon.elong;
+            $('when').textContent = dateLabel(ms) + ' · ' + hhmm(ms) + ' IST';
+            $('tt').value = state.min;
+            $('lede').textContent = `Live 3D sky dome above ${name} (${lat.toFixed(2)}°N, ${lon.toFixed(2)}°E). Explore tonight's planets, Nakshatra stars, and lunar phases—and simulate how solar storms interact with Earth's magnetosphere.`;
+            buildScene(ms, pos, b, sunAlt);
+
+            const dark = sunAlt < -6;
+            const rows = PLIDS.map(id => ({ id, alt: pos[id].alt, az: pos[id].az, mag: b[id].mag, el: b[id].elong }));
+            rows.sort((a, c) => c.alt - a.alt);
+            $('planets').innerHTML = rows.map(r => {
+                const m = META[r.id], rs = riseSet(r.id);
+                let pill, cls = '';
+                if (r.alt <= 0) { pill = 'Below Horizon' }
+                else if (r.el < 12) { pill = 'Lost in Sun\'s Glare'; cls = 'warn' }
+                else if (sunAlt > -0.83) { pill = 'Daytime Sky'; cls = 'warn' }
+                else if (!dark) { pill = 'In Twilight'; cls = 'warn' }
+                else { pill = 'Visible Now'; cls = 'ok' }
+                const where = r.alt > 0 ? `${Math.round(r.alt)}° high in the ${dirName(r.az)}` : `Below the ${dirName(r.az)} horizon`;
+                return `<button class="row" data-id="${r.id}" aria-pressed="${state.sel === r.id}"><div class="top"><span class="dot" style="background:${m.color};color:${m.color}"></span><span class="name">${m.name}</span><span class="pill ${cls}">${pill}</span></div><div class="detail">${where} · <span class="mono">mag ${r.mag.toFixed(1).replace('-', '−')}</span><br>Rises <span class="mono">${tfmt(rs.rise)}</span> · Sets <span class="mono">${tfmt(rs.set)}</span></div></button>`;
+            }).join('');
+            $('planets').querySelectorAll('.row').forEach(el => el.addEventListener('click', () => { state.sel = state.sel === el.dataset.id ? null : el.dataset.id; update(); if (state.sel && S.pos[state.sel].alt > 0) flyTo(S.pos[state.sel]) }));
+
+            const ph = b.moon.phase, ill = Math.round((1 - Math.cos(b.moon.elong * RAD)) / 2 * 100);
+            const phn = ph < 22.5 || ph >= 337.5 ? 'New Moon (Amavasya)' : ph < 67.5 ? 'Waxing Crescent' : ph < 112.5 ? 'First Quarter' : ph < 157.5 ? 'Waxing Gibbous' : ph < 202.5 ? 'Full Moon (Purnima)' : ph < 247.5 ? 'Waning Gibbous' : ph < 292.5 ? 'Last Quarter' : 'Waning Crescent';
+            const mrs = riseSet('moon'), ms2 = riseSet('sun');
+            const moonUp = pos.moon.alt > 0;
+            $('moonbox').innerHTML = `
+    <div class="moon-header">
+      ${moonSvgHtml(ph, b.moon.elong)}
+      <div>
+        <div class="label">Lunar Telemetry</div>
+        <h3>${phn} · ${ill}% Lit</h3>
+      </div>
+    </div>
+    <p class="muted" style="margin-top:12px">${moonUp ? `Currently <strong>${Math.round(pos.moon.alt)}°</strong> above the <strong>${dirName(pos.moon.az)}</strong> horizon.` : 'Currently below your horizon.'} Moonrise <span class="mono">${tfmt(mrs.rise)}</span> · Moonset <span class="mono">${tfmt(mrs.set)}</span>.<br>Sunset <span class="mono">${tfmt(ms2.set)}</span> · Next Sunrise <span class="mono">${tfmt(ms2.rise)}</span>.</p>
+    <p class="muted" style="margin-top:10px">${ill > 60 ? 'A bright Moon scatters light across the atmosphere and washes out faint Milky Way clouds, though bright planets and 1st-magnitude stars pierce right through.' : ill < 30 ? 'With minimal moonlight tonight, the sky is prime for spotting the Milky Way band and faint star clusters like the Pleiades (Krittika).' : 'Moderate moonlight leaves plenty of contrast for constellations while showing crisp crater shadows along the lunar terminator through binoculars.'}</p>`;
+
+            /* Constellations */
+            const sp = {}; for (const k in STARS) { sp[k] = horiz(STARS[k][0], STARS[k][1], lat, lon, ms) }
+            const cl = CONS.map(c => { const al = c.stars.map(s => sp[s].alt); return { c, mean: al.reduce((a, v) => a + v, 0) / al.length, mx: Math.max(...al), a: sp[c.anchor] } });
+            const up = cl.filter(x => x.mx > 8).sort((a, c) => c.mean - a.mean), down = cl.filter(x => x.mx <= 8);
+            $('cons').innerHTML = (up.length ? up.slice(0, 7).map(x => `<div class="con"><h3>${x.c.name}${x.c.ind ? ' <span class="muted" style="font-weight:400">· ' + x.c.ind + '</span>' : ''}</h3><div class="where">${x.a.alt > 0 ? 'Look ' + dirName(x.a.az) + ' · ~' + Math.round(x.a.alt) + '° altitude' : 'Low on the horizon'}</div><div class="tip">${x.c.tip}</div></div>`).join('') : '<p class="muted">No major constellations are high right now.</p>')
+                + (down.length ? `<div class="con"><div class="label" style="margin-bottom:8px">Below Horizon at This Hour</div><div class="chips">${down.map(x => `<span class="chip">${x.c.name}</span>`).join('')}</div></div>` : '');
+
+            const pa = sp.Polaris.alt;
+            $('polaris').innerHTML = `<div class="label" style="color:var(--amber)">Celestial Navigation</div><h3 style="margin-top:4px">Polaris · Dhruva Tara</h3><p style="margin-top:6px">From ${name}, Polaris stands at <b class="mono" style="color:var(--amber)">${pa.toFixed(1)}°</b> altitude due North—matching your geographic latitude (<span class="mono">${lat.toFixed(1)}°N</span>). Because Earth's rotational axis points almost directly at Polaris, the entire night sky wheels around this single steadfast star.</p>`;
+
+            const named = Object.keys(STARS).filter(k => STARS[k][2] < 1.5 && k !== 'Polaris').map(k => ({ k, s: sp[k], mag: STARS[k][2], ind: STARS[k][3] })).sort((a, c) => c.s.alt - a.s.alt).slice(0, 7);
+            $('stars').innerHTML = named.map(n => `<button class="row" data-star="${n.k}" aria-pressed="${state.sel === 'star:' + n.k}"><div class="top"><span class="name">${n.k.replace('_', ' ')}</span>${n.ind ? `<span class="muted" style="font-size:13px">· ${n.ind}</span>` : ''}<span class="pill ${n.s.alt > 0 && dark ? 'ok' : ''}">${n.s.alt > 0 ? Math.round(n.s.alt) + '° ' + dirName(n.s.az) : 'Below Horizon'}</span></div></button>`).join('');
+            $('stars').querySelectorAll('.row').forEach(el => el.addEventListener('click', () => { const k = el.dataset.star; state.sel = 'star:' + k; update(); if (S.st[k].alt > 0) flyTo(S.st[k]) }));
+
+            /* Satellite Windows */
+            const s = series(), pick = (thr) => { const c = crossings(s.sun, s.start, thr); return { down: c.find(x => !x.up), up: c.find(x => x.up) } };
+            const w0 = pick(-0.83), w6 = pick(-6), w18 = pick(-18);
+            $('win').innerHTML = `
+    <div>
+      <div class="label">Evening Twilight Window</div>
+      <ul>
+        <li><span>Sunset</span><span class="mono">${tfmt(w0.down && w0.down.t)}</span></li>
+        <li><span>Civil Dusk (Sun 6° down)</span><span class="mono">${tfmt(w6.down && w6.down.t)}</span></li>
+        <li><span>Astronomical Night (Sun 18° down)</span><span class="mono">${tfmt(w18.down && w18.down.t)}</span></li>
+      </ul>
+      <p class="muted" style="margin-top:10px;font-size:13px">Prime evening satellite passes occur between Civil Dusk and 45 minutes past Astronomical Night.</p>
+    </div>
+    <div>
+      <div class="label">Pre-Dawn Window</div>
+      <ul>
+        <li><span>First Light (Sun 18° down)</span><span class="mono">${tfmt(w18.up && w18.up.t)}</span></li>
+        <li><span>Civil Dawn (Sun 6° down)</span><span class="mono">${tfmt(w6.up && w6.up.t)}</span></li>
+        <li><span>Sunrise</span><span class="mono">${tfmt(w0.up && w0.up.t)}</span></li>
+      </ul>
+      <p class="muted" style="margin-top:10px;font-size:13px">Pre-dawn passes between First Light and Civil Dawn are often crystal-clear with lower atmospheric haze.</p>
+    </div>`;
+
+            const best = rows.filter(r => r.alt > 0 && r.el > 12).sort((a, c) => a.mag - c.mag)[0], dk = tfmt(w6.down && w6.down.t);
+            const hl = [
+                best ? { t: META[best.id].name + ' is Shining', d: `Look ${dirName(best.az)}, ${Math.round(best.alt)}° up (mag ${best.mag.toFixed(1).replace('-', '−')}). Tap to lock camera onto it.`, c: META[best.id].color, f: best, id: best.id } : { t: 'No Bright Planet Yet', d: 'Drag the timeline slider to watch the next planet rise above the horizon.', c: '#7aa2ff' },
+                { t: phn.split(' (')[0], d: `${ill}% illuminated tonight. ` + (moonUp ? `Currently ${Math.round(pos.moon.alt)}° high in the ${dirName(pos.moon.az)}.` : 'Currently below the horizon.'), c: '#f4f0e2', f: moonUp ? pos.moon : null, id: 'moon' },
+                up[0] ? { t: up[0].c.name.split(' (')[0].split(' and')[0], d: `Dominating the sky right now. Look ${dirName(up[0].a.az)}, ~${Math.round(up[0].a.alt)}° up.`, c: '#6ef3d6', f: up[0].a } : { t: 'Constellations', d: 'Slide the time into deeper night to see constellations climb.', c: '#6ef3d6' },
+                { t: 'Dark Sky from ' + dk, d: `Sunset is at ${tfmt(ms2.set)}. Deep astronomical darkness begins at ${tfmt(w18.down && w18.down.t)}.`, c: '#ffca63' }
+            ];
+            $('highlights').innerHTML = hl.map((h, i) => `<button class="hlcard" data-i="${i}" style="--c:${h.c}"><span class="orb"></span><b>${h.t}</b><span class="d">${h.d}</span></button>`).join('');
+            $('highlights').querySelectorAll('.hlcard').forEach(el => el.addEventListener('click', () => { const h = hl[+el.dataset.i]; if (h.f) { if (h.id) state.sel = h.id; update(); flyTo(h.f) } }));
+            drawRuler();
+        }
+
+        /* ================= SPACE WEATHER & GEOMAGNETIC LAB ================= */
+        const KPCOL = ['#3fae7a', '#3fae7a', '#6bbf59', '#a9c84a', '#e6c84a', '#f2a43a', '#ea7d36', '#de4f4a', '#c93a8a'];
+        const REACH = [67, 66, 65, 63, 62, 60, 55, 50, 45, 40];
+        const LEVELS = [
+            { tag: 'G0', name: 'Quiet to Unsettled', col: '#3fae7a', aur: 'Confined to the high Arctic & Antarctic circles (Norway, Alaska, Iceland).', sat: 'Nominal orbital operations. Minimal atmospheric drag.', gr: 'Normal. Power grids, GNSS/GPS, and HF radio propagate normally.' },
+            { tag: 'G1', name: 'Minor Geomagnetic Storm', col: '#f2a43a', aur: 'Visible across high latitudes such as northern Scandinavia, Scotland, and Canada.', sat: 'Minor surface charging; slight increase in thermospheric drag on LEO satellites.', gr: 'Weak induced currents on high-latitude power grids.' },
+            { tag: 'G2', name: 'Moderate Geomagnetic Storm', col: '#ea7d36', aur: 'Expands to northern Britain and the northern tier of the United States (~55° gm-lat).', sat: 'Attitude control corrections needed. Increased atmospheric drag alters low-orbit predictions.', gr: 'High-latitude power systems may experience voltage alarms; HF radio fades at high latitudes.' },
+            { tag: 'G3', name: 'Strong Geomagnetic Storm', col: '#de4f4a', aur: 'Descends into mid-latitudes across Europe and North America (~50° gm-lat).', sat: 'Surface charging on satellite components; significant drag on low-Earth orbit constellations.', gr: 'Voltage corrections required on grids; intermittent satellite navigation (GPS) and HF radio issues.' },
+            { tag: 'G4', name: 'Severe Geomagnetic Storm', col: '#c93a8a', aur: 'Reaches ~45° geomagnetic latitude; faint red auroral glow can be seen even further equatorward.', sat: 'Spacecraft tracking and orientation anomalies; strong orbital drag.', gr: 'Widespread voltage control issues; protective grid relays may trip. GPS accuracy degraded for hours.' },
+            { tag: 'G5', name: 'Extreme Geomagnetic Storm', col: '#b65cff', aur: 'Pushes down to 40° geomagnetic latitude or lower—photographed from Ladakh (Hanle/Leh) in May 2024!', sat: 'Extensive surface charging, uplink/orientation difficulties, and severe atmospheric drag.', gr: 'Grid blackouts or transformer damage possible at high latitudes; HF radio blacked out; severe GPS Scintillation in India.' }
+        ];
+        function level(kp) { return kp >= 5 ? kp - 4 : 0 }
+        function buildGauge() {
+            const cx = 150, cy = 150, Ro = 118, Ri = 82; let s = '';
+            const pt = (r, t) => [cx - r * Math.cos(t), cy - r * Math.sin(t)];
+            for (let k = 0; k < 9; k++) {
+                const t1 = k / 9 * Math.PI, t2 = (k + 1) / 9 * Math.PI, [x1, y1] = pt(Ro, t1), [x2, y2] = pt(Ro, t2), [x3, y3] = pt(Ri, t2), [x4, y4] = pt(Ri, t1);
+                s += `<path d="M${x1} ${y1} A${Ro} ${Ro} 0 0 1 ${x2} ${y2} L${x3} ${y3} A${Ri} ${Ri} 0 0 0 ${x4} ${y4}Z" fill="${KPCOL[k]}" stroke="#0c1329" stroke-width="2.5"/>`;
+            }
+            for (let k = 0; k <= 9; k++) { const [x, y] = pt(Ro + 15, k / 9 * Math.PI); s += `<text x="${x}" y="${y + 4}" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="700" font-size="11.5" fill="#9aa7cf">${k}</text>` }
+            s += `<g class="needle" id="needle"><line x1="150" y1="150" x2="${150 - Ri + 6}" y2="150" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/></g><circle cx="150" cy="150" r="9" fill="#6ef3d6"/><circle cx="150" cy="150" r="4" fill="#050813"/>`;
+            s += `<text id="kpnum" x="150" y="186" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-size="25" font-weight="700" fill="#f2f5ff"></text>`;
+            $('gauge').innerHTML = s;
+        }
+        function renderKp() {
+            const kp = state.kp, L = LEVELS[level(kp)];
+            $('needle').style.transform = 'rotate(' + (kp / 9 * 180) + 'deg)';
+            $('kpnum').textContent = 'Kp ' + kp + (kp >= 5 ? ' · ' + L.tag : '');
+            $('kp').value = kp;
+            document.querySelectorAll('#presets .btn').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.kp === kp)));
+            $('effects').innerHTML = `<div><span class="gtag" style="background:${L.col};color:#050813">${L.tag}</span><b style="font-family:var(--display);font-size:22px">${L.name}</b></div><dl><dt>Aurora</dt><dd>${L.aur}</dd><dt>Satellites</dt><dd>${L.sat}</dd><dt>On Earth</dt><dd>${L.gr}</dd></dl>${kp >= 8 ? '<p class="muted" style="border-left:3px solid var(--rose);padding-left:10px"><strong>Look at the 3D Sky above!</strong> At Kp ' + kp + ', face North in the 3D sky viewer to see the red and green auroral curtains shimmering along the northern horizon—just as the Indian Astronomical Observatory in Hanle, Ladakh captured during the historic May 2024 G5 superstorm.</p>' : ''}`;
+            drawRuler();
+            draw();
+        }
+        function drawRuler() {
+            const { lat, lon, name } = state.loc, gm = geomagLat(lat, lon), reach = REACH[state.kp], W = 640, X = v => 24 + (90 - v) / 90 * (W - 48);
+            let s = `<rect x="24" y="46" width="${W - 48}" height="22" rx="6" fill="#0d1530" stroke="rgba(130,165,255,0.25)"/>`;
+            s += `<rect x="24" y="46" width="${X(reach) - 24}" height="22" rx="6" fill="${KPCOL[Math.min(8, state.kp)]}" opacity=".9"/>`;
+            [90, 60, 30, 0].forEach(v => { s += `<line x1="${X(v)}" y1="68" x2="${X(v)}" y2="76" stroke="#9aa7cf"/><text x="${X(v)}" y="92" text-anchor="${v === 90 ? 'start' : v === 0 ? 'end' : 'middle'}" font-family="JetBrains Mono, monospace" font-size="11" fill="#9aa7cf">${v}°${v === 90 ? ' Mag Pole' : v === 0 ? ' Mag Equator' : ''}</text>` });
+            s += `<text x="${(24 + X(reach)) / 2}" y="61" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-size="11.5" font-weight="700" fill="#050813">AURORA OVAL (${reach}°)</text>`;
+            s += `<path d="M${X(gm)} 44 l-7 -13 h14z" fill="#6ef3d6"/><text x="${Math.min(W - 30, Math.max(70, X(gm)))}" y="22" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-size="13" font-weight="700" fill="#6ef3d6">${name} (${gm.toFixed(1)}°)</text>`;
+            s += `<text x="24" y="112" font-family="Plus Jakarta Sans, sans-serif" font-size="11.5" fill="#9aa7cf">Geomagnetic latitude is measured relative to Earth's tilted magnetic dipole axis, which tips away from Eurasia.</text>`;
+            $('ruler').innerHTML = s;
+            $('rulertext').textContent = `At Kp ${state.kp}, the auroral oval expands down to ~${reach}° geomagnetic latitude. ${name} sits at ${gm.toFixed(1)}° geomagnetic latitude (${Math.round(gm > reach ? 0 : reach - gm)}° equatorward of the overhead aurora boundary). While overhead green auroras stay further north, extreme G5 storms (Kp 9) produce high-altitude red oxygen auroras (400–600 km up) visible low on the northern horizon from dark high-altitude sites like Ladakh.`;
+        }
+
+        /* ================= WIRING & EVENT LISTENERS ================= */
+        const sel = $('city');
+        CITIES.forEach(([n, la, lo], i) => { const o = document.createElement('option'); o.value = i; o.textContent = n; sel.appendChild(o) });
+        { const i = CITIES.findIndex(c => c[0] === state.loc.name); if (i < 0) { const o = document.createElement('option'); o.value = 'x'; o.textContent = state.loc.name; sel.appendChild(o); sel.value = 'x' } else sel.value = i }
+        function setLoc(loc) { state.loc = loc; try { localStorage.setItem('sky-city', JSON.stringify(loc)) } catch (e) { } update() }
+        sel.addEventListener('change', () => { if (sel.value === 'x') return; const c = CITIES[+sel.value]; $('clat').value = c[1]; $('clon').value = c[2]; setLoc({ name: c[0], lat: c[1], lon: c[2] }) });
+        $('capply').addEventListener('click', () => {
+            const la = parseFloat($('clat').value), lo = parseFloat($('clon').value);
+            if (!isFinite(la) || !isFinite(lo) || la < -60 || la > 60 || lo < 60 || lo > 100) { $('nownote').textContent = 'Enter a latitude between -60° and 60° and a longitude between 60° and 100°E.'; return }
+            let x = [...sel.options].find(o => o.value === 'x'); if (!x) { x = document.createElement('option'); x.value = 'x'; sel.appendChild(x) }
+            x.textContent = `Custom (${la.toFixed(2)}°N, ${lo.toFixed(2)}°E)`; sel.value = 'x';
+            setLoc({ name: 'Your Custom Observatory', lat: la, lon: lo }); $('nownote').textContent = 'Indian Standard Time (IST)';
+        });
+        $('tt').addEventListener('input', e => { state.min = +e.target.value; $('nownote').textContent = 'Indian Standard Time (IST)'; update() });
+        $('now').addEventListener('click', () => { const o = nowOffset(); if (o >= 0 && o <= 780) { state.min = o; $('nownote').textContent = 'Live Current Time (IST)' } else { state.min = 180; $('nownote').textContent = 'Daytime right now — showing 20:00 IST tonight' } update() });
+        $('kp').addEventListener('input', e => { state.kp = +e.target.value; renderKp() });
+        [[1, 'Quiet'], [4, 'Unsettled'], [5, 'G1 Minor'], [7, 'G3 Strong'], [9, 'G5 Extreme (Ladakh Aurora)']].forEach(([k, t]) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'btn'; b.dataset.kp = k; b.textContent = t + ' (Kp ' + k + ')'; b.addEventListener('click', () => { state.kp = k; renderKp(); if (k >= 8) flyTo({ az: 0, alt: 18 }) }); $('presets').appendChild(b) });
+
+        buildGauge(); renderKp(); update();
+        let rz; window.addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(update, 100) });
+    </script>
+</body>
+
+</html>
